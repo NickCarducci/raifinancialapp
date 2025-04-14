@@ -85,7 +85,7 @@ function MyComponent() {
           transition: ".3s ease-out",
         }}
       >
-        <div style={{ padding: "10px" }}>RAI Financial</div>
+        <div style={{ padding: "10px" }}>RAI Finance</div>
         <div
           style={{
             textAlign: "center",
@@ -96,7 +96,13 @@ function MyComponent() {
           }}
         >
           {accounts[0] ? (
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+              }}
+            >
               <div
                 style={{
                   display: "block",
@@ -126,7 +132,22 @@ function MyComponent() {
                 ></div>
               </div>
               &nbsp;&nbsp;
-              {accounts[0].username}
+              <div style={{ textAlign: "left" }}>
+                {!accounts[0]
+                  ? ""
+                  : authenticatedUser &&
+                    authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
+                  ? "Finance Admin"
+                  : "User"}
+                <br />
+                <div
+                  style={{
+                    fontSize: "12px",
+                  }}
+                >
+                  {accounts[0].username}
+                </div>
+              </div>
             </div>
           ) : (
             <button onClick={() => instance.loginPopup()}>login</button>
@@ -157,7 +178,7 @@ function MyComponent() {
                 }}
                 onClick={() => setSelection("I/S")}
               >
-                I/S
+                <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
               </li>
               <li
                 onMouseEnter={(e) => setSelector("General Ledger")}
@@ -194,7 +215,7 @@ function MyComponent() {
                     });
                 }}
               >
-                General Ledger
+                <div class="fas fa-book w-6"></div>&nbsp;&nbsp;General Ledger
               </li>
               <li
                 onMouseEnter={(e) => setSelector("Charts")}
@@ -204,7 +225,7 @@ function MyComponent() {
                 }}
                 onClick={() => setSelection("Charts")}
               >
-                Charts
+                <div class="fas fa-chart-line w-6"></div>&nbsp;&nbsp;Charts
               </li>
               <li
                 onMouseEnter={(e) => setSelector("Bank")}
@@ -214,7 +235,7 @@ function MyComponent() {
                 }}
                 onClick={() => setSelection("Bank")}
               >
-                Bank
+                <div class="fas fa-wallet w-6"></div>&nbsp;&nbsp;Balances
               </li>
               <li
                 onMouseEnter={(e) => setSelector("Payroll")}
@@ -250,7 +271,7 @@ function MyComponent() {
                     });
                 }}
               >
-                Payroll
+                <div class="fas fa-exchange-alt w-6"></div>&nbsp;&nbsp;Payroll
               </li>
               <li
                 onMouseEnter={(e) => setSelector("Invoices")}
@@ -261,7 +282,7 @@ function MyComponent() {
                 }}
                 onClick={() => setSelection("Invoices")}
               >
-                Invoices
+                <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
               </li>
             </ul>
           </div>
@@ -546,4 +567,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
