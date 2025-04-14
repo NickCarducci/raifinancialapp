@@ -37,6 +37,7 @@ function MyComponent() {
   const [users, setUsers] = useState([]);
   const [editAdmins, openAdministrators] = useState(false);
   const [selection, setSelection] = useState("");
+  const [selector, setSelector] = useState("");
   const [generalLedger, setGeneralLedger] = useState(null);
   const [payoutLog, setPayoutLog] = useState(null);
 
@@ -241,20 +242,37 @@ function MyComponent() {
           NuCulture RAIFinancial
         </div>
         {!authenticatedUser ? (
-          "Must be logged in to view this page."
+          <div style={{ padding: "0px 10px" }}>
+            Must be logged in to view this page.
+          </div>
         ) : !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin ? (
-          "Must be an admin to view this page."
+          <div style={{ padding: "0px 10px" }}>
+            Must be an admin to view this page.
+          </div>
         ) : (
           <div>
             {selection === "" && (
               <ul
                 style={{
                   cursor: "pointer",
-                  color: "blue",
+                  color: "darkcyan",
                 }}
               >
-                <li onClick={() => setSelection("I/S")}>I/S</li>
                 <li
+                  onMouseEnter={(e) => setSelector("I/S")}
+                  style={{
+                    listStyleType: selector === "I/S" ? "initial" : "none",
+                  }}
+                  onClick={() => setSelection("I/S")}
+                >
+                  I/S
+                </li>
+                <li
+                  onMouseEnter={(e) => setSelector("General Ledger")}
+                  style={{
+                    listStyleType:
+                      selector === "General Ledger" ? "initial" : "none",
+                  }}
                   onClick={() => {
                     setSelection("General Ledger");
                     setGeneralLedger([{ Amount: "loading..." }]);
@@ -284,9 +302,29 @@ function MyComponent() {
                 >
                   General Ledger
                 </li>
-                <li onClick={() => setSelection("Charts")}>Charts</li>
-                <li onClick={() => setSelection("Bank")}>Bank</li>
                 <li
+                  onMouseEnter={(e) => setSelector("Charts")}
+                  style={{
+                    listStyleType: selector === "Charts" ? "initial" : "none",
+                  }}
+                  onClick={() => setSelection("Charts")}
+                >
+                  Charts
+                </li>
+                <li
+                  onMouseEnter={(e) => setSelector("Bank")}
+                  style={{
+                    listStyleType: selector === "Bank" ? "initial" : "none",
+                  }}
+                  onClick={() => setSelection("Bank")}
+                >
+                  Bank
+                </li>
+                <li
+                  onMouseEnter={(e) => setSelector("Payroll")}
+                  style={{
+                    listStyleType: selector === "Payroll" ? "initial" : "none",
+                  }}
                   onClick={() => {
                     setSelection("Payroll");
                     setPayoutLog([{ EmployeeName: "loading..." }]);
@@ -316,7 +354,15 @@ function MyComponent() {
                 >
                   Payroll
                 </li>
-                <li onClick={() => setSelection("Invoices")}>Invoices</li>
+                <li
+                  onMouseEnter={(e) => setSelector("Invoices")}
+                  style={{
+                    listStyleType: selector === "Invoices" ? "initial" : "none",
+                  }}
+                  onClick={() => setSelection("Invoices")}
+                >
+                  Invoices
+                </li>
               </ul>
             )}
           </div>
