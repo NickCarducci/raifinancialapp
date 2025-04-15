@@ -238,7 +238,7 @@ function MyComponent() {
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  setSelectionMenu(false);
+                  if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("I/S");
                 }}
               >
@@ -253,7 +253,7 @@ function MyComponent() {
                     selector === "General Ledger" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  setSelectionMenu(false);
+                  if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("General Ledger");
                   setGeneralLedger([{ Amount: "loading..." }]);
                   instance
@@ -294,7 +294,7 @@ function MyComponent() {
                   listStyleType: selector === "Charts" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  setSelectionMenu(false);
+                  if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("Charts");
                 }}
               >
@@ -307,7 +307,7 @@ function MyComponent() {
                   listStyleType: selector === "Bank" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  setSelectionMenu(false);
+                  if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("Bank");
                 }}
               >
@@ -321,7 +321,7 @@ function MyComponent() {
                   listStyleType: selector === "Payroll" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  setSelectionMenu(false);
+                  if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("Payroll");
                   setPayoutLog([{ EmployeeName: "loading..." }]);
                   instance
@@ -363,7 +363,7 @@ function MyComponent() {
                   listStyleType: selector === "Invoices" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  setSelectionMenu(false);
+                  if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("Invoices");
                 }}
               >
