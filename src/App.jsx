@@ -93,6 +93,24 @@ function MyComponent() {
   function addCommas(numberString) {
     return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      console.log(window.scrollY);
+      if (!(window.innerWidth < 500))
+        if (window.scrollY > window.innerHeight) setMobileView(true);
+      //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
+
+      setScrollPosition(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   return (
     <div
       style={{
@@ -290,6 +308,10 @@ function MyComponent() {
                         .then(async (res) => await res.json())
                         .then((result) => {
                           console.log(result);
+                          if (result.code === 401)
+                            return setIOStatement([
+                              { TotalRevenue: "please log in again..." },
+                            ]);
                           setIOMonths(
                             result.ioStatement
                               .sort(
@@ -343,6 +365,10 @@ function MyComponent() {
                         .then(async (res) => await res.json())
                         .then((result) => {
                           console.log(result);
+                          if (result.code === 401)
+                            return setGeneralLedger([
+                              { Amount: "please log in again..." },
+                            ]);
                           setGeneralLedger(result.generalLedger);
                         })
                         .catch(() => {
@@ -398,6 +424,10 @@ function MyComponent() {
                         .then(async (res) => await res.json())
                         .then((result) => {
                           console.log(result);
+                          if (result.code === 401)
+                            return setAccountBalances([
+                              { CurrentBalance: "please log in again..." },
+                            ]);
                           setAccountBalances(result.accountBalances);
                         })
                         .catch(() => {
@@ -440,6 +470,10 @@ function MyComponent() {
                         .then(async (res) => await res.json())
                         .then((result) => {
                           console.log(result);
+                          if (result.code === 401)
+                            return setPayoutLog([
+                              { EmployeeName: "please log in again..." },
+                            ]);
                           setPayoutLog(result.payoutLog);
                         })
                         .catch(() => {
@@ -892,8 +926,12 @@ function MyComponent() {
                         <tr>
                           <td>{new Date(x.Date).toLocaleDateString()}</td>
                           <td>${addCommas(String(x.Amount))}</td>
-                          <td>{x.Category}</td>
-                          <td>{x.Platform}</td>
+                          <td>
+                            <div>{x.Category}</div>
+                          </td>
+                          <td>
+                            <div>{x.Platform}</div>
+                          </td>
                         </tr>
                       );
                     })}
