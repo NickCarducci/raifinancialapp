@@ -135,16 +135,12 @@ function MyComponent() {
             cursor: "pointer",
             padding: "5px",
           }}
-          onClick={() => {
-            if (!mobileView) return null;
-            setSelectionMenu(!selectionMenu);
-          }}
         >
           {!(windowWidth < 500) && (
             <div
               onClick={() => {
+                setSelectionMenu(mobileView ? true : false);
                 setMobileView(!mobileView);
-                setSelectionMenu(false);
               }}
               style={{
                 right: "0px",
@@ -160,8 +156,13 @@ function MyComponent() {
               }}
             ></div>
           )}
-          {mobileView && (
-            <div>
+          {windowWidth < 500 && (
+            <div
+              onClick={() => {
+                if (!mobileView) return null;
+                setSelectionMenu(!selectionMenu);
+              }}
+            >
               <div
                 style={{
                   borderRadius: "5px",
@@ -693,7 +694,7 @@ function MyComponent() {
               <button onClick={() => instance.loginPopup()}>Log in</button>
             )}
           </div>
-          RAI Financial {selection}
+          <div style={{ width: "max-content" }}>RAI Financial {selection}</div>
         </div>
         {/*selection !== "" && (
           <div
@@ -905,38 +906,46 @@ function MyComponent() {
             </div>
           )}
           {selection === "General Ledger" && (
-            <table>
-              {generalLedger !== null && generalLedger.length > 0 && (
-                <thead>
-                  <tr>
-                    <td>Date</td>
-                    <td>Amount</td>
-                    <td>Category</td>
-                    <td>Platform</td>
-                  </tr>
-                </thead>
-              )}
-              <tbody>
-                {generalLedger === null
-                  ? ""
-                  : generalLedger.length === 0
-                  ? "No results"
-                  : generalLedger.map((x) => {
-                      return (
-                        <tr>
-                          <td>{new Date(x.Date).toLocaleDateString()}</td>
-                          <td>${addCommas(String(x.Amount))}</td>
-                          <td>
-                            <div>{x.Category}</div>
-                          </td>
-                          <td>
-                            <div>{x.Platform}</div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-              </tbody>
-            </table>
+            <div
+              style={{
+                overflowX: "auto",
+                overflowY: "hidden",
+                width: mobileView ? "100%" : "calc(100vw - 300px",
+              }}
+            >
+              <table>
+                {generalLedger !== null && generalLedger.length > 0 && (
+                  <thead>
+                    <tr>
+                      <td>Date</td>
+                      <td>Amount</td>
+                      <td>Category</td>
+                      <td>Platform</td>
+                    </tr>
+                  </thead>
+                )}
+                <tbody>
+                  {generalLedger === null
+                    ? ""
+                    : generalLedger.length === 0
+                    ? "No results"
+                    : generalLedger.map((x) => {
+                        return (
+                          <tr>
+                            <td>{new Date(x.Date).toLocaleDateString()}</td>
+                            <td>${addCommas(String(x.Amount))}</td>
+                            <td>
+                              <div>{x.Category}</div>
+                            </td>
+                            <td>
+                              <div>{x.Platform}</div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                </tbody>
+              </table>
+            </div>
           )}
           {selection === "Balances" && (
             <table>
