@@ -75,10 +75,12 @@ function MyComponent() {
     }
   }, [instance, accounts]);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [mobileView, setMobileView] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       setSelectionMenu(window.innerWidth < 500 ? false : true);
+      setMobileView(window.innerWidth < 500 ? true : false);
       setWindowWidth(window.innerWidth);
     };
 
@@ -94,18 +96,18 @@ function MyComponent() {
   return (
     <div
       style={{
-        display: windowWidth < 500 ? "block" : "flex",
+        display: mobileView ? "block" : "flex",
       }}
     >
       <div
         style={{
-          display: windowWidth < 500 ? "float" : "block",
+          display: mobileView ? "float" : "block",
           position: "relative",
           fontWeight: "bolder",
           color: "white",
           backgroundColor: "orange",
-          width: windowWidth < 500 ? "100vw" : "300px",
-          height: windowWidth < 500 ? "min-content" : "100vh",
+          width: mobileView ? "100vw" : "300px",
+          height: mobileView ? "min-content" : "100vh",
           transition: ".3s ease-out",
         }}
       >
@@ -116,11 +118,31 @@ function MyComponent() {
             padding: "5px",
           }}
           onClick={() => {
-            if (!(window.innerWidth < 500)) return null;
+            if (!mobileView) return null;
             setSelectionMenu(!selectionMenu);
           }}
         >
-          {windowWidth < 500 && (
+          {!(windowWidth < 500) && (
+            <div
+              onClick={() => {
+                setMobileView(!mobileView);
+                setSelectionMenu(false);
+              }}
+              style={{
+                right: "0px",
+                position: "absolute",
+                margin: "6px 0px",
+                borderLeft: "4px solid white",
+                borderBottom: "4px solid white",
+                height: "20px",
+                width: "20px",
+                borderRadius: "5px",
+                backgroundColor: "transparent",
+                transform: "rotate(45deg)",
+              }}
+            ></div>
+          )}
+          {mobileView && (
             <div>
               <div
                 style={{
@@ -245,7 +267,7 @@ function MyComponent() {
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  if (windowWidth < 500) setSelectionMenu(false);
+                  if (mobileView) setSelectionMenu(false);
                   setSelection("I/S");
                   setIOMonths(["loading..."]);
                   setIOStatement([]);
@@ -299,7 +321,7 @@ function MyComponent() {
                     selector === "General Ledger" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  if (windowWidth < 500) setSelectionMenu(false);
+                  if (mobileView) setSelectionMenu(false);
                   setSelection("General Ledger");
                   setGeneralLedger([{ Amount: "loading..." }]);
                   instance
@@ -340,7 +362,7 @@ function MyComponent() {
                   listStyleType: selector === "Charts" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  if (windowWidth < 500) setSelectionMenu(false);
+                  if (mobileView) setSelectionMenu(false);
                   setSelection("Charts");
                 }}
               >
@@ -354,7 +376,7 @@ function MyComponent() {
                   listStyleType: selector === "Balances" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  if (windowWidth < 500) setSelectionMenu(false);
+                  if (mobileView) setSelectionMenu(false);
                   setSelection("Balances");
                   setGeneralLedger([{ Amount: "loading..." }]);
                   instance
@@ -396,7 +418,7 @@ function MyComponent() {
                   listStyleType: selector === "Payroll" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  if (windowWidth < 500) setSelectionMenu(false);
+                  if (mobileView) setSelectionMenu(false);
                   setSelection("Payroll");
                   setPayoutLog([{ EmployeeName: "loading..." }]);
                   instance
@@ -438,7 +460,7 @@ function MyComponent() {
                   listStyleType: selector === "Invoices" ? "initial" : "none",
                 }}
                 onClick={() => {
-                  if (windowWidth < 500) setSelectionMenu(false);
+                  if (mobileView) setSelectionMenu(false);
                   setSelection("Invoices");
                 }}
               >
@@ -459,7 +481,7 @@ function MyComponent() {
             cursor: "pointer",
             textIndent: "20px",
             padding: "20px 0px",
-            width: windowWidth < 500 ? "100%" : "calc(100vw - 300px)",
+            width: mobileView ? "100%" : "calc(100vw - 300px)",
             color: "black",
             backgroundColor: "white",
           }}
@@ -696,7 +718,7 @@ function MyComponent() {
               )}
               <div
                 style={{
-                  width: windowWidth < 500 ? "100vw" : "calc(100vw - 300px)",
+                  width: mobileView ? "100vw" : "calc(100vw - 300px)",
                   overflowX: "auto",
                   overflowY: "hidden",
                   height: "200px",
@@ -712,14 +734,16 @@ function MyComponent() {
                       onMouseEnter={() => setIOHover("Revenue")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
+                        cursor: "pointer",
                         borderLeft: "4px solid orange",
                         backgroundColor: "white",
                         borderRadius: "10px",
                         margin: "20px",
                         marginRight: "0px",
-                        textAlign: "center",
+                        textAlign: "left",
                         width: "200px",
                         padding: "40px 10px",
+                        paddingTop: "30px",
                         boxShadow:
                           ioHover === "Revenue"
                             ? "5px 5px 5px 1px rgb(0,0,0,.2)"
@@ -727,28 +751,44 @@ function MyComponent() {
                         transition: ".3s ease-in",
                       }}
                     >
-                      Revenue
-                      <br />$
-                      {ioMonth !== "" &&
-                        addCommas(
-                          String(
-                            ioStatement.find((x) => x.Month === ioMonth)
-                              .TotalRevenue
-                          )
-                        )}
+                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                        Revenue
+                        <div
+                          class="fas fa-chart-line"
+                          style={{
+                            margin: "4px",
+                            color: "orange",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            backgroundColor: "peachpuff",
+                          }}
+                        ></div>
+                      </div>
+                      <div style={{ fontWeight: "bolder" }}>
+                        $
+                        {ioMonth !== "" &&
+                          addCommas(
+                            String(
+                              ioStatement.find((x) => x.Month === ioMonth)
+                                .TotalRevenue
+                            )
+                          )}
+                      </div>
                     </div>
                     <div
                       onMouseEnter={() => setIOHover("Expenses")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
+                        cursor: "pointer",
                         borderLeft: "4px solid orange",
                         backgroundColor: "white",
                         borderRadius: "10px",
                         margin: "20px",
                         marginRight: "0px",
-                        textAlign: "center",
+                        textAlign: "left",
                         width: "200px",
                         padding: "40px 10px",
+                        paddingTop: "30px",
                         boxShadow:
                           ioHover === "Expenses"
                             ? "5px 5px 5px 1px rgb(0,0,0,.2)"
@@ -756,28 +796,44 @@ function MyComponent() {
                         transition: ".3s ease-in",
                       }}
                     >
-                      Expenses
-                      <br />$
-                      {ioMonth !== "" &&
-                        addCommas(
-                          String(
-                            ioStatement.find((x) => x.Month === ioMonth)
-                              .TotalExpenses
-                          )
-                        )}
+                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                        Expenses
+                        <div
+                          class="fas fa-file-invoice-dollar"
+                          style={{
+                            margin: "4px",
+                            color: "orange",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            backgroundColor: "peachpuff",
+                          }}
+                        ></div>
+                      </div>
+                      <div style={{ fontWeight: "bolder" }}>
+                        $
+                        {ioMonth !== "" &&
+                          addCommas(
+                            String(
+                              ioStatement.find((x) => x.Month === ioMonth)
+                                .TotalExpenses
+                            )
+                          )}
+                      </div>
                     </div>
                     <div
                       onMouseEnter={() => setIOHover("Profit")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
+                        cursor: "pointer",
                         borderLeft: "4px solid orange",
                         backgroundColor: "white",
                         borderRadius: "10px",
                         margin: "20px",
                         marginRight: "0px",
-                        textAlign: "center",
+                        textAlign: "left",
                         width: "200px",
                         padding: "40px 10px",
+                        paddingTop: "30px",
                         boxShadow:
                           ioHover === "Profit"
                             ? "5px 5px 5px 1px rgb(0,0,0,.2)"
@@ -785,15 +841,29 @@ function MyComponent() {
                         transition: ".3s ease-in",
                       }}
                     >
-                      Profit
-                      <br />$
-                      {ioMonth !== "" &&
-                        addCommas(
-                          String(
-                            ioStatement.find((x) => x.Month === ioMonth)
-                              .NetProfit
-                          )
-                        )}
+                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                        Profit
+                        <div
+                          class="fas fa-wallet"
+                          style={{
+                            margin: "4px",
+                            color: "orange",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            backgroundColor: "peachpuff",
+                          }}
+                        ></div>
+                      </div>
+                      <div style={{ fontWeight: "bolder" }}>
+                        $
+                        {ioMonth !== "" &&
+                          addCommas(
+                            String(
+                              ioStatement.find((x) => x.Month === ioMonth)
+                                .NetProfit
+                            )
+                          )}
+                      </div>
                     </div>
                   </div>
                 )}
