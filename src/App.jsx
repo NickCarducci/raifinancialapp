@@ -36,6 +36,7 @@ function MyComponent() {
   const [authenticatedUser, setUser] = useState();
   const [users, setUsers] = useState([]);
   const [editAdmins, openAdministrators] = useState(false);
+  const [selectionMenu, setSelectionMenu] = useState(true);
   const [selection, setSelection] = useState("");
   const [selector, setSelector] = useState("");
   const [generalLedger, setGeneralLedger] = useState(null);
@@ -68,26 +69,86 @@ function MyComponent() {
         });
     }
   }, [instance, accounts]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSelectionMenu(window.innerWidth < 500 ? false : true);
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <div
       style={{
-        display: "flex",
+        display: windowWidth < 500 ? "block" : "flex",
       }}
     >
       <div
         style={{
+          display: windowWidth < 500 ? "float" : "block",
+          position: "relative",
           fontWeight: "bolder",
           color: "white",
           backgroundColor: "orange",
-          width: "300px",
-          height: "100vh",
+          width: windowWidth < 500 ? "100vw" : "300px",
+          height: windowWidth < 500 ? "min-content" : "100vh",
           transition: ".3s ease-out",
         }}
       >
-        <div style={{ padding: "10px" }}>RAI Finance</div>
         <div
           style={{
+            display: "flex",
+            cursor: "pointer",
+            padding: "5px",
+          }}
+          onClick={() => {
+            if (!(window.innerWidth < 500)) return null;
+            setSelectionMenu(!selectionMenu);
+          }}
+        >
+          {windowWidth < 500 && (
+            <div>
+              <div
+                style={{
+                  borderRadius: "5px",
+                  margin: "5px",
+                  width: "30px",
+                  height: "5px",
+                  backgroundColor: "white",
+                }}
+              ></div>
+              <div
+                style={{
+                  borderRadius: "5px",
+                  margin: "5px",
+                  width: "30px",
+                  height: "5px",
+                  backgroundColor: "white",
+                }}
+              ></div>
+              <div
+                style={{
+                  borderRadius: "5px",
+                  margin: "5px",
+                  width: "30px",
+                  height: "5px",
+                  backgroundColor: "white",
+                }}
+              ></div>
+            </div>
+          )}
+          <div style={{ padding: "10px" }}>RAI Finance</div>
+        </div>
+        <div
+          style={{
+            display: selectionMenu ? "block" : "none",
             textAlign: "center",
             margin: "10px",
             borderRadius: "8px",
@@ -153,7 +214,7 @@ function MyComponent() {
             <button onClick={() => instance.loginPopup()}>login</button>
           )}
         </div>
-        {!authenticatedUser ? (
+        {!selectionMenu ? null : !authenticatedUser ? (
           <div style={{ padding: "0px 10px" }}>
             Must be logged in to view this page.
           </div>
@@ -162,7 +223,7 @@ function MyComponent() {
             Must be an admin to view this page.
           </div>
         ) : (
-          <div>
+          <div style={{ paddingBottom: "10px" }}>
             <ul
               style={{
                 cursor: "pointer",
@@ -176,7 +237,10 @@ function MyComponent() {
                   textDecoration: selection === "I/S" ? "underline" : "none",
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
-                onClick={() => setSelection("I/S")}
+                onClick={() => {
+                  setSelectionMenu(false);
+                  setSelection("I/S");
+                }}
               >
                 <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
               </li>
@@ -189,6 +253,7 @@ function MyComponent() {
                     selector === "General Ledger" ? "initial" : "none",
                 }}
                 onClick={() => {
+                  setSelectionMenu(false);
                   setSelection("General Ledger");
                   setGeneralLedger([{ Amount: "loading..." }]);
                   instance
@@ -211,6 +276,11 @@ function MyComponent() {
                         .then((result) => {
                           console.log(result);
                           setGeneralLedger(result.generalLedger);
+                        })
+                        .catch(() => {
+                          setGeneralLedger([
+                            { Amount: "please log in again..." },
+                          ]);
                         });
                     });
                 }}
@@ -223,7 +293,10 @@ function MyComponent() {
                   textDecoration: selection === "Charts" ? "underline" : "none",
                   listStyleType: selector === "Charts" ? "initial" : "none",
                 }}
-                onClick={() => setSelection("Charts")}
+                onClick={() => {
+                  setSelectionMenu(false);
+                  setSelection("Charts");
+                }}
               >
                 <div class="fas fa-chart-line w-6"></div>&nbsp;&nbsp;Charts
               </li>
@@ -233,7 +306,10 @@ function MyComponent() {
                   textDecoration: selection === "Bank" ? "underline" : "none",
                   listStyleType: selector === "Bank" ? "initial" : "none",
                 }}
-                onClick={() => setSelection("Bank")}
+                onClick={() => {
+                  setSelectionMenu(false);
+                  setSelection("Bank");
+                }}
               >
                 <div class="fas fa-wallet w-6"></div>&nbsp;&nbsp;Balances
               </li>
@@ -245,6 +321,7 @@ function MyComponent() {
                   listStyleType: selector === "Payroll" ? "initial" : "none",
                 }}
                 onClick={() => {
+                  setSelectionMenu(false);
                   setSelection("Payroll");
                   setPayoutLog([{ EmployeeName: "loading..." }]);
                   instance
@@ -267,6 +344,11 @@ function MyComponent() {
                         .then((result) => {
                           console.log(result);
                           setPayoutLog(result.payoutLog);
+                        })
+                        .catch(() => {
+                          setPayoutLog([
+                            { EmployeeName: "please log in again..." },
+                          ]);
                         });
                     });
                 }}
@@ -280,7 +362,10 @@ function MyComponent() {
                     selection === "Invoices" ? "underline" : "none",
                   listStyleType: selector === "Invoices" ? "initial" : "none",
                 }}
-                onClick={() => setSelection("Invoices")}
+                onClick={() => {
+                  setSelectionMenu(false);
+                  setSelection("Invoices");
+                }}
               >
                 <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
               </li>
@@ -299,7 +384,7 @@ function MyComponent() {
             cursor: "pointer",
             textIndent: "20px",
             padding: "20px 0px",
-            width: "calc(100vw - 300px)",
+            width: windowWidth < 500 ? "100%" : "calc(100vw - 300px)",
             color: "black",
             backgroundColor: "white",
           }}
@@ -387,7 +472,10 @@ function MyComponent() {
                       updateUsers(setUsers, instance, accounts);
                     }}
                   >
-                    +/- Update admins
+                    {authenticatedUser &&
+                    authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
+                      ? "+/- Update admins"
+                      : "View others"}
                   </button>
                 ) : (
                   <div>
