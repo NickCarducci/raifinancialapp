@@ -694,7 +694,7 @@ function MyComponent() {
               <button onClick={() => instance.loginPopup()}>Log in</button>
             )}
           </div>
-          <div style={{ width: "max-content" }}>RAI Financial {selection}</div>
+          RAI Financial {selection}
         </div>
         {/*selection !== "" && (
           <div
@@ -929,9 +929,9 @@ function MyComponent() {
                     ? ""
                     : generalLedger.length === 0
                     ? "No results"
-                    : generalLedger.map((x) => {
+                    : generalLedger.map((x, i) => {
                         return (
-                          <tr>
+                          <tr key={i + x.Date}>
                             <td>{new Date(x.Date).toLocaleDateString()}</td>
                             <td>${addCommas(String(x.Amount))}</td>
                             <td>
@@ -948,68 +948,82 @@ function MyComponent() {
             </div>
           )}
           {selection === "Balances" && (
-            <table>
-              {accountBalances !== null && accountBalances.length > 0 && (
-                <thead>
-                  <tr>
-                    <td>Account</td>
-                    <td>Balance</td>
-                    <td>Last Updated</td>
-                  </tr>
-                </thead>
-              )}
-              <tbody>
-                {accountBalances === null
-                  ? ""
-                  : accountBalances.length === 0
-                  ? "No results"
-                  : accountBalances.map((x) => {
-                      return (
-                        <tr key={x.LastUpdated}>
-                          <td>{x.AccountName}</td>
-                          <td>${addCommas(String(x.CurrentBalance))}</td>
-                          <td>
-                            {new Date(x.LastUpdated).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      );
-                    })}
-              </tbody>
-            </table>
+            <div
+              style={{
+                overflowX: "auto",
+                overflowY: "hidden",
+                width: mobileView ? "100%" : "calc(100vw - 300px",
+              }}
+            >
+              <table>
+                {accountBalances !== null && accountBalances.length > 0 && (
+                  <thead>
+                    <tr>
+                      <td>Account</td>
+                      <td>Balance</td>
+                      <td>Last Updated</td>
+                    </tr>
+                  </thead>
+                )}
+                <tbody>
+                  {accountBalances === null
+                    ? ""
+                    : accountBalances.length === 0
+                    ? "No results"
+                    : accountBalances.map((x) => {
+                        return (
+                          <tr key={x.LastUpdated}>
+                            <td>{x.AccountName}</td>
+                            <td>${addCommas(String(x.CurrentBalance))}</td>
+                            <td>
+                              {new Date(x.LastUpdated).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                </tbody>
+              </table>
+            </div>
           )}
           {selection === "Payroll" && (
-            <table>
-              {payoutLog !== null && payoutLog.length > 0 && (
-                <thead>
-                  <tr>
-                    <td>Date</td>
-                    <td>Employee</td>
-                    <td>Amount</td>
-                    <td>Notes</td>
-                    <td>Payment Method</td>
-                  </tr>
-                </thead>
-              )}
-              <tbody>
-                {payoutLog === null
-                  ? ""
-                  : payoutLog.length === 0
-                  ? "No results"
-                  : payoutLog.map((x) => {
-                      return (
-                        <tr key={x.CreatedAt}>
-                          <td>
-                            {new Date(x.PaymentDate).toLocaleDateString()}
-                          </td>
-                          <td>{x.EmployeeName}</td>
-                          <td>${addCommas(String(x.AmountPaid))}</td>
-                          <td>{x.Notes}</td>
-                          <td>{x.PaymentMethod}</td>
-                        </tr>
-                      );
-                    })}
-              </tbody>
-            </table>
+            <div
+              style={{
+                overflowX: "auto",
+                overflowY: "hidden",
+                width: mobileView ? "100%" : "calc(100vw - 300px",
+              }}
+            >
+              <table>
+                {payoutLog !== null && payoutLog.length > 0 && (
+                  <thead>
+                    <tr>
+                      <td>Date</td>
+                      <td>Employee</td>
+                      <td>Amount</td>
+                    </tr>
+                  </thead>
+                )}
+                <tbody>
+                  {payoutLog === null
+                    ? ""
+                    : payoutLog.length === 0
+                    ? "No results"
+                    : payoutLog.map((x, i) => {
+                        return (
+                          <tr key={i + x.CreatedAt}>
+                            <td>
+                              {new Date(x.PaymentDate).toLocaleDateString()}
+                            </td>
+                            <td>
+                              <div>{x.EmployeeName}</div>
+                            </td>
+                            <td>${addCommas(String(x.AmountPaid))}</td>
+                          </tr>
+                        );
+                      })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
         {selection !== "" && "End of results."}
@@ -1019,3 +1033,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
