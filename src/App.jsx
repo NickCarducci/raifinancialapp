@@ -41,6 +41,11 @@ function MyComponent() {
   const [selector, setSelector] = useState("");
   const [generalLedger, setGeneralLedger] = useState(null);
   const [payoutLog, setPayoutLog] = useState(null);
+  const [ioStatement, setIOStatement] = useState(null);
+  const [ioMonths, setIOMonths] = useState([]);
+  const [ioMonth, setIOMonth] = useState("");
+  const [ioHover, setIOHover] = useState("");
+  const [accountBalances, setAccountBalances] = useState(null);
 
   useEffect(() => {
     if (accounts.length > 0) {
@@ -83,7 +88,9 @@ function MyComponent() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
+  function addCommas(numberString) {
+    return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
   return (
     <div
       style={{
@@ -240,6 +247,45 @@ function MyComponent() {
                 onClick={() => {
                   if (windowWidth < 500) setSelectionMenu(false);
                   setSelection("I/S");
+                  setIOMonths(["loading..."]);
+                  setIOStatement([]);
+                  instance
+                    .acquireTokenSilent({
+                      ...loginRequest,
+                      account: accounts[0],
+                    })
+                    .then((response) => {
+                      fetch(
+                        "https://raifinancial.azurewebsites.net/api/iostatement",
+                        {
+                          method: "GET",
+                          headers: {
+                            Authorization: "Bearer " + response.idToken,
+                            "Content-Type": "application/JSON",
+                          },
+                        }
+                      )
+                        .then(async (res) => await res.json())
+                        .then((result) => {
+                          console.log(result);
+                          setIOMonths(
+                            result.ioStatement
+                              .sort(
+                                (a, b) => new Date(b.Month) - new Date(a.Month)
+                              )
+                              .map((x, i) => {
+                                if (i === 0) setIOMonth(x.Month);
+                                return x.Month;
+                              })
+                          );
+                          setIOStatement(result.ioStatement);
+                        })
+                        .catch(() => {
+                          setIOStatement([
+                            { TotalRevenue: "please log in again..." },
+                          ]);
+                        });
+                    });
                 }}
               >
                 <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
@@ -301,14 +347,43 @@ function MyComponent() {
                 <div class="fas fa-chart-line w-6"></div>&nbsp;&nbsp;Charts
               </li>
               <li
-                onMouseEnter={(e) => setSelector("Bank")}
+                onMouseEnter={(e) => setSelector("Balances")}
                 style={{
-                  textDecoration: selection === "Bank" ? "underline" : "none",
-                  listStyleType: selector === "Bank" ? "initial" : "none",
+                  textDecoration:
+                    selection === "Balances" ? "underline" : "none",
+                  listStyleType: selector === "Balances" ? "initial" : "none",
                 }}
                 onClick={() => {
                   if (windowWidth < 500) setSelectionMenu(false);
-                  setSelection("Bank");
+                  setSelection("Balances");
+                  setGeneralLedger([{ Amount: "loading..." }]);
+                  instance
+                    .acquireTokenSilent({
+                      ...loginRequest,
+                      account: accounts[0],
+                    })
+                    .then((response) => {
+                      fetch(
+                        "https://raifinancial.azurewebsites.net/api/accountbalances",
+                        {
+                          method: "GET",
+                          headers: {
+                            Authorization: "Bearer " + response.idToken,
+                            "Content-Type": "application/JSON",
+                          },
+                        }
+                      )
+                        .then(async (res) => await res.json())
+                        .then((result) => {
+                          console.log(result);
+                          setAccountBalances(result.accountBalances);
+                        })
+                        .catch(() => {
+                          setAccountBalances([
+                            { CurrentBalance: "please log in again..." },
+                          ]);
+                        });
+                    });
                 }}
               >
                 <div class="fas fa-wallet w-6"></div>&nbsp;&nbsp;Balances
@@ -593,12 +668,147 @@ function MyComponent() {
             backgroundColor: "peachpuff",
           }}
         >
+          {selection === "I/S" && (
+            <div>
+              {ioStatement !== null && ioStatement.length > 0 && (
+                <select
+                  style={{
+                    margin: "10px",
+                  }}
+                  onChange={(e) => setIOMonth(e.target.value)}
+                >
+                  {ioMonths.map((month) => {
+                    const zeroPad = (x) => {
+                      return x < 10 ? "0" + x : x;
+                    };
+                    return (
+                      <option value={month} key={month}>
+                        {month ===
+                        new Date().getFullYear() +
+                          "-" +
+                          zeroPad(new Date().getMonth() + 1)
+                          ? "Current Month"
+                          : month}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+              <div
+                style={{
+                  width: windowWidth < 500 ? "100vw" : "calc(100vw - 300px)",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  height: "200px",
+                }}
+              >
+                {ioStatement === null ? (
+                  ""
+                ) : ioStatement.length === 0 ? (
+                  "No results"
+                ) : (
+                  <div style={{ display: "flex" }}>
+                    <div
+                      onMouseEnter={() => setIOHover("Revenue")}
+                      onMouseLeave={() => setIOHover("")}
+                      style={{
+                        borderLeft: "4px solid orange",
+                        backgroundColor: "white",
+                        borderRadius: "10px",
+                        margin: "20px",
+                        marginRight: "0px",
+                        textAlign: "center",
+                        width: "200px",
+                        padding: "40px 10px",
+                        boxShadow:
+                          ioHover === "Revenue"
+                            ? "5px 5px 5px 1px rgb(0,0,0,.2)"
+                            : "",
+                        transition: ".3s ease-in",
+                      }}
+                    >
+                      Revenue
+                      <br />$
+                      {ioMonth !== "" &&
+                        addCommas(
+                          String(
+                            ioStatement.find((x) => x.Month === ioMonth)
+                              .TotalRevenue
+                          )
+                        )}
+                    </div>
+                    <div
+                      onMouseEnter={() => setIOHover("Expenses")}
+                      onMouseLeave={() => setIOHover("")}
+                      style={{
+                        borderLeft: "4px solid orange",
+                        backgroundColor: "white",
+                        borderRadius: "10px",
+                        margin: "20px",
+                        marginRight: "0px",
+                        textAlign: "center",
+                        width: "200px",
+                        padding: "40px 10px",
+                        boxShadow:
+                          ioHover === "Expenses"
+                            ? "5px 5px 5px 1px rgb(0,0,0,.2)"
+                            : "",
+                        transition: ".3s ease-in",
+                      }}
+                    >
+                      Expenses
+                      <br />$
+                      {ioMonth !== "" &&
+                        addCommas(
+                          String(
+                            ioStatement.find((x) => x.Month === ioMonth)
+                              .TotalExpenses
+                          )
+                        )}
+                    </div>
+                    <div
+                      onMouseEnter={() => setIOHover("Profit")}
+                      onMouseLeave={() => setIOHover("")}
+                      style={{
+                        borderLeft: "4px solid orange",
+                        backgroundColor: "white",
+                        borderRadius: "10px",
+                        margin: "20px",
+                        marginRight: "0px",
+                        textAlign: "center",
+                        width: "200px",
+                        padding: "40px 10px",
+                        boxShadow:
+                          ioHover === "Profit"
+                            ? "5px 5px 5px 1px rgb(0,0,0,.2)"
+                            : "",
+                        transition: ".3s ease-in",
+                      }}
+                    >
+                      Profit
+                      <br />$
+                      {ioMonth !== "" &&
+                        addCommas(
+                          String(
+                            ioStatement.find((x) => x.Month === ioMonth)
+                              .NetProfit
+                          )
+                        )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           {selection === "General Ledger" && (
             <table>
               {generalLedger !== null && generalLedger.length > 0 && (
                 <thead>
                   <tr>
+                    <td>Date</td>
                     <td>Amount</td>
+                    <td>Category</td>
+                    <td>Platform</td>
                   </tr>
                 </thead>
               )}
@@ -610,7 +820,40 @@ function MyComponent() {
                   : generalLedger.map((x) => {
                       return (
                         <tr>
-                          <td>{x.Amount}</td>
+                          <td>{new Date(x.Date).toLocaleDateString()}</td>
+                          <td>${addCommas(String(x.Amount))}</td>
+                          <td>{x.Category}</td>
+                          <td>{x.Platform}</td>
+                        </tr>
+                      );
+                    })}
+              </tbody>
+            </table>
+          )}
+          {selection === "Balances" && (
+            <table>
+              {accountBalances !== null && accountBalances.length > 0 && (
+                <thead>
+                  <tr>
+                    <td>Account</td>
+                    <td>Balance</td>
+                    <td>Last Updated</td>
+                  </tr>
+                </thead>
+              )}
+              <tbody>
+                {accountBalances === null
+                  ? ""
+                  : accountBalances.length === 0
+                  ? "No results"
+                  : accountBalances.map((x) => {
+                      return (
+                        <tr key={x.LastUpdated}>
+                          <td>{x.AccountName}</td>
+                          <td>${addCommas(String(x.CurrentBalance))}</td>
+                          <td>
+                            {new Date(x.LastUpdated).toLocaleDateString()}
+                          </td>
                         </tr>
                       );
                     })}
@@ -625,6 +868,8 @@ function MyComponent() {
                     <td>Date</td>
                     <td>Employee</td>
                     <td>Amount</td>
+                    <td>Notes</td>
+                    <td>Payment Method</td>
                   </tr>
                 </thead>
               )}
@@ -640,7 +885,9 @@ function MyComponent() {
                             {new Date(x.PaymentDate).toLocaleDateString()}
                           </td>
                           <td>{x.EmployeeName}</td>
-                          <td>${x.AmountPaid}</td>
+                          <td>${addCommas(String(x.AmountPaid))}</td>
+                          <td>{x.Notes}</td>
+                          <td>{x.PaymentMethod}</td>
                         </tr>
                       );
                     })}
