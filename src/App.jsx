@@ -83,7 +83,7 @@ function MyComponent() {
       setMobileView(window.innerWidth < 500 ? true : false);
       setWindowWidth(window.innerWidth);
     };
-
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -97,7 +97,7 @@ function MyComponent() {
 
   useEffect(() => {
     const handleScroll = () => {
-      console.log(window.scrollY);
+      //console.log(window.scrollY);
       if (!(window.innerWidth < 500))
         if (window.scrollY > window.innerHeight) setMobileView(true);
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
@@ -459,7 +459,7 @@ function MyComponent() {
                     })
                     .then((response) => {
                       fetch(
-                        "https://raifinancial.azurewebsites.net/api/payoutLog",
+                        "https://raifinancial.azurewebsites.net/api/payoutlog",
                         {
                           method: "GET",
                           headers: {
@@ -1033,4 +1033,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
