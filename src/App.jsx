@@ -100,12 +100,11 @@ function MyComponent() {
 
   useEffect(() => {
     const handleScroll = () => {
-      //console.log(window.scrollY);
+      setSelectionHeight(selectionMenuRef.current.offsetHeight);
       if (!(window.innerWidth < 500))
         if (window.scrollY > window.innerHeight) {
           setMobileView(true);
           //
-          //setSelectionHeight(selectionMenuRef.current.offsetHeight);
         }
 
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
@@ -120,10 +119,10 @@ function MyComponent() {
     };
   }, []);
   useEffect(() => {
-    if (mobileView) window.scrollTo(0, 0);
+    if (mobileView) window.scrollTo(0, selectionHeight - 100);
     //window.scrollTo(0, 0); //selectionHeight
     return () => {};
-  }, [mobileView]);
+  }, [selectionHeight]);
   const selectionMenuRef = useRef(null);
   return (
     <div
