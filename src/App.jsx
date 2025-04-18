@@ -94,6 +94,7 @@ function MyComponent() {
     return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [upOrder, setUpOrder] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -481,7 +482,9 @@ function MyComponent() {
                             ]);
                           setPayoutLog(
                             result.payoutLog.sort(
-                              (a, b) => new Date(b.Date) - new Date(a.Date)
+                              (a, b) =>
+                                new Date(b.PaymentDate) -
+                                new Date(a.PaymentDate)
                             )
                           );
                         })
@@ -614,7 +617,7 @@ function MyComponent() {
                   >
                     {authenticatedUser &&
                     authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
-                      ? "+/- Update admins"
+                      ? "+/- upOrder admins"
                       : "View others"}
                   </button>
                 ) : (
@@ -1005,9 +1008,101 @@ function MyComponent() {
                 {payoutLog !== null && payoutLog.length > 0 && (
                   <thead>
                     <tr>
-                      <td>Date</td>
-                      <td>Employee</td>
-                      <td>Amount</td>
+                      <td
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upDate"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort(
+                                  (a, b) =>
+                                    new Date(a.PaymentDate) -
+                                    new Date(b.PaymentDate)
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upDate");
+                        }}
+                      >
+                        Date{" "}
+                        {upOrder === "upDate" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
+                      <td
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upEmployee"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort((a, b) =>
+                                  a.EmployeeName < b.EmployeeName ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upEmployee");
+                        }}
+                      >
+                        Employee{" "}
+                        {upOrder === "upEmployee" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
+                      <td
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upAmount"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort((a, b) =>
+                                  a.AmountPaid < b.AmountPaid ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upAmount");
+                        }}
+                      >
+                        Amount{" "}
+                        {upOrder === "upAmount" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
                     </tr>
                   </thead>
                 )}
