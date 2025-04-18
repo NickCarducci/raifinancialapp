@@ -290,7 +290,7 @@ function MyComponent() {
                   if (mobileView) setSelectionMenu(false);
                   setSelection("I/S");
                   setIOMonths(["loading..."]);
-                  setIOStatement([]);
+                  setIOStatement(null);
                   instance
                     .acquireTokenSilent({
                       ...loginRequest,
@@ -738,7 +738,7 @@ function MyComponent() {
         >
           {selection === "I/S" && (
             <div>
-              {ioStatement !== null && ioStatement.length > 0 && (
+              {ioStatement !== null && (
                 <select
                   style={{
                     margin: "10px",
