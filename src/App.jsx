@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { loginRequest } from "./authConfig";
@@ -74,6 +74,7 @@ function MyComponent() {
         });
     }
   }, [instance, accounts]);
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [mobileView, setMobileView] = useState(false);
 
@@ -95,12 +96,18 @@ function MyComponent() {
   }
   const [scrollPosition, setScrollPosition] = useState(0);
   const [upOrder, setUpOrder] = useState(false);
+  const [selectionHeight, setSelectionHeight] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       //console.log(window.scrollY);
       if (!(window.innerWidth < 500))
-        if (window.scrollY > window.innerHeight) setMobileView(true);
+        if (window.scrollY > window.innerHeight) {
+          setMobileView(true);
+          //
+          //setSelectionHeight(selectionMenuRef.current.offsetHeight);
+        }
+
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
 
       setScrollPosition(window.scrollY);
@@ -112,6 +119,12 @@ function MyComponent() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+  useEffect(() => {
+    if (mobileView) window.scrollTo(0, 0);
+    //window.scrollTo(0, 0); //selectionHeight
+    return () => {};
+  }, [mobileView]);
+  const selectionMenuRef = useRef(null);
   return (
     <div
       style={{
@@ -119,6 +132,7 @@ function MyComponent() {
       }}
     >
       <div
+        ref={selectionMenuRef}
         style={{
           display: mobileView ? "float" : "block",
           position: "relative",
