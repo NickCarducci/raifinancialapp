@@ -124,6 +124,44 @@ function MyComponent() {
     return () => {};
   }, [selectionHeight]);
   const selectionMenuRef = useRef(null);
+  const [editCategory, setEditCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const getGeneralLedger = () => {
+    if (mobileView) setSelectionMenu(false);
+    setSelection("General Ledger");
+    setGeneralLedger([{ Amount: "loading..." }]);
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        fetch("https://raifinancial.azurewebsites.net/api/generalledger", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + response.idToken,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then((result) => {
+            console.log(result);
+            if (result.code === 401)
+              return setGeneralLedger([{ Amount: "please log in again..." }]);
+            setGeneralLedger(
+              result.generalLedger.sort(
+                (a, b) => new Date(b.Date) - new Date(a.Date)
+              )
+            );
+          })
+          .catch(() => {
+            setGeneralLedger([{ Amount: "please log in again..." }]);
+          });
+      });
+  };
+  const [selectedIO, setSelectedIO] = useState("");
+  const [revenue, setRevenue] = useState(null);
+  const [expenses, setExpenses] = useState(null);
   return (
     <div
       style={{
@@ -357,46 +395,7 @@ function MyComponent() {
                   listStyleType:
                     selector === "General Ledger" ? "initial" : "none",
                 }}
-                onClick={() => {
-                  if (mobileView) setSelectionMenu(false);
-                  setSelection("General Ledger");
-                  setGeneralLedger([{ Amount: "loading..." }]);
-                  instance
-                    .acquireTokenSilent({
-                      ...loginRequest,
-                      account: accounts[0],
-                    })
-                    .then((response) => {
-                      fetch(
-                        "https://raifinancial.azurewebsites.net/api/generalledger",
-                        {
-                          method: "GET",
-                          headers: {
-                            Authorization: "Bearer " + response.idToken,
-                            "Content-Type": "application/JSON",
-                          },
-                        }
-                      )
-                        .then(async (res) => await res.json())
-                        .then((result) => {
-                          console.log(result);
-                          if (result.code === 401)
-                            return setGeneralLedger([
-                              { Amount: "please log in again..." },
-                            ]);
-                          setGeneralLedger(
-                            result.generalLedger.sort(
-                              (a, b) => new Date(b.Date) - new Date(a.Date)
-                            )
-                          );
-                        })
-                        .catch(() => {
-                          setGeneralLedger([
-                            { Amount: "please log in again..." },
-                          ]);
-                        });
-                    });
-                }}
+                onClick={getGeneralLedger}
               >
                 <div class="fas fa-book w-6"></div>&nbsp;&nbsp;General Ledger
               </li>
@@ -751,30 +750,28 @@ function MyComponent() {
         >
           {selection === "I/S" && (
             <div>
-              {ioStatement !== null && (
-                <select
-                  style={{
-                    margin: "10px",
-                  }}
-                  onChange={(e) => setIOMonth(e.target.value)}
-                >
-                  {ioMonths.map((month) => {
-                    const zeroPad = (x) => {
-                      return x < 10 ? "0" + x : x;
-                    };
-                    return (
-                      <option value={month} key={month}>
-                        {month ===
-                        new Date().getFullYear() +
-                          "-" +
-                          zeroPad(new Date().getMonth() + 1)
-                          ? "Current Month"
-                          : month}
-                      </option>
-                    );
-                  })}
-                </select>
-              )}
+              <select
+                style={{
+                  margin: "10px",
+                }}
+                onChange={(e) => setIOMonth(e.target.value)}
+              >
+                {ioMonths.map((month) => {
+                  const zeroPad = (x) => {
+                    return x < 10 ? "0" + x : x;
+                  };
+                  return (
+                    <option value={month} key={month}>
+                      {month ===
+                      new Date().getFullYear() +
+                        "-" +
+                        zeroPad(new Date().getMonth() + 1)
+                        ? "Current Month"
+                        : month}
+                    </option>
+                  );
+                })}
+              </select>
               <div
                 style={{
                   width: mobileView ? "100vw" : "calc(100vw - 300px)",
@@ -790,6 +787,34 @@ function MyComponent() {
                 ) : (
                   <div style={{ display: "flex" }}>
                     <div
+                      onClick={() => {
+                        instance
+                          .acquireTokenSilent({
+                            ...loginRequest,
+                            account: accounts[0],
+                          })
+                          .then((response) => {
+                            setSelectedIO("revenue");
+                            fetch(
+                              "https://raifinancial.azurewebsites.net/api/revenue",
+                              {
+                                method: "GET",
+                                headers: {
+                                  Authorization: `Bearer ${response.idToken}`,
+                                  "Content-Type": "application/JSON",
+                                },
+                              }
+                            )
+                              .then(async (res) => await res.json())
+                              .then((result) => {
+                                console.log(result);
+                                setRevenue(result.revenue);
+                              })
+                              .catch((error) => {
+                                console.error(error);
+                              });
+                          });
+                      }}
                       onMouseEnter={() => setIOHover("Revenue")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
@@ -835,6 +860,34 @@ function MyComponent() {
                       </div>
                     </div>
                     <div
+                      onClick={() => {
+                        setSelectedIO("expenses");
+                        instance
+                          .acquireTokenSilent({
+                            ...loginRequest,
+                            account: accounts[0],
+                          })
+                          .then((response) => {
+                            fetch(
+                              "https://raifinancial.azurewebsites.net/api/expenses",
+                              {
+                                method: "GET",
+                                headers: {
+                                  Authorization: `Bearer ${response.idToken}`,
+                                  "Content-Type": "application/JSON",
+                                },
+                              }
+                            )
+                              .then(async (res) => await res.json())
+                              .then((result) => {
+                                console.log(result);
+                                setExpenses(result.expenses);
+                              })
+                              .catch((error) => {
+                                console.error(error);
+                              });
+                          });
+                      }}
                       onMouseEnter={() => setIOHover("Expenses")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
@@ -927,6 +980,31 @@ function MyComponent() {
                   </div>
                 )}
               </div>
+              {selectedIO === "revenue" ? (
+                <div>
+                  {revenue !== null &&
+                    revenue.map((x) => {
+                      return (
+                        <div>
+                          {new Date(x.Date).toLocaleDateString()}: $
+                          {addCommas(String(x.Amount))} ({x.Category})
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : selectedIO === "expenses" ? (
+                <div>
+                  {expenses !== null &&
+                    expenses.map((x) => {
+                      return (
+                        <div>
+                          {new Date(x.Date).toLocaleDateString()}: $
+                          {addCommas(String(x.Amount))} ({x.Category})
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : null}
             </div>
           )}
           {selection === "General Ledger" && (
@@ -942,6 +1020,7 @@ function MyComponent() {
                   <thead>
                     <tr>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upDate"
@@ -973,6 +1052,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upAmount"
@@ -1004,6 +1084,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upCategory"
@@ -1035,6 +1116,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upPlatform"
@@ -1078,8 +1160,79 @@ function MyComponent() {
                           <tr key={i + x.Date}>
                             <td>{new Date(x.Date).toLocaleDateString()}</td>
                             <td>${addCommas(String(x.Amount))}</td>
-                            <td>
-                              <div>{x.Category}</div>
+                            <td
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                setEditCategory(i);
+                              }}
+                            >
+                              <div>
+                                {editCategory === i ? (
+                                  <form
+                                    style={{
+                                      display: "flex",
+                                    }}
+                                    onSubmit={(e) => {
+                                      e.preventDefault();
+                                      const answer = window.confirm(
+                                        "Are you sure you'd like to change the Category from " +
+                                          x.Category +
+                                          " to " +
+                                          newCategory +
+                                          "?"
+                                      );
+                                      if (answer) {
+                                        instance
+                                          .acquireTokenSilent({
+                                            ...loginRequest,
+                                            account: accounts[0],
+                                          })
+                                          .then((response) => {
+                                            fetch(
+                                              "https://raifinancial.azurewebsites.net/api/updatecategory/" +
+                                                x.TransactionID +
+                                                "/" +
+                                                newCategory,
+                                              {
+                                                method: "GET",
+                                                headers: {
+                                                  Authorization: `Bearer ${response.idToken}`,
+                                                  "Content-Type":
+                                                    "application/JSON",
+                                                },
+                                              }
+                                            )
+                                              .then(
+                                                async (res) => await res.json()
+                                              )
+                                              .then((response) => {
+                                                console.log(response);
+                                                setNewCategory("");
+                                                getGeneralLedger();
+                                                setEditCategory(null);
+                                              })
+                                              .catch((error) => {
+                                                console.error(error);
+                                              });
+                                          });
+                                      }
+                                    }}
+                                  >
+                                    <input
+                                      placeholder={x.Category}
+                                      value={newCategory}
+                                      onChange={(e) => {
+                                        setNewCategory(e.target.value);
+                                      }}
+                                    />
+                                    <div onClick={() => setEditCategory(false)}>
+                                      &times;
+                                    </div>
+                                  </form>
+                                ) : (
+                                  x.Category
+                                )}
+                              </div>
                             </td>
                             <td>
                               <div>{x.Platform}</div>
@@ -1142,6 +1295,7 @@ function MyComponent() {
                   <thead>
                     <tr>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setPayoutLog(
                             upOrder === "upDate"
@@ -1175,6 +1329,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setPayoutLog(
                             upOrder === "upEmployee"
@@ -1206,6 +1361,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           setPayoutLog(
                             upOrder === "upAmount"
