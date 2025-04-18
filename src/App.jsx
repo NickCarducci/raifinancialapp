@@ -162,6 +162,7 @@ function MyComponent() {
   const [selectedIO, setSelectedIO] = useState("");
   const [revenue, setRevenue] = useState(null);
   const [expenses, setExpenses] = useState(null);
+  const space = " ";
   return (
     <div
       style={{
@@ -311,7 +312,12 @@ function MyComponent() {
               </div>
             </div>
           ) : (
-            <button onClick={() => instance.loginPopup()}>login</button>
+            <div style={{ display: "block" }}>
+              <button onClick={() => instance.loginPopup()}>login</button>
+              <br />
+              Make a{space}
+              <a href="https://signup.live.com">microsoft account here</a>.
+            </div>
           )}
         </div>
         {!selectionMenu ? null : !authenticatedUser ? (
@@ -1189,9 +1195,9 @@ function MyComponent() {
                                           })
                                           .then((response) => {
                                             fetch(
-                                              "https://raifinancial.azurewebsites.net/api/updatecategory/" +
+                                              "https://raifinancial.azurewebsites.net/api/updatecategory/'" +
                                                 x.TransactionID +
-                                                "/" +
+                                                "'/" +
                                                 newCategory,
                                               {
                                                 method: "GET",
