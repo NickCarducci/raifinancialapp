@@ -928,10 +928,130 @@ function MyComponent() {
                 {generalLedger !== null && generalLedger.length > 0 && (
                   <thead>
                     <tr>
-                      <td>Date</td>
-                      <td>Amount</td>
-                      <td>Category</td>
-                      <td>Platform</td>
+                      <td
+                        onClick={() => {
+                          setGeneralLedger(
+                            upOrder === "upDate"
+                              ? generalLedger.reverse()
+                              : generalLedger.sort(
+                                  (a, b) => new Date(a.Date) - new Date(b.Date)
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upDate");
+                        }}
+                      >
+                        Date{" "}
+                        {upOrder === "upDate" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
+                      <td
+                        onClick={() => {
+                          setGeneralLedger(
+                            upOrder === "upAmount"
+                              ? generalLedger.reverse()
+                              : generalLedger.sort(
+                                  (a, b) => a.Amount - b.Amount
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upAmount");
+                        }}
+                      >
+                        Amount{" "}
+                        {upOrder === "upAmount" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
+                      <td
+                        onClick={() => {
+                          setGeneralLedger(
+                            upOrder === "upCategory"
+                              ? generalLedger.reverse()
+                              : generalLedger.sort((a, b) =>
+                                  a.Category < b.Category ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upCategory");
+                        }}
+                      >
+                        Category{" "}
+                        {upOrder === "upCategory" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
+                      <td
+                        onClick={() => {
+                          setGeneralLedger(
+                            upOrder === "upPlatform"
+                              ? generalLedger.reverse()
+                              : generalLedger.sort((a, b) =>
+                                  a.Platform < b.Platform ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upPlatform");
+                        }}
+                      >
+                        Platform{" "}
+                        {upOrder === "upPlatform" && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              margin: "6px 0px",
+                              borderLeft: "4px solid black",
+                              borderBottom: "4px solid black",
+                              height: "6px",
+                              width: "6px",
+                              borderRadius: "3px",
+                              backgroundColor: "transparent",
+                              transform: `rotate(${
+                                upOrder ? "315" : "135"
+                              }deg)`,
+                            }}
+                          ></div>
+                        )}
+                      </td>
                     </tr>
                   </thead>
                 )}
