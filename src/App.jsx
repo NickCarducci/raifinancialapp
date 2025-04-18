@@ -370,7 +370,11 @@ function MyComponent() {
                             return setGeneralLedger([
                               { Amount: "please log in again..." },
                             ]);
-                          setGeneralLedger(result.generalLedger);
+                          setGeneralLedger(
+                            result.generalLedger.sort(
+                              (a, b) => new Date(b.Date) - new Date(a.Date)
+                            )
+                          );
                         })
                         .catch(() => {
                           setGeneralLedger([
@@ -475,7 +479,11 @@ function MyComponent() {
                             return setPayoutLog([
                               { EmployeeName: "please log in again..." },
                             ]);
-                          setPayoutLog(result.payoutLog);
+                          setPayoutLog(
+                            result.payoutLog.sort(
+                              (a, b) => new Date(b.Date) - new Date(a.Date)
+                            )
+                          );
                         })
                         .catch(() => {
                           setPayoutLog([
