@@ -126,10 +126,11 @@ function MyComponent() {
   const selectionMenuRef = useRef(null);
   const [editCategory, setEditCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+  const [maxHeightDivs, setMaxHeightsDivs] = useState(0);
   const getGeneralLedger = () => {
     if (mobileView) setSelectionMenu(false);
     setSelection("General Ledger");
-    setGeneralLedger([{ Amount: "loading..." }]);
+    setGeneralLedger([{ Amount: "Connecting to database..." }]);
     instance
       .acquireTokenSilent({
         ...loginRequest,
@@ -148,14 +149,22 @@ function MyComponent() {
             console.log(result);
             if (result.code === 401)
               return setGeneralLedger([{ Amount: "please log in again..." }]);
-            setGeneralLedger(
-              result.generalLedger.sort(
-                (a, b) => new Date(b.Date) - new Date(a.Date)
-              )
+            const filteredGeneralLedger = result.generalLedger.filter((x) => {
+              if (x.Category === "End of month balance") return false;
+              return true;
+            });
+            const heights = filteredGeneralLedger.map((x) =>
+              typeof x.Amount === "number" ? x.Amount : 0
             );
+            const maxHeightDivs = Math.max(...heights);
+            setMaxHeightsDivs(maxHeightDivs);
+            const generalLedger = filteredGeneralLedger.sort(
+              (a, b) => new Date(b.Date) - new Date(a.Date)
+            );
+            setGeneralLedger(generalLedger);
           })
           .catch(() => {
-            setGeneralLedger([{ Amount: "please log in again..." }]);
+            setGeneralLedger([{ Amount: "reload or log in again..." }]);
           });
       });
   };
@@ -164,6 +173,8 @@ function MyComponent() {
   const [expenses, setExpenses] = useState(null);
   const space = " ";
   const [hoverEmail, setHoverEmail] = useState(false);
+  const [hoverDiv, setHoverDiv] = useState(0);
+  const [clickedDiv, setClickDiv] = useState(0);
   return (
     <div
       style={{
@@ -172,6 +183,7 @@ function MyComponent() {
     >
       <div
         ref={selectionMenuRef}
+        onMouseEnter={() => setClickDiv(0)}
         style={{
           display: mobileView ? "float" : "block",
           position: "relative",
@@ -359,7 +371,7 @@ function MyComponent() {
                 onClick={() => {
                   if (mobileView) setSelectionMenu(false);
                   setSelection("I/S");
-                  setIOMonths(["loading..."]);
+                  setIOMonths(["Connecting to database..."]);
                   setIOStatement(null);
                   instance
                     .acquireTokenSilent({
@@ -441,7 +453,9 @@ function MyComponent() {
                 onClick={() => {
                   if (mobileView) setSelectionMenu(false);
                   setSelection("Balances");
-                  setGeneralLedger([{ Amount: "loading..." }]);
+                  setAccountBalances([
+                    { CurrentBalance: "Connecting to database..." },
+                  ]);
                   instance
                     .acquireTokenSilent({
                       ...loginRequest,
@@ -487,7 +501,7 @@ function MyComponent() {
                 onClick={() => {
                   if (mobileView) setSelectionMenu(false);
                   setSelection("Payroll");
-                  setPayoutLog([{ EmployeeName: "loading..." }]);
+                  setPayoutLog([{ EmployeeName: "Connecting to database..." }]);
                   instance
                     .acquireTokenSilent({
                       ...loginRequest,
@@ -1048,12 +1062,95 @@ function MyComponent() {
                 width: mobileView ? "100%" : "calc(100vw - 300px",
               }}
             >
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  height: "28px",
+                  alignItems: "flex-end",
+                }}
+              >
+                {generalLedger.map((x) => {
+                  const width = windowWidth / generalLedger.length;
+                  const height = x.Amount / maxHeightDivs;
+                  //console.log(maxHeightDivs);
+                  return (
+                    <div
+                      onMouseEnter={() => {
+                        setHoverDiv(x.TransactionID);
+                      }}
+                      onMouseLeave={() => {
+                        setHoverDiv(0);
+                      }}
+                      onClick={() => setClickDiv(x.TransactionID)}
+                      style={{
+                        top: 0,
+                        backgroundColor:
+                          hoverDiv !== x.TransactionID
+                            ? x.Amount >= 0
+                              ? "green"
+                              : "red"
+                            : "black",
+                        borderTopLeftRadius: "5px",
+                        borderTopRightRadius: "5px",
+                        width,
+                        height: `${x.Amount < 0 ? 0 : height * 100}%`,
+                        transition: ".2s ease-in",
+                      }}
+                    ></div>
+                  );
+                })}
+              </div>
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  height: "28px",
+                  alignItems: "flex-start",
+                }}
+              >
+                {generalLedger.map((x) => {
+                  const width = windowWidth / generalLedger.length;
+                  const height = x.Amount / maxHeightDivs;
+                  //console.log(maxHeightDivs);
+                  return (
+                    <div
+                      onMouseEnter={() => {
+                        setHoverDiv(x.TransactionID);
+                      }}
+                      onMouseLeave={() => {
+                        setHoverDiv(0);
+                      }}
+                      onClick={() => setClickDiv(x.TransactionID)}
+                      style={{
+                        top: 0,
+                        backgroundColor:
+                          hoverDiv !== x.TransactionID
+                            ? x.Amount >= 0
+                              ? "green"
+                              : "red"
+                            : "black",
+                        borderBottomLeftRadius: "5px",
+                        borderBottomRightRadius: "5px",
+                        width,
+                        height: `${
+                          x.Amount >= 0 ? 0 : Math.abs(height) * 100
+                        }%`,
+                        transition: ".2s ease-in",
+                      }}
+                    ></div>
+                  );
+                })}
+              </div>
               <table>
                 {generalLedger !== null && generalLedger.length > 0 && (
                   <thead>
                     <tr>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          fontWeight: "bolder",
+                          cursor: "pointer",
+                        }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upDate"
@@ -1085,7 +1182,10 @@ function MyComponent() {
                         )}
                       </td>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          fontWeight: "bolder",
+                          cursor: "pointer",
+                        }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upAmount"
@@ -1117,7 +1217,10 @@ function MyComponent() {
                         )}
                       </td>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          fontWeight: "bolder",
+                          cursor: "pointer",
+                        }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upCategory"
@@ -1149,7 +1252,10 @@ function MyComponent() {
                         )}
                       </td>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          fontWeight: "bolder",
+                          cursor: "pointer",
+                        }}
                         onClick={() => {
                           setGeneralLedger(
                             upOrder === "upPlatform"
@@ -1188,91 +1294,129 @@ function MyComponent() {
                     ? ""
                     : generalLedger.length === 0
                     ? "No results"
-                    : generalLedger.map((x, i) => {
-                        return (
-                          <tr key={i + x.Date}>
-                            <td>{new Date(x.Date).toLocaleDateString()}</td>
-                            <td>${addCommas(String(x.Amount))}</td>
-                            <td
-                              style={{ cursor: "pointer" }}
-                              onClick={() => {
-                                setEditCategory(i);
+                    : generalLedger
+                        .filter((x) => {
+                          if (
+                            clickedDiv !== 0 &&
+                            clickedDiv !== x.TransactionID
+                          )
+                            return false;
+                          return true;
+                        })
+                        .map((x, i) => {
+                          return (
+                            <tr
+                              key={i + x.Date}
+                              style={{
+                                backgroundColor:
+                                  x.TransactionID === hoverDiv
+                                    ? x.Amount >= 0
+                                      ? "rgb(100,200,100,.3)"
+                                      : "rgb(200,100,100,.3)"
+                                    : "",
                               }}
                             >
-                              <div>
-                                {editCategory === i ? (
-                                  <form
-                                    style={{
-                                      display: "flex",
-                                    }}
-                                    onSubmit={(e) => {
-                                      e.preventDefault();
-                                      const answer = window.confirm(
-                                        "Are you sure you'd like to change the Category from " +
-                                          x.Category +
-                                          " to " +
-                                          newCategory +
-                                          "?"
-                                      );
-                                      if (answer) {
-                                        instance
-                                          .acquireTokenSilent({
-                                            ...loginRequest,
-                                            account: accounts[0],
-                                          })
-                                          .then((response) => {
-                                            fetch(
-                                              "https://raifinancial.azurewebsites.net/api/updatecategory/'" +
-                                                x.TransactionID +
-                                                "'/" +
-                                                newCategory,
-                                              {
-                                                method: "GET",
-                                                headers: {
-                                                  Authorization: `Bearer ${response.idToken}`,
-                                                  "Content-Type":
-                                                    "application/JSON",
-                                                },
-                                              }
-                                            )
-                                              .then(
-                                                async (res) => await res.json()
-                                              )
-                                              .then((response) => {
-                                                console.log(response);
-                                                setNewCategory("");
-                                                getGeneralLedger();
-                                                setEditCategory(null);
-                                              })
-                                              .catch((error) => {
-                                                console.error(error);
-                                              });
-                                          });
-                                      }
-                                    }}
-                                  >
-                                    <input
-                                      placeholder={x.Category}
-                                      value={newCategory}
-                                      onChange={(e) => {
-                                        setNewCategory(e.target.value);
-                                      }}
-                                    />
-                                    <div onClick={() => setEditCategory(false)}>
-                                      &times;
-                                    </div>
-                                  </form>
+                              <td>{new Date(x.Date).toLocaleDateString()}</td>
+                              <td>
+                                {typeof x.Amount === "number" ? (
+                                  `$${addCommas(String(x.Amount))}`
+                                ) : x.Amount.split("reload")[1] ? (
+                                  <span>
+                                    <span
+                                      style={{ color: "dodgerblue" }}
+                                      onClick={() => window.reload()}
+                                    >
+                                      reload
+                                    </span>
+                                    {x.Amount.split("reload")[1]}
+                                  </span>
                                 ) : (
-                                  x.Category
+                                  addCommas(String(x.Amount))
                                 )}
-                              </div>
-                            </td>
-                            <td>
-                              <div>{x.Platform}</div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              </td>
+                              <td
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  setEditCategory(i);
+                                }}
+                              >
+                                <div>
+                                  {editCategory === i ? (
+                                    <form
+                                      style={{
+                                        display: "flex",
+                                      }}
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const answer = window.confirm(
+                                          "Are you sure you'd like to change the Category from " +
+                                            x.Category +
+                                            " to " +
+                                            newCategory +
+                                            "?"
+                                        );
+                                        if (answer) {
+                                          instance
+                                            .acquireTokenSilent({
+                                              ...loginRequest,
+                                              account: accounts[0],
+                                            })
+                                            .then((response) => {
+                                              fetch(
+                                                "https://raifinancial.azurewebsites.net/api/updatecategory/" +
+                                                  x.TransactionID +
+                                                  "/" +
+                                                  newCategory,
+                                                {
+                                                  method: "GET",
+                                                  headers: {
+                                                    Authorization: `Bearer ${response.idToken}`,
+                                                    "Content-Type":
+                                                      "application/JSON",
+                                                  },
+                                                }
+                                              )
+                                                .then(
+                                                  async (res) =>
+                                                    await res.json()
+                                                )
+                                                .then((response) => {
+                                                  console.log(response);
+                                                  setNewCategory("");
+                                                  getGeneralLedger();
+                                                  setEditCategory(null);
+                                                })
+                                                .catch((error) => {
+                                                  console.error(error);
+                                                });
+                                            });
+                                        }
+                                      }}
+                                    >
+                                      <input
+                                        placeholder={x.Category}
+                                        value={newCategory}
+                                        onChange={(e) => {
+                                          setNewCategory(e.target.value);
+                                        }}
+                                      />
+                                      <div
+                                        onClick={() => setEditCategory(false)}
+                                      >
+                                        &times;
+                                      </div>
+                                    </form>
+                                  ) : (
+                                    x.Category
+                                  )}
+                                </div>
+                              </td>
+                              <td>
+                                <div>{x.Platform}</div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                 </tbody>
               </table>
             </div>
@@ -1451,7 +1595,11 @@ function MyComponent() {
             </div>
           )}
         </div>
-        {selection !== "" && "End of results."}
+        {selection !== "" && (
+          <div style={{ cursor: "pointer" }} onClick={() => setClickDiv(0)}>
+            {clickedDiv !== 0 ? "See all." : "End of results."}
+          </div>
+        )}
       </div>
     </div>
   );
