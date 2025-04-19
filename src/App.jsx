@@ -316,8 +316,20 @@ function MyComponent() {
             <div style={{ display: "block" }}>
               <button onClick={() => instance.loginPopup()}>login</button>
               <br />
-              Make a{space}
-              <a href="https://signup.live.com">microsoft account here</a>.
+              <span
+                style={{ cursor: "pointer", color: "dodgerblue" }}
+                onClick={() => instance.loginPopup({ prompt: "create" })}
+              >
+                Sign up
+              </span>
+              {space}or make a{space}
+              <a
+                style={{ fontWeight: "bolder" }}
+                href="https://signup.live.com"
+              >
+                microsoft account
+              </a>
+              {space}first.
             </div>
           )}
         </div>
@@ -1446,3 +1458,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
