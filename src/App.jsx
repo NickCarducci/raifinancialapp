@@ -148,10 +148,16 @@ function MyComponent() {
           },
         })
           .then(async (res) => await res.json())
-          .then((result) => {
+          .then(async (result) => {
             console.log(result);
-            if (result.code === 401)
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
               return setGeneralLedger([{ Amount: "please log in again..." }]);
+            }
             const filteredGeneralLedger = result.generalLedger.filter((x) => {
               if (x.Category === "End of month balance") return false;
               return true;
@@ -396,12 +402,18 @@ function MyComponent() {
                         }
                       )
                         .then(async (res) => await res.json())
-                        .then((result) => {
+                        .then(async (result) => {
                           console.log(result);
-                          if (result.code === 401)
+                          if (result.code === 401) {
+                            await instance.acquireTokenRedirect({
+                              account: accounts[0],
+                              forceRefresh: true,
+                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                            });
                             return setIOStatement([
                               { TotalRevenue: "please log in again..." },
                             ]);
+                          }
                           setIOMonths(
                             result.ioStatement
                               .sort(
@@ -479,12 +491,18 @@ function MyComponent() {
                         }
                       )
                         .then(async (res) => await res.json())
-                        .then((result) => {
+                        .then(async (result) => {
                           console.log(result);
-                          if (result.code === 401)
+                          if (result.code === 401) {
+                            await instance.acquireTokenRedirect({
+                              account: accounts[0],
+                              forceRefresh: true,
+                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                            });
                             return setAccountBalances([
                               { CurrentBalance: "please log in again..." },
                             ]);
+                          }
                           setAccountBalances(result.accountBalances);
                         })
                         .catch(() => {
@@ -525,12 +543,18 @@ function MyComponent() {
                         }
                       )
                         .then(async (res) => await res.json())
-                        .then((result) => {
+                        .then(async (result) => {
                           console.log(result);
-                          if (result.code === 401)
+                          if (result.code === 401) {
+                            await instance.acquireTokenRedirect({
+                              account: accounts[0],
+                              forceRefresh: true,
+                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                            });
                             return setPayoutLog([
                               { EmployeeName: "please log in again..." },
                             ]);
+                          }
                           setPayoutLog(
                             result.payoutLog.sort(
                               (a, b) =>
@@ -859,12 +883,18 @@ function MyComponent() {
                               }
                             )
                               .then(async (res) => await res.json())
-                              .then((result) => {
+                              .then(async (result) => {
                                 console.log(result);
-                                if (result.code === 401)
+                                if (result.code === 401) {
+                                  await instance.acquireTokenRedirect({
+                                    account: accounts[0],
+                                    forceRefresh: true,
+                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                  });
                                   return setRevenue([
                                     { Amount: "Sign in again..." },
                                   ]);
+                                }
                                 setRevenues(
                                   result.revenue.map((x) => x.Amount)
                                 );
@@ -941,12 +971,18 @@ function MyComponent() {
                               }
                             )
                               .then(async (res) => await res.json())
-                              .then((result) => {
+                              .then(async (result) => {
                                 console.log(result);
-                                if (result.code === 401)
+                                if (result.code === 401) {
+                                  await instance.acquireTokenRedirect({
+                                    account: accounts[0],
+                                    forceRefresh: true,
+                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                  });
                                   return setExpenses([
                                     { Amount: "Sign in again..." },
                                   ]);
+                                }
                                 setExpensess(
                                   result.expenses.map((x) => x.Amount)
                                 );
@@ -1384,7 +1420,13 @@ function MyComponent() {
                                   addCommas(String(x.Amount))
                                 )}
                               </td>
-                              <td style={{ cursor: "pointer" }}>
+                              <td
+                                onClick={() => {
+                                  if (editCategory === i) return null;
+                                  setEditCategory(i);
+                                }}
+                                style={{ cursor: "pointer" }}
+                              >
                                 <div>
                                   {editCategory === i ? (
                                     <form
@@ -1452,13 +1494,7 @@ function MyComponent() {
                                       </div>
                                     </form>
                                   ) : (
-                                    <div
-                                      onClick={() => {
-                                        setEditCategory(i);
-                                      }}
-                                    >
-                                      {x.Category}
-                                    </div>
+                                    x.Category
                                   )}
                                 </div>
                               </td>
