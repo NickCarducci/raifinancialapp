@@ -157,9 +157,10 @@ function MyComponent() {
               return true;
             });
             const heights = filteredGeneralLedger.map((x) =>
-              typeof x.Amount === "number" ? x.Amount : 0
+              typeof x.Amount === "number" ? Math.abs(x.Amount) : 0
             );
             const maxHeightDivs = Math.max(...heights);
+            console.log(maxHeightDivs);
             setMaxHeightsDivs(maxHeightDivs);
             const generalLedger = filteredGeneralLedger.sort(
               (a, b) => new Date(b.Date) - new Date(a.Date)
@@ -1117,12 +1118,13 @@ function MyComponent() {
                   alignItems: "flex-end",
                 }}
               >
-                {generalLedger.map((x) => {
+                {generalLedger.map((x, i) => {
                   const width = windowWidth / generalLedger.length;
                   const height = x.Amount / maxHeightDivs;
                   //console.log(maxHeightDivs);
                   return (
                     <div
+                      key={i}
                       onMouseEnter={() => {
                         setHoverDiv(x.TransactionID);
                       }}
@@ -1156,12 +1158,13 @@ function MyComponent() {
                   alignItems: "flex-start",
                 }}
               >
-                {generalLedger.map((x) => {
+                {generalLedger.map((x, i) => {
                   const width = windowWidth / generalLedger.length;
                   const height = x.Amount / maxHeightDivs;
                   //console.log(maxHeightDivs);
                   return (
                     <div
+                      key={i}
                       onMouseEnter={() => {
                         setHoverDiv(x.TransactionID);
                       }}
