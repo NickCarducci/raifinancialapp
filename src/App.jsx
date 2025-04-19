@@ -1051,13 +1051,13 @@ function MyComponent() {
               {selectedIO === "revenue" ? (
                 <div>
                   {revenue !== null &&
-                    revenue.map((x) => {
+                    revenue.map((x, i) => {
                       var total = 0;
                       revenues.forEach((amount) => {
                         total = total + amount;
                       });
                       return (
-                        <div style={{ display: "block" }}>
+                        <div key={i} style={{ display: "block" }}>
                           <div>
                             {new Date(x.Date).toLocaleDateString()}: $
                             {addCommas(String(x.Amount))} ({x.Category})
@@ -1076,13 +1076,13 @@ function MyComponent() {
               ) : selectedIO === "expenses" ? (
                 <div>
                   {expenses !== null &&
-                    expenses.map((x) => {
+                    expenses.map((x, i) => {
                       var total = 0;
                       expensess.forEach((amount) => {
                         total = total + amount;
                       });
                       return (
-                        <div style={{ display: "block" }}>
+                        <div key={i} style={{ display: "block" }}>
                           <div>
                             {new Date(x.Date).toLocaleDateString()}: $
                             {addCommas(String(x.Amount))} ({x.Category})
@@ -1131,7 +1131,7 @@ function MyComponent() {
                       }}
                       onClick={() => setClickDiv(x.TransactionID)}
                       style={{
-                        top: 0,
+                        cursor: "pointer",
                         backgroundColor:
                           hoverDiv !== x.TransactionID
                             ? x.Amount >= 0
@@ -1170,7 +1170,7 @@ function MyComponent() {
                       }}
                       onClick={() => setClickDiv(x.TransactionID)}
                       style={{
-                        top: 0,
+                        cursor: "pointer",
                         backgroundColor:
                           hoverDiv !== x.TransactionID
                             ? x.Amount >= 0
@@ -1381,12 +1381,7 @@ function MyComponent() {
                                   addCommas(String(x.Amount))
                                 )}
                               </td>
-                              <td
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                  setEditCategory(i);
-                                }}
-                              >
+                              <td style={{ cursor: "pointer" }}>
                                 <div>
                                   {editCategory === i ? (
                                     <form
@@ -1431,7 +1426,7 @@ function MyComponent() {
                                                   console.log(response);
                                                   setNewCategory("");
                                                   getGeneralLedger();
-                                                  setEditCategory(null);
+                                                  setEditCategory(false);
                                                 })
                                                 .catch((error) => {
                                                   console.error(error);
@@ -1454,7 +1449,13 @@ function MyComponent() {
                                       </div>
                                     </form>
                                   ) : (
-                                    x.Category
+                                    <div
+                                      onClick={() => {
+                                        setEditCategory(i);
+                                      }}
+                                    >
+                                      {x.Category}
+                                    </div>
                                   )}
                                 </div>
                               </td>
@@ -1653,3 +1654,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
