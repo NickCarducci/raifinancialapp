@@ -175,6 +175,7 @@ function MyComponent() {
   const [hoverEmail, setHoverEmail] = useState(false);
   const [hoverDiv, setHoverDiv] = useState(0);
   const [clickedDiv, setClickDiv] = useState(0);
+  const [revenues, setRevenues] = useState([]);
   return (
     <div
       style={{
@@ -855,7 +856,10 @@ function MyComponent() {
                               .then(async (res) => await res.json())
                               .then((result) => {
                                 console.log(result);
-                                setRevenue(result.revenue);
+                                setRevenues(
+                                  result.revenue.map((x) => x.Amount)
+                                );
+                                result.revenue && setRevenue(result.revenue);
                               })
                               .catch((error) => {
                                 console.error(error);
@@ -928,7 +932,7 @@ function MyComponent() {
                               .then(async (res) => await res.json())
                               .then((result) => {
                                 console.log(result);
-                                setExpenses(result.expenses);
+                                result.expenses && setExpenses(result.expenses);
                               })
                               .catch((error) => {
                                 console.error(error);
@@ -1031,10 +1035,24 @@ function MyComponent() {
                 <div>
                   {revenue !== null &&
                     revenue.map((x) => {
+                      var total = 0;
+                      revenues.forEach((amount) => {
+                        total = total + amount;
+                      });
+                      console.log(total);
                       return (
-                        <div>
-                          {new Date(x.Date).toLocaleDateString()}: $
-                          {addCommas(String(x.Amount))} ({x.Category})
+                        <div style={{ display: "block" }}>
+                          <div>
+                            {new Date(x.Date).toLocaleDateString()}: $
+                            {addCommas(String(x.Amount))} ({x.Category})
+                          </div>
+                          <div
+                            style={{
+                              width: `${(x.Amount / total) * 100}%`,
+                              height: "10px",
+                              backgroundColor: "dodgerblue",
+                            }}
+                          ></div>
                         </div>
                       );
                     })}
@@ -1606,4 +1624,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
