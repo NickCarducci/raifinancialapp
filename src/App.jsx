@@ -176,6 +176,7 @@ function MyComponent() {
   const [hoverDiv, setHoverDiv] = useState(0);
   const [clickedDiv, setClickDiv] = useState(0);
   const [revenues, setRevenues] = useState([]);
+  const [expensess, setExpensess] = useState([]);
   return (
     <div
       style={{
@@ -856,10 +857,16 @@ function MyComponent() {
                               .then(async (res) => await res.json())
                               .then((result) => {
                                 console.log(result);
+                                if (result.code === 401)
+                                  return setRevenue([
+                                    { Amount: "Sign in again..." },
+                                  ]);
                                 setRevenues(
                                   result.revenue.map((x) => x.Amount)
                                 );
-                                result.revenue && setRevenue(result.revenue);
+                                if (result.revenue)
+                                  return setRevenue(result.revenue);
+                                setRevenue([{ Amount: "Try again" }]);
                               })
                               .catch((error) => {
                                 console.error(error);
@@ -932,6 +939,13 @@ function MyComponent() {
                               .then(async (res) => await res.json())
                               .then((result) => {
                                 console.log(result);
+                                if (result.code === 401)
+                                  return setExpenses([
+                                    { Amount: "Sign in again..." },
+                                  ]);
+                                setExpensess(
+                                  result.expenses.map((x) => x.Amount)
+                                );
                                 result.expenses && setExpenses(result.expenses);
                               })
                               .catch((error) => {
@@ -1039,7 +1053,6 @@ function MyComponent() {
                       revenues.forEach((amount) => {
                         total = total + amount;
                       });
-                      console.log(total);
                       return (
                         <div style={{ display: "block" }}>
                           <div>
@@ -1061,10 +1074,23 @@ function MyComponent() {
                 <div>
                   {expenses !== null &&
                     expenses.map((x) => {
+                      var total = 0;
+                      expensess.forEach((amount) => {
+                        total = total + amount;
+                      });
                       return (
-                        <div>
-                          {new Date(x.Date).toLocaleDateString()}: $
-                          {addCommas(String(x.Amount))} ({x.Category})
+                        <div style={{ display: "block" }}>
+                          <div>
+                            {new Date(x.Date).toLocaleDateString()}: $
+                            {addCommas(String(x.Amount))} ({x.Category})
+                          </div>
+                          <div
+                            style={{
+                              width: `${(x.Amount / total) * 100}%`,
+                              height: "10px",
+                              backgroundColor: "dodgerblue",
+                            }}
+                          ></div>
                         </div>
                       );
                     })}
