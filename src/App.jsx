@@ -79,7 +79,7 @@ function MyComponent() {
   }, [instance, accounts]);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [mobileView, setMobileView] = useState(false);
+  const [mobileView, setMobileView] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -1654,4 +1654,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
