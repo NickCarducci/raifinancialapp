@@ -651,10 +651,10 @@ function MyComponent() {
                       {users.map((user) => (
                         <li
                           onClick={() => {
-                            /*if (
-                        !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
-                      )
-                        return null;*/
+                            if (
+                              !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
+                            )
+                              return null;
                             const answer =
                               //!user.extension_24a8955a629c4869b36185a566f48b4a_Admin &&
                               window.confirm(
