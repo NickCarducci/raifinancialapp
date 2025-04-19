@@ -653,6 +653,7 @@ function MyComponent() {
                         <li
                           style={{ wordWrap: "normal" }}
                           onClick={() => {
+                            console.log(authenticatedUser, user);
                             if (
                               !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
                             )
@@ -664,7 +665,7 @@ function MyComponent() {
                                   ? "Remove " +
                                       user.displayName +
                                       " as admin?" +
-                                      (authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
+                                      (authenticatedUser.id === user.id
                                         ? " You will not have administrative privileges anymore."
                                         : "")
                                   : "Would you like to make " +
