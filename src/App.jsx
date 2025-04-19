@@ -651,6 +651,7 @@ function MyComponent() {
                     <ul>
                       {users.map((user) => (
                         <li
+                          style={{ wordWrap: "normal" }}
                           onClick={() => {
                             if (
                               !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
@@ -723,7 +724,8 @@ function MyComponent() {
                               ? user.userPrincipalName.split("#EXT#")[0]
                               : user.displayName}
                           </span>{" "}
-                          {user.extension_24a8955a629c4869b36185a566f48b4a_Admin &&
+                          {hoverEmail !== user.userPrincipalName &&
+                            user.extension_24a8955a629c4869b36185a566f48b4a_Admin &&
                             "(admin)"}
                         </li>
                       ))}
