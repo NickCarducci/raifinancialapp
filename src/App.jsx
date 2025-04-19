@@ -5,6 +5,9 @@ import { loginRequest } from "./authConfig";
 
 const updateUsers = (setUsers, instance, accounts) => {
   if (accounts.length > 0) {
+    setUsers([
+      { displayName: "Connecting...", userPrincipalName: "Connecting.." },
+    ]);
     instance
       .acquireTokenSilent({
         ...loginRequest,
