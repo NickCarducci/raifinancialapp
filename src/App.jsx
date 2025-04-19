@@ -12,7 +12,7 @@ const updateUsers = (setUsers, instance, accounts) => {
       })
       .then((response) => {
         fetch(
-          "https://graph.microsoft.com/v1.0/users?$select=id,displayName,extension_24a8955a629c4869b36185a566f48b4a_Admin",
+          "https://graph.microsoft.com/v1.0/users?$select=id,displayName,userPrincipalName,extension_24a8955a629c4869b36185a566f48b4a_Admin",
           {
             headers: {
               Authorization: `Bearer ${response.accessToken}`,
@@ -163,6 +163,7 @@ function MyComponent() {
   const [revenue, setRevenue] = useState(null);
   const [expenses, setExpenses] = useState(null);
   const space = " ";
+  const [hoverEmail, setHoverEmail] = useState(false);
   return (
     <div
       style={{
@@ -635,7 +636,7 @@ function MyComponent() {
                   >
                     {authenticatedUser &&
                     authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
-                      ? "+/- upOrder admins"
+                      ? "+/- edit admins"
                       : "View others"}
                   </button>
                 ) : (
@@ -710,7 +711,18 @@ function MyComponent() {
                           }}
                           key={user.id}
                         >
-                          {user.displayName}{" "}
+                          <span
+                            onMouseEnter={() => {
+                              setHoverEmail(user.userPrincipalName);
+                            }}
+                            onMouseLeave={() => {
+                              setHoverEmail(false);
+                            }}
+                          >
+                            {hoverEmail === user.userPrincipalName
+                              ? user.userPrincipalName.split("#EXT#")[0]
+                              : user.displayName}
+                          </span>{" "}
                           {user.extension_24a8955a629c4869b36185a566f48b4a_Admin &&
                             "(admin)"}
                         </li>
