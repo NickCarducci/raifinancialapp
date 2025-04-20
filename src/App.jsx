@@ -166,7 +166,7 @@ function MyComponent() {
               typeof x.Amount === "number" ? Math.abs(x.Amount) : 0
             );
             const maxHeightDivs = Math.max(...heights);
-            console.log(maxHeightDivs);
+            //console.log(maxHeightDivs);
             setMaxHeightsDivs(maxHeightDivs);
             const generalLedger = filteredGeneralLedger.sort(
               (a, b) => new Date(b.Date) - new Date(a.Date)
@@ -1148,6 +1148,7 @@ function MyComponent() {
             >
               <div
                 style={{
+                  transform: "scaleX(-1)",
                   width: "100%",
                   display: "flex",
                   height: "28px",
@@ -1188,6 +1189,7 @@ function MyComponent() {
               </div>
               <div
                 style={{
+                  transform: "scaleX(-1)",
                   width: "100%",
                   display: "flex",
                   height: "28px",
