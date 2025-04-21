@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { loginRequest } from "./authConfig";
+import { PieChart } from "react-minimal-pie-chart";
 
 const updateUsers = (setUsers, instance, accounts) => {
   if (accounts.length > 0) {
@@ -80,12 +81,38 @@ function MyComponent() {
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [mobileView, setMobileView] = useState(true);
+  const [tds, setTds] = useState([]);
+  const tableRef = useRef(null);
+  const [tableWidth, setTableWidth] = useState(0);
 
+  const displayTds = () => {
+    let tdList = [];
+    for (
+      var i = 0;
+      i <
+      Math.floor(
+        window.innerWidth < 500
+          ? (window.innerWidth - tableWidth) / 60
+          : (window.innerWidth - tableWidth - 300) / 60
+      ) -
+        2;
+      i++
+    ) {
+      tdList.push(i);
+    }
+    setTds(tdList);
+  };
+  useEffect(() => {
+    if (tableRef.current) setTableWidth(tableRef.current.offsetWidth);
+    return () => {};
+  }, [selection]);
   useEffect(() => {
     const handleResize = () => {
       setSelectionMenu(window.innerWidth < 500 ? false : true);
-      setMobileView(window.innerWidth < 500 ? true : false);
+      //setMobileView(window.innerWidth < 500 ? true : false);
       setWindowWidth(window.innerWidth);
+      //clearTimeout(timeout);
+      displayTds();
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -100,13 +127,15 @@ function MyComponent() {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [upOrder, setUpOrder] = useState(false);
   const [selectionHeight, setSelectionHeight] = useState(0);
+  const [payoutTotals, setPayoutTotals] = useState({});
 
   useEffect(() => {
     const handleScroll = () => {
       setSelectionHeight(selectionMenuRef.current.offsetHeight);
       if (!(window.innerWidth < 500))
         if (window.scrollY > window.innerHeight) {
-          if (!mobileView) setMobileView(true);
+          //if (!mobileView)
+          setMobileView(true);
           //
         }
 
@@ -187,6 +216,11 @@ function MyComponent() {
   const [clickedDiv, setClickDiv] = useState(0);
   const [revenues, setRevenues] = useState([]);
   const [expensess, setExpensess] = useState([]);
+  const [payoutChart, setPayoutChart] = useState([]);
+
+  const [clickedPie, setClickPie] = useState(null);
+  const [payoutLogSorted, setPayoutLogSorted] = useState([]);
+  //console.log(tds);
   return (
     <div
       style={{
@@ -555,18 +589,64 @@ function MyComponent() {
                               { EmployeeName: "please log in again..." },
                             ]);
                           }
+
+                          var payoutLog = result.payoutLog.map((x) => {
+                            const employeeName =
+                              x.EmployeeName.split("RTP Sent ")[1];
+                            return {
+                              ...x,
+                              EmployeeName: employeeName.slice(
+                                0,
+                                employeeName.search(/\d/)
+                              ),
+                            };
+                          });
+                          var payoutTotals = [];
+                          var totals = {};
+                          payoutLog.forEach((x) => {
+                            if (!totals[x.EmployeeName])
+                              totals[x.EmployeeName] = 0;
+                            //console.log(x.AmountPaid);
+                            totals[x.EmployeeName] =
+                              totals[x.EmployeeName] + x.AmountPaid;
+                          });
+                          setPayoutTotals(totals);
+                          setPayoutChart(
+                            Object.keys(totals).map((employeeName, i) => {
+                              console.log(
+                                employeeName,
+                                Object.values(totals)[i]
+                              );
+                              return {
+                                title: employeeName,
+                                value: Object.values(totals)[i],
+                                color: `rgb(${
+                                  (i / Object.keys(totals).length) * 250
+                                },${
+                                  (i / Object.keys(totals).length) * 100 + 50
+                                },${
+                                  0 //(i / result.payoutLog.length) * 250
+                                })`,
+                              };
+                            })
+                          );
                           setPayoutLog(
-                            result.payoutLog.sort(
+                            payoutLog.sort(
+                              (a, b) =>
+                                new Date(b.PaymentDate) -
+                                new Date(a.PaymentDate)
+                            )
+                          );
+                          setPayoutLogSorted(
+                            payoutLog.sort(
                               (a, b) =>
                                 new Date(b.PaymentDate) -
                                 new Date(a.PaymentDate)
                             )
                           );
                         })
-                        .catch(() => {
-                          setPayoutLog([
-                            { EmployeeName: "please log in again..." },
-                          ]);
+                        .catch((e) => {
+                          console.log(e);
                         });
                     });
                 }}
@@ -1148,8 +1228,9 @@ function MyComponent() {
             >
               <div
                 style={{
+                  justifyContent: "flex-end",
                   transform: "scaleX(-1)",
-                  width: "100%",
+                  //width: `calc(${mobileView ? "100vw" : "100vw - 300px"})`,
                   display: "flex",
                   height: "28px",
                   alignItems: "flex-end",
@@ -1189,6 +1270,7 @@ function MyComponent() {
               </div>
               <div
                 style={{
+                  justifyContent: "flex-end",
                   transform: "scaleX(-1)",
                   width: "100%",
                   display: "flex",
@@ -1230,284 +1312,329 @@ function MyComponent() {
                   );
                 })}
               </div>
-              <table>
-                {generalLedger !== null && generalLedger.length > 0 && (
-                  <thead>
-                    <tr>
-                      <td
-                        style={{
-                          fontWeight: "bolder",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setGeneralLedger(
-                            upOrder === "upDate"
-                              ? generalLedger.reverse()
-                              : generalLedger.sort(
-                                  (a, b) => new Date(a.Date) - new Date(b.Date)
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upDate");
-                        }}
-                      >
-                        Date{" "}
-                        {upOrder === "upDate" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: "bolder",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setGeneralLedger(
-                            upOrder === "upAmount"
-                              ? generalLedger.reverse()
-                              : generalLedger.sort(
-                                  (a, b) => a.Amount - b.Amount
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upAmount");
-                        }}
-                      >
-                        Amount{" "}
-                        {upOrder === "upAmount" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: "bolder",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setGeneralLedger(
-                            upOrder === "upCategory"
-                              ? generalLedger.reverse()
-                              : generalLedger.sort((a, b) =>
-                                  a.Category < b.Category ? 1 : -1
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upCategory");
-                        }}
-                      >
-                        Category{" "}
-                        {upOrder === "upCategory" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: "bolder",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setGeneralLedger(
-                            upOrder === "upPlatform"
-                              ? generalLedger.reverse()
-                              : generalLedger.sort((a, b) =>
-                                  a.Platform < b.Platform ? 1 : -1
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upPlatform");
-                        }}
-                      >
-                        Platform{" "}
-                        {upOrder === "upPlatform" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </td>
-                    </tr>
-                  </thead>
-                )}
-                <tbody>
-                  {generalLedger === null
-                    ? ""
-                    : generalLedger.length === 0
-                    ? "No results"
-                    : generalLedger
-                        .filter((x) => {
-                          if (
-                            clickedDiv !== 0 &&
-                            clickedDiv !== x.TransactionID
-                          )
-                            return false;
-                          return true;
-                        })
-                        .map((x, i) => {
-                          return (
-                            <tr
-                              key={i + x.Date}
+              <div ref={tableRef}>
+                <table>
+                  {generalLedger !== null && generalLedger.length > 0 && (
+                    <thead>
+                      <tr>
+                        <td
+                          style={{
+                            fontWeight: "bolder",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setGeneralLedger(
+                              upOrder === "upDate"
+                                ? generalLedger.reverse()
+                                : generalLedger.sort(
+                                    (a, b) =>
+                                      new Date(a.Date) - new Date(b.Date)
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upDate");
+                          }}
+                        >
+                          Date{" "}
+                          {upOrder === "upDate" && (
+                            <div
                               style={{
-                                backgroundColor:
-                                  x.TransactionID === hoverDiv
-                                    ? x.Amount >= 0
-                                      ? "rgb(100,200,100,.3)"
-                                      : "rgb(200,100,100,.3)"
-                                    : "",
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
                               }}
-                            >
-                              <td>{new Date(x.Date).toLocaleDateString()}</td>
-                              <td>
-                                {typeof x.Amount === "number" ? (
-                                  `$${addCommas(String(x.Amount))}`
-                                ) : x.Amount.split("reload")[1] ? (
-                                  <span>
-                                    <span
-                                      style={{ color: "dodgerblue" }}
-                                      onClick={() => window.reload()}
-                                    >
-                                      reload
-                                    </span>
-                                    {x.Amount.split("reload")[1]}
-                                  </span>
-                                ) : (
-                                  addCommas(String(x.Amount))
-                                )}
+                            ></div>
+                          )}
+                        </td>
+                        <td
+                          style={{
+                            fontWeight: "bolder",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setGeneralLedger(
+                              upOrder === "upAmount"
+                                ? generalLedger.reverse()
+                                : generalLedger.sort(
+                                    (a, b) => a.Amount - b.Amount
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upAmount");
+                          }}
+                        >
+                          Amount{" "}
+                          {upOrder === "upAmount" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </td>
+                        <td
+                          style={{
+                            fontWeight: "bolder",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setGeneralLedger(
+                              upOrder === "upCategory"
+                                ? generalLedger.reverse()
+                                : generalLedger.sort((a, b) =>
+                                    a.Category < b.Category ? 1 : -1
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upCategory");
+                          }}
+                        >
+                          Category{" "}
+                          {upOrder === "upCategory" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </td>
+                        <td
+                          style={{
+                            fontWeight: "bolder",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setGeneralLedger(
+                              upOrder === "upPlatform"
+                                ? generalLedger.reverse()
+                                : generalLedger.sort((a, b) =>
+                                    a.Platform < b.Platform ? 1 : -1
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upPlatform");
+                          }}
+                        >
+                          Platform{" "}
+                          {upOrder === "upPlatform" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </td>
+                        <td
+                          style={{
+                            fontWeight: "bolder",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Description
+                        </td>
+                        {false &&
+                          tds.map((x, i) => {
+                            return (
+                              <td key={i}>
+                                <div
+                                  style={{
+                                    width: "60px",
+                                  }}
+                                ></div>
                               </td>
-                              <td
-                                onClick={() => {
-                                  if (editCategory === i) return null;
-                                  setEditCategory(i);
+                            );
+                          })}
+                      </tr>
+                    </thead>
+                  )}
+                  <tbody>
+                    {generalLedger === null
+                      ? ""
+                      : generalLedger.length === 0
+                      ? "No results"
+                      : generalLedger
+                          .filter((x) => {
+                            if (
+                              clickedDiv !== 0 &&
+                              clickedDiv !== x.TransactionID
+                            )
+                              return false;
+                            return true;
+                          })
+                          .map((x, i) => {
+                            return (
+                              <tr
+                                key={i + x.Date}
+                                style={{
+                                  backgroundColor:
+                                    x.TransactionID === hoverDiv
+                                      ? x.Amount >= 0
+                                        ? "rgb(100,200,100,.3)"
+                                        : "rgb(200,100,100,.3)"
+                                      : "",
                                 }}
-                                style={{ cursor: "pointer" }}
                               >
-                                <div>
-                                  {editCategory === i ? (
-                                    <form
-                                      style={{
-                                        display: "flex",
-                                      }}
-                                      onSubmit={(e) => {
-                                        e.preventDefault();
-                                        const answer = window.confirm(
-                                          "Are you sure you'd like to change the Category from " +
-                                            x.Category +
-                                            " to " +
-                                            newCategory +
-                                            "?"
-                                        );
-                                        if (answer) {
-                                          instance
-                                            .acquireTokenSilent({
-                                              ...loginRequest,
-                                              account: accounts[0],
-                                            })
-                                            .then((response) => {
-                                              fetch(
-                                                "https://raifinancial.azurewebsites.net/api/updatecategory/" +
-                                                  x.TransactionID +
-                                                  "/" +
-                                                  newCategory,
-                                                {
-                                                  method: "GET",
-                                                  headers: {
-                                                    Authorization: `Bearer ${response.idToken}`,
-                                                    "Content-Type":
-                                                      "application/JSON",
-                                                  },
-                                                }
-                                              )
-                                                .then(
-                                                  async (res) =>
-                                                    await res.json()
-                                                )
-                                                .then((response) => {
-                                                  console.log(response);
-                                                  setNewCategory("");
-                                                  getGeneralLedger();
-                                                  setEditCategory(false);
-                                                })
-                                                .catch((error) => {
-                                                  console.error(error);
-                                                });
-                                            });
-                                        }
-                                      }}
-                                    >
-                                      <input
-                                        placeholder={x.Category}
-                                        value={newCategory}
-                                        onChange={(e) => {
-                                          setNewCategory(e.target.value);
+                                <td>
+                                  <div>
+                                    {new Date(x.Date).toLocaleDateString()}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div>
+                                    {typeof x.Amount === "number" ? (
+                                      `$${addCommas(String(x.Amount))}`
+                                    ) : x.Amount.split("reload")[1] ? (
+                                      <span>
+                                        <span
+                                          style={{ color: "dodgerblue" }}
+                                          onClick={() => window.reload()}
+                                        >
+                                          reload
+                                        </span>
+                                        {x.Amount.split("reload")[1]}
+                                      </span>
+                                    ) : (
+                                      addCommas(String(x.Amount))
+                                    )}
+                                  </div>
+                                </td>
+                                <td
+                                  onClick={() => {
+                                    if (editCategory === i) return null;
+                                    setEditCategory(i);
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <div>
+                                    {editCategory === i ? (
+                                      <form
+                                        style={{
+                                          display: "flex",
                                         }}
-                                      />
-                                      <div
-                                        onClick={() => setEditCategory(false)}
+                                        onSubmit={(e) => {
+                                          e.preventDefault();
+                                          const answer = window.confirm(
+                                            "Are you sure you'd like to change the Category from " +
+                                              x.Category +
+                                              " to " +
+                                              newCategory +
+                                              "?"
+                                          );
+                                          if (answer) {
+                                            instance
+                                              .acquireTokenSilent({
+                                                ...loginRequest,
+                                                account: accounts[0],
+                                              })
+                                              .then((response) => {
+                                                fetch(
+                                                  "https://raifinancial.azurewebsites.net/api/updatecategory/" +
+                                                    x.TransactionID +
+                                                    "/" +
+                                                    newCategory,
+                                                  {
+                                                    method: "GET",
+                                                    headers: {
+                                                      Authorization: `Bearer ${response.idToken}`,
+                                                      "Content-Type":
+                                                        "application/JSON",
+                                                    },
+                                                  }
+                                                )
+                                                  .then(
+                                                    async (res) =>
+                                                      await res.json()
+                                                  )
+                                                  .then((response) => {
+                                                    console.log(response);
+                                                    setNewCategory("");
+                                                    getGeneralLedger();
+                                                    setEditCategory(false);
+                                                  })
+                                                  .catch((error) => {
+                                                    console.error(error);
+                                                  });
+                                              });
+                                          }
+                                        }}
                                       >
-                                        &times;
-                                      </div>
-                                    </form>
-                                  ) : (
-                                    x.Category
-                                  )}
-                                </div>
-                              </td>
-                              <td>
-                                <div>{x.Platform}</div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                </tbody>
-              </table>
+                                        <input
+                                          placeholder={x.Category}
+                                          value={newCategory}
+                                          onChange={(e) => {
+                                            setNewCategory(e.target.value);
+                                          }}
+                                        />
+                                        <div
+                                          onClick={() => setEditCategory(false)}
+                                        >
+                                          &times;
+                                        </div>
+                                      </form>
+                                    ) : (
+                                      x.Category
+                                    )}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div>{x.Platform}</div>
+                                </td>
+                                <td>
+                                  <div>{x.Description}</div>
+                                </td>
+                                {false &&
+                                  tds.map((x, i) => {
+                                    return (
+                                      <td key={i}>
+                                        <div
+                                          style={{
+                                            margin: "0px",
+                                            width: "60px",
+                                          }}
+                                        ></div>
+                                      </td>
+                                    );
+                                  })}
+                              </tr>
+                            );
+                          })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
           {selection === "Balances" && (
@@ -1551,6 +1678,7 @@ function MyComponent() {
           {selection === "Payroll" && (
             <div
               style={{
+                display: "flex",
                 overflowX: "auto",
                 overflowY: "hidden",
                 width: mobileView ? "100%" : "calc(100vw - 300px",
@@ -1668,25 +1796,61 @@ function MyComponent() {
                     ? "No results"
                     : payoutLog.map((x, i) => {
                         return (
-                          <tr key={i + x.CreatedAt}>
-                            <td>
-                              {new Date(x.PaymentDate).toLocaleDateString()}
-                            </td>
-                            <td>
-                              <div>{x.EmployeeName}</div>
-                            </td>
-                            <td>${addCommas(String(x.AmountPaid))}</td>
-                          </tr>
+                          (clickedPie === null ||
+                            x.EmployeeName === clickedPie) && (
+                            <tr key={i + x.CreatedAt}>
+                              <td>
+                                <div>
+                                  {new Date(x.PaymentDate).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td>
+                                <div>{x.EmployeeName}</div>
+                              </td>
+                              <td>
+                                <div>${addCommas(String(x.AmountPaid))}</div>
+                              </td>
+                            </tr>
+                          )
                         );
                       })}
                 </tbody>
               </table>
+              <div
+                style={{
+                  margin: "0px 60px",
+                  minWidth: "300px",
+                }}
+              >
+                <PieChart
+                  data={payoutChart}
+                  onClick={(e, segmentIndex) => {
+                    const employeeName = Object.keys(payoutTotals).find(
+                      (x, i) => {
+                        //console.log(segmentIndex, i);
+                        return i === segmentIndex;
+                      }
+                    );
+                    //console.log(employeeName);
+                    setClickPie(employeeName);
+                  }}
+                  //radius={100}
+                />
+              </div>
             </div>
           )}
         </div>
         {selection !== "" && (
-          <div style={{ cursor: "pointer" }} onClick={() => setClickDiv(0)}>
-            {clickedDiv !== 0 ? "See all." : "End of results."}
+          <div
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setClickDiv(0);
+              setClickPie(null);
+            }}
+          >
+            {clickedDiv !== 0 || clickedPie !== null
+              ? "See all."
+              : "End of results."}
           </div>
         )}
       </div>
