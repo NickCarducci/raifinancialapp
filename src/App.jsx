@@ -1710,9 +1710,9 @@ function MyComponent() {
                 {accountBalances !== null && accountBalances.length > 0 && (
                   <thead>
                     <tr>
-                      <td>Account</td>
-                      <td>Balance</td>
-                      <td>Last Updated</td>
+                      <td style={{ fontWeight: "bolder" }}>Account</td>
+                      <td style={{ fontWeight: "bolder" }}>Balance</td>
+                      <td style={{ fontWeight: "bolder" }}>Last Updated</td>
                     </tr>
                   </thead>
                 )}
@@ -1724,10 +1724,16 @@ function MyComponent() {
                     : accountBalances.map((x) => {
                         return (
                           <tr key={x.LastUpdated}>
-                            <td>{x.AccountName}</td>
-                            <td>${addCommas(String(x.CurrentBalance))}</td>
                             <td>
-                              {new Date(x.LastUpdated).toLocaleDateString()}
+                              <div>{x.AccountName}</div>
+                            </td>
+                            <td>
+                              <div>${addCommas(String(x.CurrentBalance))}</div>
+                            </td>
+                            <td>
+                              <div>
+                                {new Date(x.LastUpdated).toLocaleDateString()}
+                              </div>
                             </td>
                           </tr>
                         );
