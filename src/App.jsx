@@ -401,16 +401,24 @@ function MyComponent() {
           </div>
         ) : (
           <div style={{ paddingBottom: "10px" }}>
-            <ul
+            <div
               style={{
                 cursor: "pointer",
-                color: "darkcyan",
+                color: "white",
               }}
             >
-              <li
+              <div
                 onMouseLeave={(e) => setSelector("")}
                 onMouseEnter={(e) => setSelector("I/S")}
                 style={{
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                  borderLeft: selection === "I/S" ? "2px solid white" : "",
+                  padding: "3px 10px",
+                  margin: "3px 10px",
+                  transition: ".3s ease-in",
+                  backgroundColor:
+                    selection === "I/S" ? "rgba(250,250,250,.3)" : "",
                   textDecoration: selection === "I/S" ? "underline" : "none",
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
@@ -469,10 +477,21 @@ function MyComponent() {
                 }}
               >
                 <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
-              </li>
-              <li
+              </div>
+              <div
                 onMouseEnter={(e) => setSelector("General Ledger")}
                 style={{
+                  padding: "3px 10px",
+                  margin: "3px 10px",
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                  borderLeft:
+                    selection === "General Ledger" ? "2px solid white" : "",
+                  transition: ".3s ease-in",
+                  backgroundColor:
+                    selection === "General Ledger"
+                      ? "rgba(250,250,250,.3)"
+                      : "",
                   textDecoration:
                     selection === "General Ledger" ? "underline" : "none",
                   listStyleType:
@@ -481,10 +500,18 @@ function MyComponent() {
                 onClick={getGeneralLedger}
               >
                 <div class="fas fa-book w-6"></div>&nbsp;&nbsp;General Ledger
-              </li>
-              <li
+              </div>
+              <div
                 onMouseEnter={(e) => setSelector("Charts")}
                 style={{
+                  padding: "3px 10px",
+                  margin: "3px 10px",
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                  borderLeft: selection === "Charts" ? "2px solid white" : "",
+                  transition: ".3s ease-in",
+                  backgroundColor:
+                    selection === "Charts" ? "rgba(250,250,250,.3)" : "",
                   textDecoration: selection === "Charts" ? "underline" : "none",
                   listStyleType: selector === "Charts" ? "initial" : "none",
                 }}
@@ -494,10 +521,18 @@ function MyComponent() {
                 }}
               >
                 <div class="fas fa-chart-line w-6"></div>&nbsp;&nbsp;Charts
-              </li>
-              <li
+              </div>
+              <div
                 onMouseEnter={(e) => setSelector("Balances")}
                 style={{
+                  padding: "3px 10px",
+                  margin: "3px 10px",
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                  borderLeft: selection === "Balances" ? "2px solid white" : "",
+                  transition: ".3s ease-in",
+                  backgroundColor:
+                    selection === "Balances" ? "rgba(250,250,250,.3)" : "",
                   textDecoration:
                     selection === "Balances" ? "underline" : "none",
                   listStyleType: selector === "Balances" ? "initial" : "none",
@@ -548,10 +583,18 @@ function MyComponent() {
                 }}
               >
                 <div class="fas fa-wallet w-6"></div>&nbsp;&nbsp;Balances
-              </li>
-              <li
+              </div>
+              <div
                 onMouseEnter={(e) => setSelector("Payroll")}
                 style={{
+                  padding: "3px 10px",
+                  margin: "3px 10px",
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                  borderLeft: selection === "Payroll" ? "2px solid white" : "",
+                  transition: ".3s ease-in",
+                  backgroundColor:
+                    selection === "Payroll" ? "rgba(250,250,250,.3)" : "",
                   textDecoration:
                     selection === "Payroll" ? "underline" : "none",
                   listStyleType: selector === "Payroll" ? "initial" : "none",
@@ -652,10 +695,18 @@ function MyComponent() {
                 }}
               >
                 <div class="fas fa-exchange-alt w-6"></div>&nbsp;&nbsp;Payroll
-              </li>
-              <li
+              </div>
+              <div
                 onMouseEnter={(e) => setSelector("Invoices")}
                 style={{
+                  padding: "3px 10px",
+                  margin: "3px 10px",
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                  borderLeft: selection === "Invoices" ? "2px solid white" : "",
+                  transition: ".3s ease-in",
+                  backgroundColor:
+                    selection === "Invoices" ? "rgba(250,250,250,.3)" : "",
                   textDecoration:
                     selection === "Invoices" ? "underline" : "none",
                   listStyleType: selector === "Invoices" ? "initial" : "none",
@@ -666,8 +717,8 @@ function MyComponent() {
                 }}
               >
                 <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -785,9 +836,9 @@ function MyComponent() {
                     >
                       - Close
                     </button>
-                    <ul>
+                    <div>
                       {users.map((user) => (
-                        <li
+                        <div
                           style={{ wordWrap: "normal" }}
                           onClick={() => {
                             console.log(authenticatedUser, user);
@@ -865,9 +916,9 @@ function MyComponent() {
                           {hoverEmail !== user.userPrincipalName &&
                             user.extension_24a8955a629c4869b36185a566f48b4a_Admin &&
                             "(admin)"}
-                        </li>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
               </div>
