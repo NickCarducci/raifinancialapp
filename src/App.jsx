@@ -236,6 +236,8 @@ function MyComponent() {
           fontWeight: "bolder",
           color: "white",
           backgroundColor: "orange",
+          borderBottom: mobileView ? "5px solid rgba(0,0,0,.3)" : "",
+          borderRight: !mobileView ? "5px solid rgba(0,0,0,.3)" : "",
           width: mobileView ? "100vw" : "300px",
           height: mobileView ? "min-content" : "100vh",
           transition: ".3s ease-out",
@@ -1934,3 +1936,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
