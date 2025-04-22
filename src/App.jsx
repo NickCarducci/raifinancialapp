@@ -712,6 +712,7 @@ function MyComponent() {
           </div>
           <div
             style={{
+              zIndex: 1,
               boxShadow: "-2px 5px 5px 1px grey",
               backgroundColor: "white",
               borderRadius: "10px",
@@ -1176,8 +1177,7 @@ function MyComponent() {
                       return (
                         <div key={i} style={{ display: "block" }}>
                           <div>
-                            {new Date(x.Date).toLocaleDateString()}: $
-                            {addCommas(String(x.Amount))} ({x.Category})
+                            ${addCommas(String(x.Amount))} ({x.Category})
                           </div>
                           <div
                             style={{
@@ -1201,8 +1201,7 @@ function MyComponent() {
                       return (
                         <div key={i} style={{ display: "block" }}>
                           <div>
-                            {new Date(x.Date).toLocaleDateString()}: $
-                            {addCommas(String(x.Amount))} ({x.Category})
+                            ${addCommas(String(x.Amount))} ({x.Category})
                           </div>
                           <div
                             style={{
@@ -1521,7 +1520,9 @@ function MyComponent() {
                                       <span>
                                         <span
                                           style={{ color: "dodgerblue" }}
-                                          onClick={() => window.reload()}
+                                          onClick={() =>
+                                            window.location.reload()
+                                          }
                                         >
                                           reload
                                         </span>
@@ -1678,6 +1679,7 @@ function MyComponent() {
           {selection === "Payroll" && (
             <div
               style={{
+                alignItems: "flex-start",
                 display: "flex",
                 overflowX: "auto",
                 overflowY: "hidden",
