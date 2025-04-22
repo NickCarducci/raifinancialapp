@@ -725,7 +725,7 @@ function MyComponent() {
       </div>
       <div
         style={{
-          backgroundColor: "oldlace",
+          backgroundColor: "whitesmoke",
           display: "block",
         }}
       >
@@ -815,7 +815,13 @@ function MyComponent() {
                   </div>
                   <p>{accounts[0].username}</p>
                 </div>
-                <button onClick={() => instance.logout()}>Log out</button>
+                <button
+                  onClick={() =>
+                    instance.logoutRedirect({ account: accounts[0] })
+                  }
+                >
+                  Log out
+                </button>
                 {!editAdmins ? (
                   <button
                     onClick={() => {
@@ -957,7 +963,7 @@ function MyComponent() {
         )*/}
         <div
           style={{
-            backgroundColor: "peachpuff",
+            backgroundColor: "lightgrey",
           }}
         >
           {selection === "I/S" && (
