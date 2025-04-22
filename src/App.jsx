@@ -372,7 +372,9 @@ function MyComponent() {
             </div>
           ) : (
             <div style={{ display: "block" }}>
-              <button onClick={() => instance.loginPopup()}>login</button>
+              <button onClick={() => instance.loginPopup({ prompt: "login" })}>
+                login
+              </button>
               <br />
               <span
                 style={{ cursor: "pointer", color: "dodgerblue" }}
@@ -419,7 +421,7 @@ function MyComponent() {
                   transition: ".3s ease-in",
                   backgroundColor:
                     selection === "I/S" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration: selection === "I/S" ? "underline" : "none",
+                  textDecoration: selector === "I/S" ? "underline" : "none",
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -493,7 +495,7 @@ function MyComponent() {
                       ? "rgba(250,250,250,.3)"
                       : "",
                   textDecoration:
-                    selection === "General Ledger" ? "underline" : "none",
+                    selector === "General Ledger" ? "underline" : "none",
                   listStyleType:
                     selector === "General Ledger" ? "initial" : "none",
                 }}
@@ -512,7 +514,7 @@ function MyComponent() {
                   transition: ".3s ease-in",
                   backgroundColor:
                     selection === "Charts" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration: selection === "Charts" ? "underline" : "none",
+                  textDecoration: selector === "Charts" ? "underline" : "none",
                   listStyleType: selector === "Charts" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -534,7 +536,7 @@ function MyComponent() {
                   backgroundColor:
                     selection === "Balances" ? "rgba(250,250,250,.3)" : "",
                   textDecoration:
-                    selection === "Balances" ? "underline" : "none",
+                    selector === "Balances" ? "underline" : "none",
                   listStyleType: selector === "Balances" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -595,8 +597,7 @@ function MyComponent() {
                   transition: ".3s ease-in",
                   backgroundColor:
                     selection === "Payroll" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration:
-                    selection === "Payroll" ? "underline" : "none",
+                  textDecoration: selector === "Payroll" ? "underline" : "none",
                   listStyleType: selector === "Payroll" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -708,7 +709,7 @@ function MyComponent() {
                   backgroundColor:
                     selection === "Invoices" ? "rgba(250,250,250,.3)" : "",
                   textDecoration:
-                    selection === "Invoices" ? "underline" : "none",
+                    selector === "Invoices" ? "underline" : "none",
                   listStyleType: selector === "Invoices" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -836,9 +837,9 @@ function MyComponent() {
                     >
                       - Close
                     </button>
-                    <div>
+                    <ul>
                       {users.map((user) => (
-                        <div
+                        <li
                           style={{ wordWrap: "normal" }}
                           onClick={() => {
                             console.log(authenticatedUser, user);
@@ -916,14 +917,16 @@ function MyComponent() {
                           {hoverEmail !== user.userPrincipalName &&
                             user.extension_24a8955a629c4869b36185a566f48b4a_Admin &&
                             "(admin)"}
-                        </div>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 )}
               </div>
             ) : (
-              <button onClick={() => instance.loginPopup()}>Log in</button>
+              <button onClick={() => instance.loginPopup({ prompt: "login" })}>
+                Log in
+              </button>
             )}
           </div>
           RAI Financial {selection}
@@ -1742,7 +1745,7 @@ function MyComponent() {
                   <thead>
                     <tr>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{ fontWeight: "bolder", cursor: "pointer" }}
                         onClick={() => {
                           setPayoutLog(
                             upOrder === "upDate"
@@ -1776,7 +1779,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{ fontWeight: "bolder", cursor: "pointer" }}
                         onClick={() => {
                           setPayoutLog(
                             upOrder === "upEmployee"
@@ -1808,7 +1811,7 @@ function MyComponent() {
                         )}
                       </td>
                       <td
-                        style={{ cursor: "pointer" }}
+                        style={{ fontWeight: "bolder", cursor: "pointer" }}
                         onClick={() => {
                           setPayoutLog(
                             upOrder === "upAmount"
@@ -1854,7 +1857,14 @@ function MyComponent() {
                             <tr key={i + x.CreatedAt}>
                               <td>
                                 <div>
-                                  {new Date(x.PaymentDate).toLocaleDateString()}
+                                  {new Date(x.PaymentDate).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    }
+                                  )}
                                 </div>
                               </td>
                               <td>
@@ -1871,7 +1881,7 @@ function MyComponent() {
               </table>
               <div
                 style={{
-                  margin: "0px 60px",
+                  margin: "20px 60px",
                   minWidth: "300px",
                 }}
               >
