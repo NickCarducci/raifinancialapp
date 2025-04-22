@@ -725,7 +725,7 @@ function MyComponent() {
       </div>
       <div
         style={{
-          backgroundColor: "whitesmoke",
+          backgroundColor: "snow",
           display: "block",
         }}
       >
@@ -963,7 +963,7 @@ function MyComponent() {
         )*/}
         <div
           style={{
-            backgroundColor: "lightgrey",
+            backgroundColor: "whitesmoke",
           }}
         >
           {selection === "I/S" && (
