@@ -209,10 +209,12 @@ function MyComponent() {
               });
               return setGeneralLedger([{ Amount: "please log in again..." }]);
             }
-            const filteredGeneralLedger = result.generalLedger.filter((x) => {
-              if (x.Category === "End of month balance") return false;
-              return true;
-            });
+            const filteredGeneralLedger = result.generalLedger
+              .filter((x) => {
+                if (x.Category === "End of month balance") return false;
+                return true;
+              })
+              .sort((a, b) => new Date(b.Date) - new Date(a.Date));
             var filteredGeneralLedgerObjectss = [];
             filteredGeneralLedger.forEach((x, i) => {
               var found = filteredGeneralLedgerObjectss.find(
@@ -241,10 +243,7 @@ function MyComponent() {
             const maxHeightDivs = Math.max(...heights);
             //console.log(maxHeightDivs);
             setMaxHeightsDivs(maxHeightDivs);
-            const generalLedger = filteredGeneralLedger.sort(
-              (a, b) => new Date(b.Date) - new Date(a.Date)
-            );
-            setGeneralLedger(generalLedger);
+            setGeneralLedger(filteredGeneralLedger);
           })
           .catch(() => {
             setGeneralLedger([{ Amount: "reload or log in again..." }]);
@@ -1503,15 +1502,15 @@ function MyComponent() {
                             cursor: "pointer",
                           }}
                           onClick={() => {
-                            setGeneralLedger(
+                            const generalLedgerr =
                               upOrder === "upDate"
                                 ? generalLedger.reverse()
                                 : generalLedger.sort(
                                     (a, b) =>
                                       new Date(a.Date) - new Date(b.Date)
-                                  )
-                            );
-                            const filteredGeneralLedger = generalLedger.filter(
+                                  );
+                            setGeneralLedger(generalLedgerr);
+                            const filteredGeneralLedger = generalLedgerr.filter(
                               (x) => {
                                 if (x.Category === "End of month balance")
                                   return false;
@@ -1519,12 +1518,7 @@ function MyComponent() {
                               }
                             );
                             var filteredGeneralLedgerObjectss = [];
-                            (upOrder === "upDate"
-                              ? filteredGeneralLedger.reverse()
-                              : filteredGeneralLedger.sort(
-                                  (a, b) => new Date(a.Date) - new Date(b.Date)
-                                )
-                            ).forEach((x, i) => {
+                            filteredGeneralLedger.forEach((x, i) => {
                               var found = filteredGeneralLedgerObjectss.find(
                                 (y) => y[x.Date.split("T")[0]]
                               );
