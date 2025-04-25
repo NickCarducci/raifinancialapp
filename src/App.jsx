@@ -159,6 +159,8 @@ function MyComponent() {
   const [editCategory, setEditCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [maxHeightDivs, setMaxHeightsDivs] = useState(0);
+  const [filteredGeneralLedgerObjects, setFilteredGeneralLedgerObjects] =
+    useState([]);
   const getGeneralLedger = () => {
     if (mobileView) setSelectionMenu(false);
     setSelection("General Ledger");
@@ -211,9 +213,31 @@ function MyComponent() {
               if (x.Category === "End of month balance") return false;
               return true;
             });
-            const heights = filteredGeneralLedger.map((x) =>
-              typeof x.Amount === "number" ? Math.abs(x.Amount) : 0
-            );
+            var filteredGeneralLedgerObjectss = [];
+            filteredGeneralLedger.forEach((x, i) => {
+              var found = filteredGeneralLedgerObjectss.find(
+                (y) => y[x.Date.split("T")[0]]
+              );
+              if (!found)
+                filteredGeneralLedgerObjectss.push({
+                  [x.Date.split("T")[0]]: 0,
+                });
+              filteredGeneralLedgerObjectss =
+                filteredGeneralLedgerObjectss.filter(
+                  (y) => Object.keys(y)[0] !== x.Date.split("T")[0]
+                );
+              filteredGeneralLedgerObjectss.push({
+                [x.Date.split("T")[0]]:
+                  (found ? Object.values(found)[0] : 0) + x.Amount,
+              });
+              //console.log(filteredGeneralLedgerObjectss);
+            });
+            //console.log(filteredGeneralLedgerObjectss);
+            setFilteredGeneralLedgerObjects(filteredGeneralLedgerObjectss);
+            const heights = filteredGeneralLedgerObjectss.map((x) => {
+              const amount = Object.values(x)[0];
+              return typeof amount === "number" ? Math.abs(amount) : 0;
+            });
             const maxHeightDivs = Math.max(...heights);
             //console.log(maxHeightDivs);
             setMaxHeightsDivs(maxHeightDivs);
@@ -232,8 +256,8 @@ function MyComponent() {
   const [expenses, setExpenses] = useState(null);
   const space = " ";
   const [hoverEmail, setHoverEmail] = useState(false);
-  const [hoverDiv, setHoverDiv] = useState(0);
-  const [clickedDiv, setClickDiv] = useState(0);
+  const [hoverDiv, setHoverDiv] = useState("");
+  const [clickedDiv, setClickDiv] = useState("");
   const [revenues, setRevenues] = useState([]);
   const [expensess, setExpensess] = useState([]);
   const [payoutChart, setPayoutChart] = useState([]);
@@ -265,7 +289,7 @@ function MyComponent() {
     >
       <div
         ref={selectionMenuRef}
-        onMouseEnter={() => setClickDiv(0)}
+        onMouseEnter={() => setClickDiv("")}
         style={{
           display: mobileView ? "float" : "block",
           position: "relative",
@@ -1344,32 +1368,35 @@ function MyComponent() {
                   alignItems: "flex-end",
                 }}
               >
-                {generalLedger.map((x, i) => {
-                  const width = windowWidth / generalLedger.length;
-                  const height = x.Amount / maxHeightDivs;
+                {filteredGeneralLedgerObjects.map((x, i) => {
+                  const width =
+                    windowWidth / filteredGeneralLedgerObjects.length;
+                  const height = Object.values(x)[0] / maxHeightDivs;
                   //console.log(maxHeightDivs);
                   return (
                     <div
                       key={i}
                       onMouseEnter={() => {
-                        setHoverDiv(x.TransactionID);
+                        setHoverDiv(Object.keys(x)[0]);
                       }}
                       onMouseLeave={() => {
-                        setHoverDiv(0);
+                        setHoverDiv("");
                       }}
-                      onClick={() => setClickDiv(x.TransactionID)}
+                      onClick={() => setClickDiv(Object.keys(x)[0])}
                       style={{
                         cursor: "pointer",
                         backgroundColor:
-                          hoverDiv !== x.TransactionID
-                            ? x.Amount >= 0
+                          hoverDiv !== Object.keys(x)[0]
+                            ? Object.values(x)[0] >= 0
                               ? "green"
                               : "red"
                             : "black",
                         borderTopLeftRadius: "5px",
                         borderTopRightRadius: "5px",
                         width,
-                        height: `${x.Amount < 0 ? 0 : height * 100}%`,
+                        height: `${
+                          Object.values(x)[0] < 0 ? 0 : height * 100
+                        }%`,
                         transition: ".2s ease-in",
                       }}
                     ></div>
@@ -1386,25 +1413,26 @@ function MyComponent() {
                   alignItems: "flex-start",
                 }}
               >
-                {generalLedger.map((x, i) => {
-                  const width = windowWidth / generalLedger.length;
-                  const height = x.Amount / maxHeightDivs;
+                {filteredGeneralLedgerObjects.map((x, i) => {
+                  const width =
+                    windowWidth / filteredGeneralLedgerObjects.length;
+                  const height = Object.values(x)[0] / maxHeightDivs;
                   //console.log(maxHeightDivs);
                   return (
                     <div
                       key={i}
                       onMouseEnter={() => {
-                        setHoverDiv(x.TransactionID);
+                        setHoverDiv(Object.keys(x)[0]);
                       }}
                       onMouseLeave={() => {
-                        setHoverDiv(0);
+                        setHoverDiv("");
                       }}
-                      onClick={() => setClickDiv(x.TransactionID)}
+                      onClick={() => setClickDiv(Object.keys(x)[0])}
                       style={{
                         cursor: "pointer",
                         backgroundColor:
-                          hoverDiv !== x.TransactionID
-                            ? x.Amount >= 0
+                          hoverDiv !== Object.keys(x)[0]
+                            ? Object.values(x)[0] >= 0
                               ? "green"
                               : "red"
                             : "black",
@@ -1412,7 +1440,7 @@ function MyComponent() {
                         borderBottomRightRadius: "5px",
                         width,
                         height: `${
-                          x.Amount >= 0 ? 0 : Math.abs(height) * 100
+                          Object.values(x)[0] >= 0 ? 0 : Math.abs(height) * 100
                         }%`,
                         transition: ".2s ease-in",
                       }}
@@ -1471,6 +1499,42 @@ function MyComponent() {
                                     (a, b) =>
                                       new Date(a.Date) - new Date(b.Date)
                                   )
+                            );
+                            const filteredGeneralLedger = generalLedger.filter(
+                              (x) => {
+                                if (x.Category === "End of month balance")
+                                  return false;
+                                return true;
+                              }
+                            );
+                            var filteredGeneralLedgerObjectss = [];
+                            (upOrder === "upDate"
+                              ? filteredGeneralLedger.reverse()
+                              : filteredGeneralLedger.sort(
+                                  (a, b) => new Date(a.Date) - new Date(b.Date)
+                                )
+                            ).forEach((x, i) => {
+                              var found = filteredGeneralLedgerObjectss.find(
+                                (y) => y[x.Date.split("T")[0]]
+                              );
+                              if (!found)
+                                filteredGeneralLedgerObjectss.push({
+                                  [x.Date.split("T")[0]]: 0,
+                                });
+                              filteredGeneralLedgerObjectss =
+                                filteredGeneralLedgerObjectss.filter(
+                                  (y) =>
+                                    Object.keys(y)[0] !== x.Date.split("T")[0]
+                                );
+                              filteredGeneralLedgerObjectss.push({
+                                [x.Date.split("T")[0]]:
+                                  (found ? Object.values(found)[0] : 0) +
+                                  x.Amount,
+                              });
+                              //console.log(filteredGeneralLedgerObjectss);
+                            });
+                            setFilteredGeneralLedgerObjects(
+                              filteredGeneralLedgerObjectss
                             );
                             setUpOrder(upOrder ? false : "upDate");
                           }}
@@ -1623,158 +1687,163 @@ function MyComponent() {
                     </thead>
                   )}
                   <tbody>
-                    {generalLedger === null
-                      ? ""
-                      : generalLedger.length === 0
-                      ? "No results"
-                      : generalLedger
-                          .filter((x) => {
-                            if (
-                              clickedDiv !== 0 &&
-                              clickedDiv !== x.TransactionID
-                            )
-                              return false;
-                            return true;
-                          })
-                          .map((x, i) => {
-                            return (
-                              <tr
-                                key={i + x.Date}
-                                style={{
-                                  backgroundColor:
-                                    x.TransactionID === hoverDiv
-                                      ? x.Amount >= 0
-                                        ? "rgb(100,200,100,.3)"
-                                        : "rgb(200,100,100,.3)"
-                                      : "",
-                                }}
-                              >
-                                <td>
-                                  <div>
-                                    {new Date(x.Date).toLocaleDateString()}
-                                  </div>
-                                </td>
-                                <td>
-                                  <div>
-                                    {typeof x.Amount === "number" ? (
-                                      `$${addCommas(String(x.Amount))}`
-                                    ) : x.Amount.split("reload")[1] ? (
-                                      <span>
-                                        <span
-                                          style={{ color: "dodgerblue" }}
-                                          onClick={() =>
-                                            window.location.reload()
-                                          }
-                                        >
-                                          reload
-                                        </span>
-                                        {x.Amount.split("reload")[1]}
-                                      </span>
-                                    ) : (
-                                      addCommas(String(x.Amount))
-                                    )}
-                                  </div>
-                                </td>
-                                <td
-                                  onClick={() => {
-                                    if (editCategory === i) return null;
-                                    setEditCategory(i);
-                                  }}
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  <div>
-                                    {editCategory === i ? (
-                                      <form
-                                        style={{
-                                          display: "flex",
-                                        }}
-                                        onSubmit={(e) => {
-                                          e.preventDefault();
-                                          const answer = window.confirm(
-                                            "Are you sure you'd like to change the Category from " +
-                                              x.Category +
-                                              " to " +
-                                              newCategory +
-                                              "?"
-                                          );
-                                          if (answer) {
-                                            instance
-                                              .acquireTokenSilent({
-                                                ...loginRequest,
-                                                account: accounts[0],
-                                              })
-                                              .then((response) => {
-                                                fetch(
-                                                  "https://raifinancial.azurewebsites.net/api/updatecategory/" +
-                                                    x.TransactionID +
-                                                    "/" +
-                                                    newCategory,
-                                                  {
-                                                    method: "GET",
-                                                    headers: {
-                                                      Authorization: `Bearer ${response.idToken}`,
-                                                      "Content-Type":
-                                                        "application/JSON",
-                                                    },
-                                                  }
-                                                )
-                                                  .then(
-                                                    async (res) =>
-                                                      await res.json()
-                                                  )
-                                                  .then((response) => {
-                                                    console.log(response);
-                                                    setNewCategory("");
-                                                    getGeneralLedger();
-                                                    setEditCategory(false);
-                                                  })
-                                                  .catch((error) => {
-                                                    console.error(error);
-                                                  });
-                                              });
-                                          }
-                                        }}
+                    {generalLedger === null ? (
+                      <tr>
+                        <td></td>
+                      </tr>
+                    ) : generalLedger.length === 0 ? (
+                      <tr>
+                        <td>No results</td>
+                      </tr>
+                    ) : (
+                      generalLedger
+                        .filter((x) => {
+                          if (
+                            clickedDiv !== "" &&
+                            x.Date &&
+                            clickedDiv !== x.Date.split("T")[0]
+                          )
+                            return false;
+                          return true;
+                        })
+                        .map((x, i) => {
+                          return (
+                            <tr
+                              key={i + x.Date}
+                              style={{
+                                backgroundColor:
+                                  x.Date === hoverDiv
+                                    ? x.Amount >= 0
+                                      ? "rgb(100,200,100,.3)"
+                                      : "rgb(200,100,100,.3)"
+                                    : "",
+                              }}
+                            >
+                              <td>
+                                <div>
+                                  {new Date(x.Date).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td>
+                                <div>
+                                  {typeof x.Amount === "number" ? (
+                                    `$${addCommas(String(x.Amount))}`
+                                  ) : x.Amount.split("reload")[1] ? (
+                                    <span>
+                                      <span
+                                        style={{ color: "dodgerblue" }}
+                                        onClick={() => window.location.reload()}
                                       >
-                                        <input
-                                          placeholder={x.Category}
-                                          value={newCategory}
-                                          onChange={(e) => {
-                                            setNewCategory(e.target.value);
-                                          }}
-                                        />
-                                        <div
-                                          onClick={() => setEditCategory(false)}
-                                        >
-                                          &times;
-                                        </div>
-                                      </form>
-                                    ) : (
-                                      x.Category
-                                    )}
-                                  </div>
-                                </td>
-                                <td>
-                                  <div>{x.Platform}</div>
-                                </td>
-                                <td>
-                                  <div>{x.Description}</div>
-                                </td>
-                                {false &&
-                                  tds.map((x, i) => {
-                                    return (
-                                      <td key={i}>
-                                        <div
-                                          style={{
-                                            margin: "0px",
-                                            width: "60px",
-                                          }}
-                                        ></div>
-                                      </td>
-                                    );
-                                  })}
-                              </tr>
-                            );
-                          })}
+                                        reload
+                                      </span>
+                                      {x.Amount.split("reload")[1]}
+                                    </span>
+                                  ) : (
+                                    addCommas(String(x.Amount))
+                                  )}
+                                </div>
+                              </td>
+                              <td
+                                onClick={() => {
+                                  if (editCategory === i) return null;
+                                  setEditCategory(i);
+                                }}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <div>
+                                  {editCategory === i ? (
+                                    <form
+                                      style={{
+                                        display: "flex",
+                                      }}
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const answer = window.confirm(
+                                          "Are you sure you'd like to change the Category from " +
+                                            x.Category +
+                                            " to " +
+                                            newCategory +
+                                            "?"
+                                        );
+                                        if (answer) {
+                                          instance
+                                            .acquireTokenSilent({
+                                              ...loginRequest,
+                                              account: accounts[0],
+                                            })
+                                            .then((response) => {
+                                              fetch(
+                                                "https://raifinancial.azurewebsites.net/api/updatecategory/" +
+                                                  x.TransactionID +
+                                                  "/" +
+                                                  newCategory,
+                                                {
+                                                  method: "GET",
+                                                  headers: {
+                                                    Authorization: `Bearer ${response.idToken}`,
+                                                    "Content-Type":
+                                                      "application/JSON",
+                                                  },
+                                                }
+                                              )
+                                                .then(
+                                                  async (res) =>
+                                                    await res.json()
+                                                )
+                                                .then((response) => {
+                                                  console.log(response);
+                                                  setNewCategory("");
+                                                  getGeneralLedger();
+                                                  setEditCategory(false);
+                                                })
+                                                .catch((error) => {
+                                                  console.error(error);
+                                                });
+                                            });
+                                        }
+                                      }}
+                                    >
+                                      <input
+                                        placeholder={x.Category}
+                                        value={newCategory}
+                                        onChange={(e) => {
+                                          setNewCategory(e.target.value);
+                                        }}
+                                      />
+                                      <div
+                                        onClick={() => setEditCategory(false)}
+                                      >
+                                        &times;
+                                      </div>
+                                    </form>
+                                  ) : (
+                                    x.Category
+                                  )}
+                                </div>
+                              </td>
+                              <td>
+                                <div>{x.Platform}</div>
+                              </td>
+                              <td>
+                                <div>{x.Description}</div>
+                              </td>
+                              {false &&
+                                tds.map((x, i) => {
+                                  return (
+                                    <td key={i}>
+                                      <div
+                                        style={{
+                                          margin: "0px",
+                                          width: "60px",
+                                        }}
+                                      ></div>
+                                    </td>
+                                  );
+                                })}
+                            </tr>
+                          );
+                        })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2002,11 +2071,11 @@ function MyComponent() {
           <div
             style={{ cursor: "pointer" }}
             onClick={() => {
-              setClickDiv(0);
+              setClickDiv("");
               setClickPie(null);
             }}
           >
-            {clickedDiv !== 0 || clickedPie !== null
+            {clickedDiv !== "" || clickedPie !== null
               ? "See all."
               : "End of results."}
           </div>
