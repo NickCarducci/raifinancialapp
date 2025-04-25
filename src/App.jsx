@@ -169,13 +169,19 @@ function MyComponent() {
         account: accounts[0],
       })
       .then((response) => {
-        fetch("https://raifinancial.azurewebsites.net/api/generalledger", {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + response.idToken,
-            "Content-Type": "application/JSON",
-          },
-        })
+        fetch(
+          "https://raifinancial.azurewebsites.net/api/generalledger/" +
+            startingDate +
+            "/" +
+            endingDate,
+          {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + response.idToken,
+              "Content-Type": "application/JSON",
+            },
+          }
+        )
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
@@ -220,6 +226,22 @@ function MyComponent() {
 
   const [clickedPie, setClickPie] = useState(null);
   const [payoutLogSorted, setPayoutLogSorted] = useState([]);
+  function getStartOfMonth(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    return `${year}-${month}-01`;
+  }
+  function getEndOfMonth(date) {
+    var fullYear = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, "0");
+    var lastDayOfMonth = new Date(fullYear, month, 0).getDate();
+    console.log(`${fullYear}-${month}-${lastDayOfMonth}`);
+    return `${fullYear}-${month}-${lastDayOfMonth}`;
+  }
+  const [startingDate, setStartingDate] = useState(
+    getStartOfMonth(new Date()) //new Date().toISOString().split("T")[0]
+  );
+  const [endingDate, setEndingDate] = useState(getEndOfMonth(new Date()));
   //console.log(tds);
   return (
     <div
@@ -374,7 +396,11 @@ function MyComponent() {
             </div>
           ) : (
             <div style={{ display: "block" }}>
-              <button onClick={() => instance.loginPopup({ prompt: "login" })}>
+              <button
+                onClick={() =>
+                  instance.loginPopup({ prompt: "select_account" })
+                }
+              >
                 login
               </button>
               <br />
@@ -819,7 +845,10 @@ function MyComponent() {
                 </div>
                 <button
                   onClick={() =>
-                    instance.logoutRedirect({ account: accounts[0] })
+                    instance.logoutRedirect({
+                      account: accounts[0],
+                      mainWindowRedirectUri: window.location.href,
+                    })
                   }
                 >
                   Log out
@@ -932,7 +961,11 @@ function MyComponent() {
                 )}
               </div>
             ) : (
-              <button onClick={() => instance.loginPopup({ prompt: "login" })}>
+              <button
+                onClick={() =>
+                  instance.loginPopup({ prompt: "select_account" })
+                }
+              >
                 Log in
               </button>
             )}
@@ -1372,6 +1405,39 @@ function MyComponent() {
                     ></div>
                   );
                 })}
+              </div>
+              <div style={{ display: "flex" }}>
+                <span
+                  class="fa fa-refresh"
+                  style={{
+                    padding: "6px",
+                    borderRadius: "10px",
+                    border: "1px solid black",
+                  }}
+                  onClick={() => {
+                    getGeneralLedger();
+                  }}
+                ></span>
+                {space}starting date:
+                <input
+                  type="date"
+                  id="start"
+                  name="query-start"
+                  value={startingDate}
+                  onChange={(e) => {
+                    setStartingDate(e.target.value);
+                  }}
+                />
+                {space}ending date:
+                <input
+                  type="date"
+                  id="end"
+                  name="query-end"
+                  value={endingDate}
+                  onChange={(e) => {
+                    setEndingDate(e.target.value);
+                  }}
+                />
               </div>
               <div ref={tableRef}>
                 <table>
@@ -1912,6 +1978,7 @@ function MyComponent() {
                     setClickPie(employeeName);
                   }}
                   //radius={100}
+                  lineWidth={80}
                 />
               </div>
             </div>
