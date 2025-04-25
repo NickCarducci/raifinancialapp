@@ -169,11 +169,25 @@ function MyComponent() {
         account: accounts[0],
       })
       .then((response) => {
+        const newStartingDate = new Date(
+          new Date(startingDate).getTime() + 86400000 * 2
+        );
+        const newEndingDate = new Date(
+          new Date(endingDate).getTime() + 86400000 * 2
+        );
         fetch(
           "https://raifinancial.azurewebsites.net/api/generalledger/" +
-            startingDate +
+            newStartingDate.getFullYear() +
+            "-" +
+            String(newStartingDate.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(newStartingDate.getDate()).padStart(2, "0") +
             "/" +
-            endingDate,
+            newEndingDate.getFullYear() +
+            "-" +
+            String(newEndingDate.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(newEndingDate.getDate()).padStart(2, "0"),
           {
             method: "GET",
             headers: {
@@ -235,7 +249,7 @@ function MyComponent() {
     var fullYear = date.getFullYear();
     var month = String(date.getMonth() + 1).padStart(2, "0");
     var lastDayOfMonth = new Date(fullYear, month, 0).getDate();
-    console.log(`${fullYear}-${month}-${lastDayOfMonth}`);
+    //console.log(`${fullYear}-${month}-${lastDayOfMonth}`);
     return `${fullYear}-${month}-${lastDayOfMonth}`;
   }
   const [startingDate, setStartingDate] = useState(
@@ -2003,4 +2017,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
