@@ -281,6 +281,21 @@ function MyComponent() {
   );
   const [endingDate, setEndingDate] = useState(getEndOfMonth(new Date()));
   //console.log(tds);
+  const pieChart = () => (
+    <PieChart
+      data={payoutChart}
+      onClick={(e, segmentIndex) => {
+        const employeeName = Object.keys(payoutTotals).find((x, i) => {
+          //console.log(segmentIndex, i);
+          return i === segmentIndex;
+        });
+        //console.log(employeeName);
+        setClickPie(employeeName);
+      }}
+      //radius={100}
+      lineWidth={80}
+    />
+  );
   return (
     <div
       style={{
@@ -723,10 +738,6 @@ function MyComponent() {
                           setPayoutTotals(totals);
                           setPayoutChart(
                             Object.keys(totals).map((employeeName, i) => {
-                              console.log(
-                                employeeName,
-                                Object.values(totals)[i]
-                              );
                               return {
                                 title: employeeName,
                                 value: Object.values(totals)[i],
@@ -1897,12 +1908,22 @@ function MyComponent() {
             <div
               style={{
                 alignItems: "flex-start",
-                display: "flex",
+                display: windowWidth < 500 ? "block" : "flex",
                 overflowX: "auto",
                 overflowY: "hidden",
                 width: mobileView ? "100%" : "calc(100vw - 300px",
               }}
             >
+              {windowWidth < 500 && (
+                <div
+                  style={{
+                    margin: "20px 60px",
+                    minWidth: "300px",
+                  }}
+                >
+                  {pieChart()}
+                </div>
+              )}
               <table>
                 {payoutLog !== null && payoutLog.length > 0 && (
                   <thead>
@@ -2042,28 +2063,16 @@ function MyComponent() {
                       })}
                 </tbody>
               </table>
-              <div
-                style={{
-                  margin: "20px 60px",
-                  minWidth: "300px",
-                }}
-              >
-                <PieChart
-                  data={payoutChart}
-                  onClick={(e, segmentIndex) => {
-                    const employeeName = Object.keys(payoutTotals).find(
-                      (x, i) => {
-                        //console.log(segmentIndex, i);
-                        return i === segmentIndex;
-                      }
-                    );
-                    //console.log(employeeName);
-                    setClickPie(employeeName);
+              {!(windowWidth < 500) && (
+                <div
+                  style={{
+                    margin: "20px 60px",
+                    minWidth: "300px",
                   }}
-                  //radius={100}
-                  lineWidth={80}
-                />
-              </div>
+                >
+                  {pieChart()}
+                </div>
+              )}
             </div>
           )}
         </div>
