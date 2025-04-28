@@ -3,6 +3,16 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { loginRequest } from "./authConfig";
 import { PieChart } from "react-minimal-pie-chart";
+import { Bar } from "react-chartjs-2";
+import {
+  BarController,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Chart,
+} from "chart.js";
+
+Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
 const updateUsers = (setUsers, instance, accounts) => {
   if (accounts.length > 0) {
@@ -325,6 +335,107 @@ function MyComponent() {
         (thisMonthsIOStatement.NetProfit - lastMonthsIOStatment.NetProfit)) /
       lastMonthsIOStatment.NetProfit
     ).toFixed(2);
+  const pieChartColors = ["salmon", "red", "orange", "pink", "black", "blue"];
+  const barChartData = ioStatement && {
+    labels: ioStatement
+      .map((x) => {
+        return x.Month;
+      })
+      .reverse(),
+    datasets: [
+      {
+        label: "Revenue",
+        data: ioStatement
+          .map((x) => {
+            //console.log(x.TotalRevenue);
+            return x.TotalRevenue;
+          })
+          .reverse(),
+        borderWidth: 1,
+        backgroundColor: "green",
+      },
+      {
+        label: "Expenses",
+        data: ioStatement
+          .map((x) => {
+            //console.log(x.TotalRevenue);
+            return x.TotalExpenses;
+          })
+          .reverse(),
+        borderWidth: 1,
+        backgroundColor: "red",
+      },
+    ],
+  };
+  const getRevenue = () => {
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        setSelectedIO("revenue");
+        fetch("https://raifinancial.azurewebsites.net/api/revenue", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${response.idToken}`,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then(async (result) => {
+            console.log(result);
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
+              return setRevenue([{ Amount: "Sign in again..." }]);
+            }
+            setRevenues(result.revenue.map((x) => x.Amount));
+            if (result.revenue) return setRevenue(result.revenue);
+            setRevenue([{ Amount: "Try again" }]);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      });
+  };
+  const getExpenses = () => {
+    setSelectedIO("expenses");
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        fetch("https://raifinancial.azurewebsites.net/api/expenses", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${response.idToken}`,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then(async (result) => {
+            console.log(result);
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
+              return setExpenses([{ Amount: "Sign in again..." }]);
+            }
+            setExpensess(result.expenses.map((x) => x.Amount));
+            result.expenses && setExpenses(result.expenses);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      });
+  };
   return (
     <div
       style={{
@@ -1118,49 +1229,7 @@ function MyComponent() {
                 ) : (
                   <div style={{ display: "flex" }}>
                     <div
-                      onClick={() => {
-                        instance
-                          .acquireTokenSilent({
-                            ...loginRequest,
-                            account: accounts[0],
-                          })
-                          .then((response) => {
-                            setSelectedIO("revenue");
-                            fetch(
-                              "https://raifinancial.azurewebsites.net/api/revenue",
-                              {
-                                method: "GET",
-                                headers: {
-                                  Authorization: `Bearer ${response.idToken}`,
-                                  "Content-Type": "application/JSON",
-                                },
-                              }
-                            )
-                              .then(async (res) => await res.json())
-                              .then(async (result) => {
-                                console.log(result);
-                                if (result.code === 401) {
-                                  await instance.acquireTokenRedirect({
-                                    account: accounts[0],
-                                    forceRefresh: true,
-                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                                  });
-                                  return setRevenue([
-                                    { Amount: "Sign in again..." },
-                                  ]);
-                                }
-                                setRevenues(
-                                  result.revenue.map((x) => x.Amount)
-                                );
-                                if (result.revenue)
-                                  return setRevenue(result.revenue);
-                                setRevenue([{ Amount: "Try again" }]);
-                              })
-                              .catch((error) => {
-                                console.error(error);
-                              });
-                          });
-                      }}
+                      onClick={getRevenue}
                       onMouseEnter={() => setIOHover("Revenue")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
@@ -1212,47 +1281,7 @@ function MyComponent() {
                       )}
                     </div>
                     <div
-                      onClick={() => {
-                        setSelectedIO("expenses");
-                        instance
-                          .acquireTokenSilent({
-                            ...loginRequest,
-                            account: accounts[0],
-                          })
-                          .then((response) => {
-                            fetch(
-                              "https://raifinancial.azurewebsites.net/api/expenses",
-                              {
-                                method: "GET",
-                                headers: {
-                                  Authorization: `Bearer ${response.idToken}`,
-                                  "Content-Type": "application/JSON",
-                                },
-                              }
-                            )
-                              .then(async (res) => await res.json())
-                              .then(async (result) => {
-                                console.log(result);
-                                if (result.code === 401) {
-                                  await instance.acquireTokenRedirect({
-                                    account: accounts[0],
-                                    forceRefresh: true,
-                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                                  });
-                                  return setExpenses([
-                                    { Amount: "Sign in again..." },
-                                  ]);
-                                }
-                                setExpensess(
-                                  result.expenses.map((x) => x.Amount)
-                                );
-                                result.expenses && setExpenses(result.expenses);
-                              })
-                              .catch((error) => {
-                                console.error(error);
-                              });
-                          });
-                      }}
+                      onClick={getExpenses}
                       onMouseEnter={() => setIOHover("Expenses")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
@@ -1367,7 +1396,139 @@ function MyComponent() {
                   </div>
                 )}
               </div>
-              {selectedIO === "revenue" ? (
+              <div style={{ display: windowWidth < 500 ? "block" : "flex" }}>
+                <div
+                  onMouseLeave={() => setIOHover("")}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    margin: "20px",
+                    marginRight: "0px",
+                    textAlign: "left",
+                    width: "400px",
+                    padding: "10px",
+                  }}
+                >
+                  <div>Revenue vs Expenses</div>
+                  {ioStatement && (
+                    <Bar
+                      options={{
+                        onClick: (event, elements) => {
+                          if (elements.length > 0) {
+                            const elementIndex = elements[0].index;
+                            const datasetIndex = elements[0].datasetIndex;
+                            const value =
+                              barChartData.datasets[datasetIndex].data[
+                                elementIndex
+                              ];
+                            const label =
+                              barChartData.datasets[datasetIndex].label;
+                            //const label = barChartData.labels[elementIndex];
+                            console.log(label);
+                            setSelectedIO(label);
+                            if (label === "Revenue") {
+                              getRevenue();
+                            } else if (label === "Expenses") {
+                              getExpenses();
+                            }
+                          }
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                          },
+                        },
+                      }}
+                      data={barChartData}
+                    />
+                  )}
+                </div>
+                <div
+                  onMouseLeave={() => setIOHover("")}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    margin: "20px",
+                    marginRight: "0px",
+                    textAlign: "left",
+                    width: "400px",
+                    padding: "10px",
+                    display: "block",
+                  }}
+                >
+                  <div>
+                    {selectedIO.substring(0, 1).toLocaleUpperCase() +
+                      selectedIO.substring(1, selectedIO.length)}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <div style={{ width: "200px", marginRight: "30px" }}>
+                      {selectedIO === "revenue"
+                        ? revenue && (
+                            <PieChart
+                              data={revenue.map((x, i) => {
+                                return {
+                                  title: x.Category,
+                                  value: x.Amount,
+                                  color: pieChartColors[i],
+                                };
+                              })}
+                              //radius={100}
+                              lineWidth={80}
+                            />
+                          )
+                        : expenses && (
+                            <PieChart
+                              data={expenses.map((x, i) => {
+                                return {
+                                  title: x.Category,
+                                  value: x.Amount,
+                                  color: pieChartColors[i],
+                                };
+                              })}
+                              //radius={100}
+                              lineWidth={80}
+                            />
+                          )}
+                    </div>
+                    <div style={{ display: "block" }}>
+                      {selectedIO === "revenue"
+                        ? revenue &&
+                          revenue.map((x, i) => {
+                            return (
+                              <div style={{ display: "flex" }}>
+                                <div
+                                  style={{
+                                    width: "40px",
+                                    height: "20px",
+                                    backgroundColor: pieChartColors[i],
+                                  }}
+                                ></div>
+                                <div>{x.Category}</div>
+                              </div>
+                            );
+                          })
+                        : expenses &&
+                          expenses.map((x, i) => {
+                            return (
+                              <div style={{ display: "flex" }}>
+                                <div
+                                  style={{
+                                    width: "40px",
+                                    height: "20px",
+                                    backgroundColor: pieChartColors[i],
+                                  }}
+                                ></div>
+                                <div>{x.Category}</div>
+                              </div>
+                            );
+                          })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {true ? null : selectedIO === "revenue" ? (
                 <div>
                   {revenue !== null &&
                     revenue.map((x, i) => {
