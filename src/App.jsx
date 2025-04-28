@@ -1778,17 +1778,20 @@ function MyComponent() {
                                             })
                                             .then((response) => {
                                               fetch(
-                                                "https://raifinancial.azurewebsites.net/api/updatecategory/" +
-                                                  x.TransactionID +
-                                                  "/" +
-                                                  newCategory,
+                                                "https://raifinancial.azurewebsites.net/api/updatecategory",
                                                 {
-                                                  method: "GET",
+                                                  method: "POST",
                                                   headers: {
                                                     Authorization: `Bearer ${response.idToken}`,
                                                     "Content-Type":
                                                       "application/JSON",
                                                   },
+                                                  body: JSON.stringify({
+                                                    ...x,
+                                                    TransactionID:
+                                                      x.TransactionID,
+                                                    Category: newCategory,
+                                                  }),
                                                 }
                                               )
                                                 .then(
