@@ -295,6 +295,36 @@ function MyComponent() {
       lineWidth={80}
     />
   );
+  var lastMonthsIOStatment = {};
+  const thisMonthsIOStatement =
+    ioStatement &&
+    ioStatement.find((x, i) => {
+      lastMonthsIOStatment = ioStatement.find((x, ii) => ii === i + 1);
+      return x.Month === ioMonth;
+    });
+  const changeInTotalRevenue =
+    thisMonthsIOStatement &&
+    (
+      (100 *
+        (thisMonthsIOStatement.TotalRevenue -
+          lastMonthsIOStatment.TotalRevenue)) /
+      lastMonthsIOStatment.TotalRevenue
+    ).toFixed(2);
+  const changeInTotalExpenses =
+    thisMonthsIOStatement &&
+    (
+      (100 *
+        (thisMonthsIOStatement.TotalExpenses -
+          lastMonthsIOStatment.TotalExpenses)) /
+      lastMonthsIOStatment.TotalExpenses
+    ).toFixed(2);
+  const changeInNetProfit =
+    thisMonthsIOStatement &&
+    (
+      (100 *
+        (thisMonthsIOStatement.NetProfit - lastMonthsIOStatment.NetProfit)) /
+      lastMonthsIOStatment.NetProfit
+    ).toFixed(2);
   return (
     <div
       style={{
@@ -303,7 +333,7 @@ function MyComponent() {
     >
       <div
         ref={selectionMenuRef}
-        onMouseEnter={() => setClickDiv("")}
+        //onMouseEnter={() => setClickDiv("")}
         style={{
           display: mobileView ? "float" : "block",
           position: "relative",
@@ -1167,13 +1197,19 @@ function MyComponent() {
                       <div style={{ fontWeight: "bolder" }}>
                         $
                         {ioMonth !== "" &&
-                          addCommas(
-                            String(
-                              ioStatement.find((x) => x.Month === ioMonth)
-                                .TotalRevenue
-                            )
-                          )}
+                          addCommas(String(thisMonthsIOStatement.TotalRevenue))}
                       </div>
+                      {lastMonthsIOStatment && (
+                        <div>
+                          {Number(changeInTotalRevenue) >= 0 ? (
+                            <span class="fa fa-arrow-trend-up"></span>
+                          ) : (
+                            <span class="fa fa-arrow-trend-down"></span>
+                          )}
+                          {space}
+                          {changeInTotalRevenue}%
+                        </div>
+                      )}
                     </div>
                     <div
                       onClick={() => {
@@ -1260,6 +1296,17 @@ function MyComponent() {
                             )
                           )}
                       </div>
+                      {lastMonthsIOStatment && (
+                        <div>
+                          {Number(changeInTotalExpenses) >= 0 ? (
+                            <span class="fa fa-arrow-trend-up"></span>
+                          ) : (
+                            <span class="fa fa-arrow-trend-down"></span>
+                          )}
+                          {space}
+                          {changeInTotalExpenses}%
+                        </div>
+                      )}
                     </div>
                     <div
                       onMouseEnter={() => setIOHover("Profit")}
@@ -1305,6 +1352,17 @@ function MyComponent() {
                             )
                           )}
                       </div>
+                      {lastMonthsIOStatment && (
+                        <div>
+                          {Number(changeInNetProfit) >= 0 ? (
+                            <span class="fa fa-arrow-trend-up"></span>
+                          ) : (
+                            <span class="fa fa-arrow-trend-down"></span>
+                          )}
+                          {space}
+                          {changeInNetProfit}%
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
