@@ -1497,7 +1497,7 @@ function MyComponent() {
                         ? revenue &&
                           revenue.map((x, i) => {
                             return (
-                              <div style={{ display: "flex" }}>
+                              <div key={i} style={{ display: "flex" }}>
                                 <div
                                   style={{
                                     width: "40px",
@@ -1512,7 +1512,7 @@ function MyComponent() {
                         : expenses &&
                           expenses.map((x, i) => {
                             return (
-                              <div style={{ display: "flex" }}>
+                              <div key={i} style={{ display: "flex" }}>
                                 <div
                                   style={{
                                     width: "40px",
@@ -2311,3 +2311,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
