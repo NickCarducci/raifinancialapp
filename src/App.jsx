@@ -11,6 +11,7 @@ import {
   LinearScale,
   Chart,
 } from "chart.js";
+import { usePlaidLink } from "react-plaid-link";
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
@@ -173,7 +174,6 @@ function MyComponent() {
     useState([]);
   const getGeneralLedger = () => {
     if (mobileView) setSelectionMenu(false);
-    setSelection("General Ledger");
     setGeneralLedger([{ Amount: "Connecting to database..." }]);
     instance
       .acquireTokenSilent({
@@ -251,7 +251,6 @@ function MyComponent() {
               return typeof amount === "number" ? Math.abs(amount) : 0;
             });
             const maxHeightDivs = Math.max(...heights);
-            //console.log(maxHeightDivs);
             setMaxHeightsDivs(maxHeightDivs);
             setGeneralLedger(filteredGeneralLedger);
           })
@@ -266,6 +265,7 @@ function MyComponent() {
   const space = " ";
   const [hoverEmail, setHoverEmail] = useState(false);
   const [hoverDiv, setHoverDiv] = useState("");
+  const [hoverDivs, setHoverDivs] = useState(false);
   const [clickedDiv, setClickDiv] = useState("");
   const [revenues, setRevenues] = useState([]);
   const [expensess, setExpensess] = useState([]);
@@ -313,60 +313,175 @@ function MyComponent() {
       return x.Month === ioMonth;
     });
   const changeInTotalRevenue =
-    thisMonthsIOStatement &&
-    (
-      (100 *
-        (thisMonthsIOStatement.TotalRevenue -
-          lastMonthsIOStatment.TotalRevenue)) /
-      lastMonthsIOStatment.TotalRevenue
-    ).toFixed(2);
+    thisMonthsIOStatement && lastMonthsIOStatment
+      ? Math.sign(thisMonthsIOStatement.TotalRevenue) ===
+        Math.sign(lastMonthsIOStatment.TotalRevenue)
+        ? (
+            ((thisMonthsIOStatement.TotalRevenue -
+              lastMonthsIOStatment.TotalRevenue) /
+              lastMonthsIOStatment.TotalRevenue) *
+            100
+          ).toFixed(2)
+        : (
+            ((thisMonthsIOStatement.TotalRevenue +
+              lastMonthsIOStatment.TotalRevenue) /
+              lastMonthsIOStatment.TotalRevenue) *
+            100
+          ).toFixed(2)
+      : 0;
   const changeInTotalExpenses =
-    thisMonthsIOStatement &&
-    (
-      (100 *
-        (thisMonthsIOStatement.TotalExpenses -
-          lastMonthsIOStatment.TotalExpenses)) /
-      lastMonthsIOStatment.TotalExpenses
-    ).toFixed(2);
+    thisMonthsIOStatement && lastMonthsIOStatment
+      ? Math.sign(thisMonthsIOStatement.TotalExpenses) ===
+        Math.sign(lastMonthsIOStatment.TotalExpenses)
+        ? (
+            ((thisMonthsIOStatement.TotalExpenses -
+              lastMonthsIOStatment.TotalExpenses) /
+              lastMonthsIOStatment.TotalExpenses) *
+            100
+          ).toFixed(2)
+        : (
+            ((thisMonthsIOStatement.TotalExpenses +
+              lastMonthsIOStatment.TotalExpenses) /
+              lastMonthsIOStatment.TotalExpenses) *
+            100
+          ).toFixed(2)
+      : 0;
   const changeInNetProfit =
-    thisMonthsIOStatement &&
-    (
-      (100 *
-        (thisMonthsIOStatement.NetProfit - lastMonthsIOStatment.NetProfit)) /
-      lastMonthsIOStatment.NetProfit
-    ).toFixed(2);
+    thisMonthsIOStatement && lastMonthsIOStatment
+      ? Math.sign(thisMonthsIOStatement.NetProfit) ===
+        Math.sign(lastMonthsIOStatment.NetProfit)
+        ? (
+            ((thisMonthsIOStatement.NetProfit -
+              lastMonthsIOStatment.NetProfit) /
+              lastMonthsIOStatment.NetProfit) *
+            100
+          ).toFixed(2)
+        : (
+            ((Math.abs(thisMonthsIOStatement.NetProfit) +
+              Math.abs(lastMonthsIOStatment.NetProfit)) /
+              thisMonthsIOStatement.NetProfit) *
+            100
+          ).toFixed(2)
+      : 0;
   const pieChartColors = ["salmon", "red", "orange", "pink", "black", "blue"];
-  const barChartData = ioStatement && {
-    labels: ioStatement
-      .map((x) => {
-        return x.Month;
-      })
-      .reverse(),
-    datasets: [
-      {
-        label: "Revenue",
-        data: ioStatement
-          .map((x) => {
-            //console.log(x.TotalRevenue);
-            return x.TotalRevenue;
-          })
-          .reverse(),
-        borderWidth: 1,
-        backgroundColor: "green",
-      },
-      {
-        label: "Expenses",
-        data: ioStatement
-          .map((x) => {
-            //console.log(x.TotalRevenue);
-            return x.TotalExpenses;
-          })
-          .reverse(),
-        borderWidth: 1,
-        backgroundColor: "red",
-      },
-    ],
-  };
+  var barChartData = null;
+  const [selectedFrequency, setSelectedFrequency] = useState("Monthly");
+  if (ioStatement) {
+    var quarterlyIOStatement = [];
+    ioStatement.forEach((x) => {
+      const month = x.Month.split("-")[1];
+      const thisQuarter = ["01", "02", "03"].includes(month)
+        ? "Q1"
+        : ["04", "05", "06"].includes(month)
+        ? "Q2"
+        : ["07", "08", "09"].includes(month)
+        ? "Q3"
+        : ["10", "11", "12"].includes(month)
+        ? "Q4"
+        : "";
+      const found = quarterlyIOStatement.find((y) =>
+        thisQuarter === y.Quarter ? true : false
+      );
+      quarterlyIOStatement = quarterlyIOStatement.filter(
+        (y) => y.Quarter !== thisQuarter
+      );
+      quarterlyIOStatement.push(
+        found
+          ? {
+              ...found,
+              TotalRevenue: found.TotalRevenue + x.TotalRevenue,
+              TotalExpenses: found.TotalExpenses + x.TotalExpenses,
+              NetProfit: found.NetProfit + x.NetProfit,
+            }
+          : { ...x, Quarter: thisQuarter }
+      );
+    });
+    var annualIOStatement = [];
+    ioStatement.forEach((x) => {
+      const year = x.Month.split("-")[0];
+      const found = annualIOStatement.find((y) =>
+        year === y.Year ? true : false
+      );
+      if (!found)
+        annualIOStatement.push({
+          NetProfit: 0,
+          TotalRevenue: 0,
+          TotalExpenses: 0,
+          Year: year,
+        });
+      annualIOStatement = annualIOStatement.filter((y) => y.Year !== year);
+      annualIOStatement.push(
+        found
+          ? {
+              ...found,
+              TotalRevenue: found.TotalRevenue + x.TotalRevenue,
+              TotalExpenses: found.TotalExpenses + x.TotalExpenses,
+              NetProfit: found.NetProfit + x.NetProfit,
+            }
+          : { ...x, Year: year }
+      );
+    });
+    barChartData = {
+      labels:
+        selectedFrequency === "Monthly"
+          ? ioStatement
+              .map((x) => {
+                return x.Month;
+              })
+              .reverse()
+          : selectedFrequency === "Quarterly"
+          ? quarterlyIOStatement
+              .map((x) => {
+                return x.Quarter;
+              })
+              .reverse()
+          : selectedFrequency === "Yearly"
+          ? annualIOStatement
+              .map((x) => {
+                return x.Year;
+              })
+              .reverse()
+          : [],
+      datasets: [
+        {
+          label: "Revenue",
+          data: (selectedFrequency === "Monthly"
+            ? ioStatement
+            : selectedFrequency === "Quarterly"
+            ? quarterlyIOStatement
+            : selectedFrequency === "Yearly"
+            ? annualIOStatement
+            : []
+          )
+            .map((x) => {
+              //console.log(x.TotalRevenue);
+              return x.TotalRevenue;
+            })
+            .reverse(),
+          borderWidth: 1,
+          backgroundColor: "green",
+        },
+        {
+          label: "Expenses",
+          data: (selectedFrequency === "Monthly"
+            ? ioStatement
+            : selectedFrequency === "Quarterly"
+            ? quarterlyIOStatement
+            : selectedFrequency === "Yearly"
+            ? annualIOStatement
+            : []
+          )
+            .map((x) => {
+              //console.log(x.TotalRevenue);
+              return x.TotalExpenses;
+            })
+            .reverse(),
+          borderWidth: 1,
+          backgroundColor: "red",
+        },
+      ],
+    };
+  }
   const getRevenue = () => {
     instance
       .acquireTokenSilent({
@@ -436,6 +551,85 @@ function MyComponent() {
           });
       });
   };
+  const [needsRelinkList, setNeedsRelinkList] = useState([]);
+  const [needsRelink, setNeedsRelink] = useState({ ID: -1 });
+
+  useEffect(() => {
+    return () => {};
+    ///api/needs_relink?userId=1
+    authenticatedUser &&
+      fetch("https://raifinancial.azurewebsites.net/api/needsrelinklist")
+        .then(async (res) => await res.json())
+        .then((result) => {
+          if (result.needsRelinkList.length > 0) {
+            setNeedsRelinkList(result.needsRelinkList);
+          }
+        })
+        .catch((e) => console.log(e.message));
+  }, [authenticatedUser]);
+  const [linkToken, setLinkToken] = useState(null);
+  useEffect(() => {
+    return () => {};
+    ///api/create_link_token
+    authenticatedUser &&
+      fetch("https://raifinancial.azurewebsites.net/api/get_link_token", {
+        method: "GET",
+      })
+        .then(async (res) => await res.json())
+        .then((result) => {
+          setLinkToken(result.link_token);
+        })
+        .catch((e) => console.log(e.message));
+  }, [authenticatedUser]);
+  const config = {
+    token: linkToken,
+    onSuccess: (public_token, metadata) => {
+      // Handle successful connection
+      console.log("public_token", public_token);
+      console.log("metadata", metadata);
+
+      // Send public_token to server to exchange for access_token
+      ///api/exchange_public_token
+      fetch("https://raifinancial.azurewebsites.net/api/get_access_token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ public_token }),
+      })
+        .then(async (res) => await res.json())
+        .then((result) => {
+          console.log("access_token", result.access_token);
+          //console.log("item_id", result.item_id);
+          var needsRelinkWithOrWithoutID = needsRelink;
+          if (needsRelinkWithOrWithoutID.ID === -1) {
+            delete needsRelinkWithOrWithoutID.ID;
+          }
+          fetch(
+            "https://raifinancial.azurewebsites.net/api/updateuserbanktoken",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ...needsRelinkWithOrWithoutID,
+                AccessToken: result.access_token,
+              }),
+            }
+          )
+            .then(async (res) => await res.json())
+            .then((resu) => {
+              console.log("Updated access_token for item " + resu.item_id);
+              setNeedsRelink({ ID: -1 });
+            })
+            .catch((e) => console.log(e.message));
+        })
+        .catch((e) => console.log(e.message));
+    },
+  };
+
+  const { open: openPlaid, ready: readyPlaid } = usePlaidLink(config);
   return (
     <div
       style={{
@@ -689,6 +883,7 @@ function MyComponent() {
                                 return x.Month;
                               })
                           );
+                          console.log(result.ioStatement);
                           setIOStatement(result.ioStatement);
                         })
                         .catch(() => {
@@ -697,6 +892,7 @@ function MyComponent() {
                           ]);
                         });
                     });
+                  getGeneralLedger();
                 }}
               >
                 <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
@@ -720,7 +916,10 @@ function MyComponent() {
                   listStyleType:
                     selector === "General Ledger" ? "initial" : "none",
                 }}
-                onClick={getGeneralLedger}
+                onClick={() => {
+                  getGeneralLedger();
+                  setSelection("General Ledger");
+                }}
               >
                 <div class="fas fa-book w-6"></div>&nbsp;&nbsp;General Ledger
               </div>
@@ -876,17 +1075,27 @@ function MyComponent() {
                               totals[x.EmployeeName] + x.AmountPaid;
                           });
                           setPayoutTotals(totals);
+                          let triedColors = [];
+                          let i = 0;
+                          function getRandomInt(max) {
+                            const value = Math.floor(Math.random() * max);
+                            if (triedColors.includes(value)) {
+                              if (i > 20) return value;
+                              i++;
+                              return getRandomInt(max);
+                            }
+                            return value;
+                          }
                           setPayoutChart(
                             Object.keys(totals).map((employeeName, i) => {
                               return {
                                 title: employeeName,
                                 value: Object.values(totals)[i],
-                                color: `rgb(${
-                                  (i / Object.keys(totals).length) * 250
-                                },${
-                                  (i / Object.keys(totals).length) * 100 + 50
-                                },${
-                                  0 //(i / result.payoutLog.length) * 250
+                                //(i / Object.keys(totals).length)
+                                color: `rgb(${getRandomInt(250)},${getRandomInt(
+                                  250
+                                )},${
+                                  getRandomInt(250) //(i / result.payoutLog.length) * 250
                                 })`,
                               };
                             })
@@ -935,6 +1144,43 @@ function MyComponent() {
                 }}
               >
                 <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
+              </div>
+
+              <div
+                style={{
+                  backgroundColor: "yellow",
+                  padding: "1em",
+                  marginBottom: "1em",
+                  display: "none",
+                }}
+              >
+                {needsRelinkList.length > 0 && (
+                  <div>
+                    ⚠️ Please reconnect the following bank(s):{" "}
+                    {needsRelinkList.map((x) => {
+                      return (
+                        <button
+                          onClick={() => {
+                            openPlaid();
+                            setNeedsRelink(x);
+                          }}
+                          disabled={!readyPlaid || !linkTokenPlaid}
+                        >
+                          Reconnect {x.BankName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    openPlaid();
+                    setNeedsRelink({ ID: -1 });
+                  }}
+                  disabled={!readyPlaid || !linkTokenPlaid}
+                >
+                  Connect New Bank Account
+                </button>
               </div>
             </div>
           </div>
@@ -1159,7 +1405,7 @@ function MyComponent() {
               </button>
             )}
           </div>
-          RAI Financial {selection}
+          Financial Dashboard
         </div>
         {/*selection !== "" && (
           <div
@@ -1219,7 +1465,7 @@ function MyComponent() {
                   width: mobileView ? "100vw" : "calc(100vw - 300px)",
                   overflowX: "auto",
                   overflowY: "hidden",
-                  height: "200px",
+                  height: "170px",
                 }}
               >
                 {ioStatement === null ? (
@@ -1237,8 +1483,7 @@ function MyComponent() {
                         borderLeft: "4px solid orange",
                         backgroundColor: "white",
                         borderRadius: "10px",
-                        margin: "20px",
-                        marginRight: "0px",
+                        marginLeft: "20px",
                         textAlign: "left",
                         width: "200px",
                         padding: "40px 10px",
@@ -1268,17 +1513,23 @@ function MyComponent() {
                         {ioMonth !== "" &&
                           addCommas(String(thisMonthsIOStatement.TotalRevenue))}
                       </div>
-                      {lastMonthsIOStatment && (
-                        <div>
-                          {Number(changeInTotalRevenue) >= 0 ? (
-                            <span class="fa fa-arrow-trend-up"></span>
-                          ) : (
-                            <span class="fa fa-arrow-trend-down"></span>
-                          )}
-                          {space}
-                          {changeInTotalRevenue}%
-                        </div>
-                      )}
+                      <div
+                        style={{
+                          width: "max-content",
+                          color: changeInTotalRevenue === 0 ? "grey" : "black",
+                        }}
+                      >
+                        {Number(changeInTotalRevenue) >= 0 ? (
+                          <span class="fa fa-arrow-trend-up"></span>
+                        ) : (
+                          <span class="fa fa-arrow-trend-down"></span>
+                        )}
+                        {space}
+                        {changeInTotalRevenue === 0
+                          ? "-"
+                          : changeInTotalRevenue}
+                        %
+                      </div>
                     </div>
                     <div
                       onClick={getExpenses}
@@ -1289,8 +1540,7 @@ function MyComponent() {
                         borderLeft: "4px solid orange",
                         backgroundColor: "white",
                         borderRadius: "10px",
-                        margin: "20px",
-                        marginRight: "0px",
+                        marginLeft: "20px",
                         textAlign: "left",
                         width: "200px",
                         padding: "40px 10px",
@@ -1325,17 +1575,23 @@ function MyComponent() {
                             )
                           )}
                       </div>
-                      {lastMonthsIOStatment && (
-                        <div>
-                          {Number(changeInTotalExpenses) >= 0 ? (
-                            <span class="fa fa-arrow-trend-up"></span>
-                          ) : (
-                            <span class="fa fa-arrow-trend-down"></span>
-                          )}
-                          {space}
-                          {changeInTotalExpenses}%
-                        </div>
-                      )}
+                      <div
+                        style={{
+                          width: "max-content",
+                          color: changeInTotalExpenses === 0 ? "grey" : "black",
+                        }}
+                      >
+                        {Number(changeInTotalExpenses) >= 0 ? (
+                          <span class="fa fa-arrow-trend-up"></span>
+                        ) : (
+                          <span class="fa fa-arrow-trend-down"></span>
+                        )}
+                        {space}
+                        {changeInTotalExpenses === 0
+                          ? "-"
+                          : changeInTotalExpenses}
+                        %
+                      </div>
                     </div>
                     <div
                       onMouseEnter={() => setIOHover("Profit")}
@@ -1345,8 +1601,7 @@ function MyComponent() {
                         borderLeft: "4px solid orange",
                         backgroundColor: "white",
                         borderRadius: "10px",
-                        margin: "20px",
-                        marginRight: "0px",
+                        marginLeft: "20px",
                         textAlign: "left",
                         width: "200px",
                         padding: "40px 10px",
@@ -1381,17 +1636,20 @@ function MyComponent() {
                             )
                           )}
                       </div>
-                      {lastMonthsIOStatment && (
-                        <div>
-                          {Number(changeInNetProfit) >= 0 ? (
-                            <span class="fa fa-arrow-trend-up"></span>
-                          ) : (
-                            <span class="fa fa-arrow-trend-down"></span>
-                          )}
-                          {space}
-                          {changeInNetProfit}%
-                        </div>
-                      )}
+                      <div
+                        style={{
+                          width: "max-content",
+                          color: changeInNetProfit === 0 ? "grey" : "black",
+                        }}
+                      >
+                        {Number(changeInNetProfit) >= 0 ? (
+                          <span class="fa fa-arrow-trend-up"></span>
+                        ) : (
+                          <span class="fa fa-arrow-trend-down"></span>
+                        )}
+                        {space}
+                        {changeInNetProfit === 0 ? "-" : changeInNetProfit}%
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1400,6 +1658,7 @@ function MyComponent() {
                 <div
                   onMouseLeave={() => setIOHover("")}
                   style={{
+                    position: "relative",
                     cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
@@ -1410,7 +1669,20 @@ function MyComponent() {
                     padding: "10px",
                   }}
                 >
-                  <div>Revenue vs Expenses</div>
+                  <div style={{ paddingBottom: "20px" }}>
+                    <select
+                      value={selectedFrequency}
+                      style={{ position: "absolute", right: "10px" }}
+                      onChange={(e) => {
+                        setSelectedFrequency(e.target.value);
+                      }}
+                    >
+                      {["Monthly", "Quarterly", "Yearly"].map((x) => {
+                        return <option>{x}</option>;
+                      })}
+                    </select>
+                    Revenue vs Expenses
+                  </div>
                   {ioStatement && (
                     <Bar
                       options={{
@@ -1478,7 +1750,8 @@ function MyComponent() {
                               lineWidth={80}
                             />
                           )
-                        : expenses && (
+                        : selectedIO === "expenses"
+                        ? expenses && (
                             <PieChart
                               data={expenses.map((x, i) => {
                                 return {
@@ -1490,7 +1763,8 @@ function MyComponent() {
                               //radius={100}
                               lineWidth={80}
                             />
-                          )}
+                          )
+                        : "Click revenue or expenses"}
                     </div>
                     <div style={{ display: "block" }}>
                       {selectedIO === "revenue"
@@ -1579,7 +1853,7 @@ function MyComponent() {
               ) : null}
             </div>
           )}
-          {selection === "General Ledger" && (
+          {(selection === "General Ledger" || selection === "I/S") && (
             <div
               style={{
                 overflowX: "auto",
@@ -1588,105 +1862,131 @@ function MyComponent() {
               }}
             >
               <div
+                onMouseEnter={() => {
+                  setHoverDivs(true);
+                }}
+                onMouseLeave={() => {
+                  setHoverDivs(false);
+                }}
                 style={{
-                  justifyContent: "flex-end",
-                  transform: "scaleX(-1)",
-                  //width: `calc(${mobileView ? "100vw" : "100vw - 300px"})`,
-                  display: "flex",
-                  height: "28px",
-                  alignItems: "flex-end",
+                  display: generalLedger.length > 0 ? "block" : "none",
+                  margin: "10px",
+                  border:
+                    "2px solid " + (hoverDivs === true ? "black" : "lightgrey"),
+                  borderRadius: "10px",
+                  transition: ".3s ease-out",
                 }}
               >
-                {filteredGeneralLedgerObjects.map((x, i) => {
-                  const width =
-                    windowWidth / filteredGeneralLedgerObjects.length;
-                  const height = Object.values(x)[0] / maxHeightDivs;
-                  //console.log(maxHeightDivs);
-                  return (
-                    <div
-                      key={i}
-                      onMouseEnter={() => {
-                        setHoverDiv(Object.keys(x)[0]);
-                      }}
-                      onMouseLeave={() => {
-                        setHoverDiv("");
-                      }}
-                      onClick={() => setClickDiv(Object.keys(x)[0])}
-                      style={{
-                        cursor: "pointer",
-                        backgroundColor:
-                          hoverDiv !== Object.keys(x)[0]
-                            ? Object.values(x)[0] >= 0
-                              ? "green"
-                              : "red"
-                            : "black",
-                        borderTopLeftRadius: "5px",
-                        borderTopRightRadius: "5px",
-                        width,
-                        height: `${
-                          Object.values(x)[0] < 0 ? 0 : height * 100
-                        }%`,
-                        transition: ".2s ease-in",
-                      }}
-                    ></div>
-                  );
-                })}
+                <div
+                  style={{
+                    justifyContent: "flex-end",
+                    transform: "scaleX(-1)",
+                    //width: `calc(${mobileView ? "100vw" : "100vw - 300px"})`,
+                    display: selection !== "I/S" ? "flex" : "none",
+                    height: "28px",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  {filteredGeneralLedgerObjects.map((x, i) => {
+                    const width =
+                      (windowWidth - 22) / filteredGeneralLedgerObjects.length;
+                    const height = Object.values(x)[0] / maxHeightDivs;
+                    //console.log(maxHeightDivs);
+                    return (
+                      <div
+                        key={i}
+                        onMouseEnter={() => {
+                          setHoverDiv(Object.keys(x)[0]);
+                        }}
+                        onMouseLeave={() => {
+                          setHoverDiv("");
+                        }}
+                        onClick={() => setClickDiv(Object.keys(x)[0])}
+                        style={{
+                          cursor: "pointer",
+                          backgroundColor:
+                            hoverDiv !== Object.keys(x)[0]
+                              ? Object.values(x)[0] >= 0
+                                ? "green"
+                                : "red"
+                              : "black",
+                          borderTopLeftRadius: "5px",
+                          borderTopRightRadius: "5px",
+                          width,
+                          height: `${
+                            Object.values(x)[0] < 0 ? 0 : height * 100
+                          }%`,
+                          transition: ".2s ease-in",
+                        }}
+                      ></div>
+                    );
+                  })}
+                </div>
+                <div
+                  style={{
+                    justifyContent: "flex-end",
+                    transform: "scaleX(-1)",
+                    width: "100%",
+                    display: selection !== "I/S" ? "flex" : "none",
+                    height: "28px",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  {filteredGeneralLedgerObjects.map((x, i) => {
+                    const width =
+                      (windowWidth - 22) / filteredGeneralLedgerObjects.length;
+                    const height = Object.values(x)[0] / maxHeightDivs;
+                    //console.log(maxHeightDivs);
+                    return (
+                      <div
+                        key={i}
+                        onMouseEnter={() => {
+                          setHoverDiv(Object.keys(x)[0]);
+                        }}
+                        onMouseLeave={() => {
+                          setHoverDiv("");
+                        }}
+                        onClick={() => setClickDiv(Object.keys(x)[0])}
+                        style={{
+                          cursor: "pointer",
+                          backgroundColor:
+                            hoverDiv !== Object.keys(x)[0]
+                              ? Object.values(x)[0] >= 0
+                                ? "green"
+                                : "red"
+                              : "black",
+                          borderBottomLeftRadius: "5px",
+                          borderBottomRightRadius: "5px",
+                          width,
+                          height: `${
+                            Object.values(x)[0] >= 0
+                              ? 0
+                              : Math.abs(height) * 100
+                          }%`,
+                          transition: ".2s ease-in",
+                        }}
+                      ></div>
+                    );
+                  })}
+                </div>
               </div>
               <div
                 style={{
-                  justifyContent: "flex-end",
-                  transform: "scaleX(-1)",
-                  width: "100%",
-                  display: "flex",
-                  height: "28px",
-                  alignItems: "flex-start",
+                  display: selection !== "I/S" ? "flex" : "none",
                 }}
               >
-                {filteredGeneralLedgerObjects.map((x, i) => {
-                  const width =
-                    windowWidth / filteredGeneralLedgerObjects.length;
-                  const height = Object.values(x)[0] / maxHeightDivs;
-                  //console.log(maxHeightDivs);
-                  return (
-                    <div
-                      key={i}
-                      onMouseEnter={() => {
-                        setHoverDiv(Object.keys(x)[0]);
-                      }}
-                      onMouseLeave={() => {
-                        setHoverDiv("");
-                      }}
-                      onClick={() => setClickDiv(Object.keys(x)[0])}
-                      style={{
-                        cursor: "pointer",
-                        backgroundColor:
-                          hoverDiv !== Object.keys(x)[0]
-                            ? Object.values(x)[0] >= 0
-                              ? "green"
-                              : "red"
-                            : "black",
-                        borderBottomLeftRadius: "5px",
-                        borderBottomRightRadius: "5px",
-                        width,
-                        height: `${
-                          Object.values(x)[0] >= 0 ? 0 : Math.abs(height) * 100
-                        }%`,
-                        transition: ".2s ease-in",
-                      }}
-                    ></div>
-                  );
-                })}
-              </div>
-              <div style={{ display: "flex" }}>
                 <span
                   class="fa fa-refresh"
                   style={{
+                    marginLeft: "20px",
+                    marginRight: "10px",
                     padding: "6px",
                     borderRadius: "10px",
                     border: "1px solid black",
                   }}
                   onClick={() => {
                     getGeneralLedger();
+                    setSelection("General Ledger");
                   }}
                 ></span>
                 {space}starting date:
@@ -1698,6 +1998,7 @@ function MyComponent() {
                   onChange={(e) => {
                     setStartingDate(e.target.value);
                   }}
+                  style={{ marginRight: "10px", borderRadius: "6px" }}
                 />
                 {space}ending date:
                 <input
@@ -1708,16 +2009,66 @@ function MyComponent() {
                   onChange={(e) => {
                     setEndingDate(e.target.value);
                   }}
+                  style={{ borderRadius: "6px" }}
                 />
               </div>
               <div ref={tableRef}>
+                <span
+                  style={{
+                    display: selection === "I/S" ? "block" : "none",
+                    cursor: "pointer",
+                    position: "absolute",
+                    marginTop: "10px",
+                    right: "10px",
+                    padding: "4px",
+                    borderRadius: "6px",
+                    backgroundColor: "snow",
+                  }}
+                  onClick={() => {
+                    setSelection("General Ledger");
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  see all
+                </span>
                 <table>
-                  {generalLedger !== null && generalLedger.length > 0 && (
-                    <thead>
+                  {selection === "I/S" ? (
+                    <caption
+                      style={{
+                        display: "flex",
+                        width: "max-content",
+                        position: "relative",
+                        fontSize: "20px",
+                        fontWeight: "bolder",
+                        paddingBottom: "14px",
+                        colspan: "2",
+                      }}
+                    >
+                      Recent Transactions
+                    </caption>
+                  ) : (
+                    <caption
+                      style={{
+                        display: "flex",
+                        width: "max-content",
+                        position: "relative",
+                        fontSize: "20px",
+                        fontWeight: "bolder",
+                        paddingBottom: "14px",
+                        colspan: "2",
+                      }}
+                    >
+                      General Ledger
+                    </caption>
+                  )}
+                  <tbody>
+                    {generalLedger !== null && generalLedger.length > 0 && (
                       <tr>
                         <td
                           style={{
-                            fontWeight: "bolder",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
                             cursor: "pointer",
                           }}
                           onClick={() => {
@@ -1741,10 +2092,6 @@ function MyComponent() {
                               var found = filteredGeneralLedgerObjectss.find(
                                 (y) => y[x.Date.split("T")[0]]
                               );
-                              if (!found)
-                                filteredGeneralLedgerObjectss.push({
-                                  [x.Date.split("T")[0]]: 0,
-                                });
                               filteredGeneralLedgerObjectss =
                                 filteredGeneralLedgerObjectss.filter(
                                   (y) =>
@@ -1763,28 +2110,32 @@ function MyComponent() {
                             setUpOrder(upOrder ? false : "upDate");
                           }}
                         >
-                          Date{" "}
-                          {upOrder === "upDate" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
+                          <div>
+                            DATE{space}
+                            {upOrder === "upDate" && (
+                              <div
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
+                                }}
+                              ></div>
+                            )}
+                          </div>
                         </td>
                         <td
                           style={{
-                            fontWeight: "bolder",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
                             cursor: "pointer",
                           }}
                           onClick={() => {
@@ -1798,28 +2149,32 @@ function MyComponent() {
                             setUpOrder(upOrder ? false : "upAmount");
                           }}
                         >
-                          Amount{" "}
-                          {upOrder === "upAmount" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
+                          <div>
+                            AMOUNT{space}
+                            {upOrder === "upAmount" && (
+                              <div
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
+                                }}
+                              ></div>
+                            )}
+                          </div>
                         </td>
                         <td
                           style={{
-                            fontWeight: "bolder",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
                             cursor: "pointer",
                           }}
                           onClick={() => {
@@ -1833,28 +2188,32 @@ function MyComponent() {
                             setUpOrder(upOrder ? false : "upCategory");
                           }}
                         >
-                          Category{" "}
-                          {upOrder === "upCategory" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
+                          <div>
+                            CATEGORY{space}
+                            {upOrder === "upCategory" && (
+                              <div
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
+                                }}
+                              ></div>
+                            )}
+                          </div>
                         </td>
                         <td
                           style={{
-                            fontWeight: "bolder",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
                             cursor: "pointer",
                           }}
                           onClick={() => {
@@ -1868,32 +2227,36 @@ function MyComponent() {
                             setUpOrder(upOrder ? false : "upPlatform");
                           }}
                         >
-                          Platform{" "}
-                          {upOrder === "upPlatform" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
+                          <div>
+                            PLATFORM{space}
+                            {upOrder === "upPlatform" && (
+                              <div
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
+                                }}
+                              ></div>
+                            )}
+                          </div>
                         </td>
                         <td
                           style={{
-                            fontWeight: "bolder",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
                             cursor: "pointer",
                           }}
                         >
-                          Description
+                          <div>DESCRIPTION</div>
                         </td>
                         {false &&
                           tds.map((x, i) => {
@@ -1908,20 +2271,25 @@ function MyComponent() {
                             );
                           })}
                       </tr>
-                    </thead>
-                  )}
-                  <tbody>
+                    )}
                     {generalLedger === null ? (
                       <tr>
                         <td></td>
                       </tr>
                     ) : generalLedger.length === 0 ? (
                       <tr>
-                        <td>No results</td>
+                        <td>
+                          No results{space}
+                          <i>for the dates selected</i>.
+                        </td>
                       </tr>
                     ) : (
                       generalLedger
+                        .map((x, i) =>
+                          selection !== "I/S" || i < 10 ? x : null
+                        )
                         .filter((x) => {
+                          if (x === null) return false;
                           if (
                             clickedDiv !== "" &&
                             x.Date &&
@@ -2021,6 +2389,9 @@ function MyComponent() {
                                                   console.log(response);
                                                   setNewCategory("");
                                                   getGeneralLedger();
+                                                  setSelection(
+                                                    "General Ledger"
+                                                  );
                                                   setEditCategory(false);
                                                 })
                                                 .catch((error) => {
@@ -2085,23 +2456,61 @@ function MyComponent() {
               }}
             >
               <table>
+                <caption
+                  style={{
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    paddingBottom: "14px",
+                    colspan: "2",
+                  }}
+                >
+                  Account Balances
+                </caption>
                 {accountBalances !== null && accountBalances.length > 0 && (
-                  <thead>
-                    <tr>
-                      <td style={{ fontWeight: "bolder" }}>Account</td>
-                      <td style={{ fontWeight: "bolder" }}>Balance</td>
-                      <td style={{ fontWeight: "bolder" }}>Last Updated</td>
-                    </tr>
-                  </thead>
+                  <tr>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        backgroundColor: "whitesmoke",
+                        color: "grey",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div>Account</div>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        backgroundColor: "whitesmoke",
+                        color: "grey",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div>Balance</div>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        backgroundColor: "whitesmoke",
+                        color: "grey",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div>Last Updated</div>
+                    </td>
+                  </tr>
                 )}
                 <tbody>
                   {accountBalances === null
                     ? ""
                     : accountBalances.length === 0
                     ? "No results"
-                    : accountBalances.map((x) => {
+                    : accountBalances.map((x, i) => {
                         return (
-                          <tr key={x.LastUpdated}>
+                          <tr key={i + x.LastUpdated}>
                             <td>
                               <div>{x.AccountName}</div>
                             </td>
@@ -2141,24 +2550,42 @@ function MyComponent() {
                 </div>
               )}
               <table>
+                <caption
+                  style={{
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    paddingBottom: "14px",
+                    colspan: "2",
+                  }}
+                >
+                  Payroll
+                </caption>
                 {payoutLog !== null && payoutLog.length > 0 && (
-                  <thead>
-                    <tr>
-                      <td
-                        style={{ fontWeight: "bolder", cursor: "pointer" }}
-                        onClick={() => {
-                          setPayoutLog(
-                            upOrder === "upDate"
-                              ? payoutLog.reverse()
-                              : payoutLog.sort(
-                                  (a, b) =>
-                                    new Date(a.PaymentDate) -
-                                    new Date(b.PaymentDate)
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upDate");
-                        }}
-                      >
+                  <tr>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        backgroundColor: "whitesmoke",
+                        color: "grey",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setPayoutLog(
+                          upOrder === "upDate"
+                            ? payoutLog.reverse()
+                            : payoutLog.sort(
+                                (a, b) =>
+                                  new Date(a.PaymentDate) -
+                                  new Date(b.PaymentDate)
+                              )
+                        );
+                        setUpOrder(upOrder ? false : "upDate");
+                      }}
+                    >
+                      <div>
                         Date{" "}
                         {upOrder === "upDate" && (
                           <div
@@ -2177,20 +2604,27 @@ function MyComponent() {
                             }}
                           ></div>
                         )}
-                      </td>
-                      <td
-                        style={{ fontWeight: "bolder", cursor: "pointer" }}
-                        onClick={() => {
-                          setPayoutLog(
-                            upOrder === "upEmployee"
-                              ? payoutLog.reverse()
-                              : payoutLog.sort((a, b) =>
-                                  a.EmployeeName < b.EmployeeName ? 1 : -1
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upEmployee");
-                        }}
-                      >
+                      </div>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        backgroundColor: "whitesmoke",
+                        color: "grey",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setPayoutLog(
+                          upOrder === "upEmployee"
+                            ? payoutLog.reverse()
+                            : payoutLog.sort((a, b) =>
+                                a.EmployeeName < b.EmployeeName ? 1 : -1
+                              )
+                        );
+                        setUpOrder(upOrder ? false : "upEmployee");
+                      }}
+                    >
+                      <div>
                         Employee{" "}
                         {upOrder === "upEmployee" && (
                           <div
@@ -2209,20 +2643,27 @@ function MyComponent() {
                             }}
                           ></div>
                         )}
-                      </td>
-                      <td
-                        style={{ fontWeight: "bolder", cursor: "pointer" }}
-                        onClick={() => {
-                          setPayoutLog(
-                            upOrder === "upAmount"
-                              ? payoutLog.reverse()
-                              : payoutLog.sort((a, b) =>
-                                  a.AmountPaid < b.AmountPaid ? 1 : -1
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upAmount");
-                        }}
-                      >
+                      </div>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        backgroundColor: "whitesmoke",
+                        color: "grey",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setPayoutLog(
+                          upOrder === "upAmount"
+                            ? payoutLog.reverse()
+                            : payoutLog.sort((a, b) =>
+                                a.AmountPaid < b.AmountPaid ? 1 : -1
+                              )
+                        );
+                        setUpOrder(upOrder ? false : "upAmount");
+                      }}
+                    >
+                      <div>
                         Amount{" "}
                         {upOrder === "upAmount" && (
                           <div
@@ -2241,9 +2682,9 @@ function MyComponent() {
                             }}
                           ></div>
                         )}
-                      </td>
-                    </tr>
-                  </thead>
+                      </div>
+                    </td>
+                  </tr>
                 )}
                 <tbody>
                   {payoutLog === null
@@ -2293,16 +2734,19 @@ function MyComponent() {
           )}
         </div>
         {selection !== "" && (
-          <div
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setClickDiv("");
-              setClickPie(null);
-            }}
-          >
-            {clickedDiv !== "" || clickedPie !== null
-              ? "See all."
-              : "End of results."}
+          <div>
+            {clickedDiv !== "" || clickedPie !== null ? (
+              <button
+                onClick={() => {
+                  setClickDiv("");
+                  setClickPie(null);
+                }}
+              >
+                See all.
+              </button>
+            ) : (
+              "End of results."
+            )}
           </div>
         )}
       </div>
