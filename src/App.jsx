@@ -363,7 +363,21 @@ function MyComponent() {
             100
           ).toFixed(2)
       : 0;
-  const pieChartColors = ["salmon", "red", "orange", "pink", "black", "blue"];
+  const pieChartColors = [
+    "salmon",
+    "red",
+    "orange",
+    "pink",
+    "black",
+    "blue",
+    "aquamarine",
+    "cadetblue",
+    "darkgreen",
+    "cornsilk",
+    "orangered",
+    "palegreen",
+    "royalblue",
+  ];
   var barChartData = null;
   const [selectedFrequency, setSelectedFrequency] = useState("Monthly");
   if (ioStatement) {
@@ -509,6 +523,17 @@ function MyComponent() {
               return setRevenue([{ Amount: "Sign in again..." }]);
             }
             setRevenues(result.revenue.map((x) => x.Amount));
+            setRevenueMonth(
+              [
+                ...new Set(
+                  result.revenue.map((x, i) => {
+                    const date = getEndOfMonth(new Date(x.Date));
+                    if (i === result.revenue.length - 1) setSelectedDate(date);
+                    return date;
+                  })
+                ),
+              ].reverse()
+            );
             if (result.revenue) return setRevenue(result.revenue);
             setRevenue([{ Amount: "Try again" }]);
           })
@@ -544,6 +569,17 @@ function MyComponent() {
               return setExpenses([{ Amount: "Sign in again..." }]);
             }
             setExpensess(result.expenses.map((x) => x.Amount));
+            setExpensesMonth(
+              [
+                ...new Set(
+                  result.expenses.map((x, i) => {
+                    const date = getEndOfMonth(new Date(x.Date));
+                    if (i === result.expenses.length - 1) setSelectedDate(date);
+                    return date;
+                  })
+                ),
+              ].reverse()
+            );
             result.expenses && setExpenses(result.expenses);
           })
           .catch((error) => {
@@ -630,6 +666,9 @@ function MyComponent() {
   };
 
   const { open: openPlaid, ready: readyPlaid } = usePlaidLink(config);
+  const [revenueMonths, setRevenueMonth] = useState([]);
+  const [expensesMonths, setExpensesMonth] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
   return (
     <div
       style={{
@@ -1059,10 +1098,12 @@ function MyComponent() {
                               x.EmployeeName.split("RTP Sent ")[1];
                             return {
                               ...x,
-                              EmployeeName: employeeName.slice(
-                                0,
-                                employeeName.search(/\d/)
-                              ),
+                              EmployeeName: employeeName
+                                ? employeeName.slice(
+                                    0,
+                                    employeeName.search(/\d/)
+                                  )
+                                : x.EmployeeName,
                             };
                           });
                           var payoutTotals = [];
@@ -1739,13 +1780,22 @@ function MyComponent() {
                       {selectedIO === "revenue"
                         ? revenue && (
                             <PieChart
-                              data={revenue.map((x, i) => {
-                                return {
-                                  title: x.Category,
-                                  value: x.Amount,
-                                  color: pieChartColors[i],
-                                };
-                              })}
+                              data={revenue
+                                .filter((x) => {
+                                  if (
+                                    getEndOfMonth(new Date(x.Date)) !==
+                                    selectedDate
+                                  )
+                                    return null;
+                                  return x;
+                                })
+                                .map((x, i) => {
+                                  return {
+                                    title: x.Category,
+                                    value: x.Amount,
+                                    color: pieChartColors[i],
+                                  };
+                                })}
                               //radius={100}
                               lineWidth={80}
                             />
@@ -1753,13 +1803,28 @@ function MyComponent() {
                         : selectedIO === "expenses"
                         ? expenses && (
                             <PieChart
-                              data={expenses.map((x, i) => {
-                                return {
-                                  title: x.Category,
-                                  value: x.Amount,
-                                  color: pieChartColors[i],
-                                };
-                              })}
+                              data={expenses
+                                .filter((x) => {
+                                  if (
+                                    getEndOfMonth(new Date(x.Date)) !==
+                                    selectedDate
+                                  )
+                                    return null;
+                                  return x;
+                                })
+                                .map((x, i) => {
+                                  if (
+                                    getEndOfMonth(new Date(x.Date)) !==
+                                    selectedDate
+                                  )
+                                    return null;
+                                  return {
+                                    title: x.Category,
+                                    value: x.Amount,
+                                    color: pieChartColors[i],
+                                  };
+                                })
+                                .filter((x) => x)}
                               //radius={100}
                               lineWidth={80}
                             />
@@ -1769,35 +1834,51 @@ function MyComponent() {
                     <div style={{ display: "block" }}>
                       {selectedIO === "revenue"
                         ? revenue &&
-                          revenue.map((x, i) => {
-                            return (
-                              <div key={i} style={{ display: "flex" }}>
-                                <div
-                                  style={{
-                                    width: "40px",
-                                    height: "20px",
-                                    backgroundColor: pieChartColors[i],
-                                  }}
-                                ></div>
-                                <div>{x.Category}</div>
-                              </div>
-                            );
-                          })
+                          revenue
+                            .filter((x) => {
+                              if (
+                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                              )
+                                return null;
+                              return x;
+                            })
+                            .map((x, i) => {
+                              return (
+                                <div key={i} style={{ display: "flex" }}>
+                                  <div
+                                    style={{
+                                      width: "40px",
+                                      height: "20px",
+                                      backgroundColor: pieChartColors[i],
+                                    }}
+                                  ></div>
+                                  <div>{x.Category}</div>
+                                </div>
+                              );
+                            })
                         : expenses &&
-                          expenses.map((x, i) => {
-                            return (
-                              <div key={i} style={{ display: "flex" }}>
-                                <div
-                                  style={{
-                                    width: "40px",
-                                    height: "20px",
-                                    backgroundColor: pieChartColors[i],
-                                  }}
-                                ></div>
-                                <div>{x.Category}</div>
-                              </div>
-                            );
-                          })}
+                          expenses
+                            .filter((x) => {
+                              if (
+                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                              )
+                                return null;
+                              return x;
+                            })
+                            .map((x, i) => {
+                              return (
+                                <div key={i} style={{ display: "flex" }}>
+                                  <div
+                                    style={{
+                                      width: "40px",
+                                      height: "20px",
+                                      backgroundColor: pieChartColors[i],
+                                    }}
+                                  ></div>
+                                  <div>{x.Category}</div>
+                                </div>
+                              );
+                            })}
                     </div>
                   </div>
                 </div>
@@ -1851,9 +1932,98 @@ function MyComponent() {
                     })}
                 </div>
               ) : null}
+              <select
+                style={{
+                  margin: "10px",
+                }}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              >
+                {(selectedIO === "revenue"
+                  ? revenueMonths
+                  : selectedIO === "expenses"
+                  ? expensesMonths
+                  : []
+                ).map((date) => {
+                  const zeroPad = (x) => {
+                    return x < 10 ? "0" + x : x;
+                  };
+                  return (
+                    <option value={date} key={date}>
+                      {date === getEndOfMonth(new Date())
+                        ? "Current Month"
+                        : date}
+                    </option>
+                  );
+                })}
+              </select>
+              <table>
+                <caption
+                  style={{
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    paddingBottom: "14px",
+                    colspan: "2",
+                  }}
+                >
+                  {selectedIO.substring(0, 1).toLocaleUpperCase() +
+                    selectedIO.substring(1, selectedIO.length)}
+                </caption>
+                <tbody>
+                  {ioStatement !== null && ioStatement.length > 0 && (
+                    <tr>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        CATEGORY
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        AMOUNT
+                      </td>
+                    </tr>
+                  )}
+
+                  {(selectedIO === "revenue"
+                    ? revenue !== null && revenue.length > 0
+                      ? revenue
+                      : []
+                    : selectedIO === "expenses"
+                    ? expenses !== null && expenses.length > 0
+                      ? expenses
+                      : []
+                    : []
+                  ).map((x, i) => {
+                    if (
+                      selectedDate === null ||
+                      getEndOfMonth(new Date(x.Date)) !== selectedDate
+                    )
+                      return null;
+                    return (
+                      <tr key={i + x.Date}>
+                        <td>{x.Category}</td>
+                        <td>${addCommas(String(x.Amount))}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
-          {(selection === "General Ledger" || selection === "I/S") && (
+          {selection === "General Ledger" && (
             <div
               style={{
                 overflowX: "auto",
@@ -2032,7 +2202,7 @@ function MyComponent() {
                   see all
                 </span>
                 <table>
-                  {selection === "I/S" ? (
+                  {selection === "I/S" && false ? (
                     <caption
                       style={{
                         display: "flex",
@@ -2375,8 +2545,6 @@ function MyComponent() {
                                                   },
                                                   body: JSON.stringify({
                                                     ...x,
-                                                    TransactionID:
-                                                      x.TransactionID,
                                                     Category: newCategory,
                                                   }),
                                                 }
@@ -2469,41 +2637,41 @@ function MyComponent() {
                 >
                   Account Balances
                 </caption>
-                {accountBalances !== null && accountBalances.length > 0 && (
-                  <tr>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "whitesmoke",
-                        color: "grey",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div>Account</div>
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "whitesmoke",
-                        color: "grey",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div>Balance</div>
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "whitesmoke",
-                        color: "grey",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div>Last Updated</div>
-                    </td>
-                  </tr>
-                )}
                 <tbody>
+                  {accountBalances !== null && accountBalances.length > 0 && (
+                    <tr>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div>Account</div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div>Balance</div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div>Last Updated</div>
+                      </td>
+                    </tr>
+                  )}
                   {accountBalances === null
                     ? ""
                     : accountBalances.length === 0
@@ -2563,130 +2731,130 @@ function MyComponent() {
                 >
                   Payroll
                 </caption>
-                {payoutLog !== null && payoutLog.length > 0 && (
-                  <tr>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "whitesmoke",
-                        color: "grey",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setPayoutLog(
-                          upOrder === "upDate"
-                            ? payoutLog.reverse()
-                            : payoutLog.sort(
-                                (a, b) =>
-                                  new Date(a.PaymentDate) -
-                                  new Date(b.PaymentDate)
-                              )
-                        );
-                        setUpOrder(upOrder ? false : "upDate");
-                      }}
-                    >
-                      <div>
-                        Date{" "}
-                        {upOrder === "upDate" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </div>
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "whitesmoke",
-                        color: "grey",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setPayoutLog(
-                          upOrder === "upEmployee"
-                            ? payoutLog.reverse()
-                            : payoutLog.sort((a, b) =>
-                                a.EmployeeName < b.EmployeeName ? 1 : -1
-                              )
-                        );
-                        setUpOrder(upOrder ? false : "upEmployee");
-                      }}
-                    >
-                      <div>
-                        Employee{" "}
-                        {upOrder === "upEmployee" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </div>
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "whitesmoke",
-                        color: "grey",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setPayoutLog(
-                          upOrder === "upAmount"
-                            ? payoutLog.reverse()
-                            : payoutLog.sort((a, b) =>
-                                a.AmountPaid < b.AmountPaid ? 1 : -1
-                              )
-                        );
-                        setUpOrder(upOrder ? false : "upAmount");
-                      }}
-                    >
-                      <div>
-                        Amount{" "}
-                        {upOrder === "upAmount" && (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              margin: "6px 0px",
-                              borderLeft: "4px solid black",
-                              borderBottom: "4px solid black",
-                              height: "6px",
-                              width: "6px",
-                              borderRadius: "3px",
-                              backgroundColor: "transparent",
-                              transform: `rotate(${
-                                upOrder ? "315" : "135"
-                              }deg)`,
-                            }}
-                          ></div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )}
                 <tbody>
+                  {payoutLog !== null && payoutLog.length > 0 && (
+                    <tr>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upDate"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort(
+                                  (a, b) =>
+                                    new Date(a.PaymentDate) -
+                                    new Date(b.PaymentDate)
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upDate");
+                        }}
+                      >
+                        <div>
+                          Date{" "}
+                          {upOrder === "upDate" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upEmployee"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort((a, b) =>
+                                  a.EmployeeName < b.EmployeeName ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upEmployee");
+                        }}
+                      >
+                        <div>
+                          Employee{" "}
+                          {upOrder === "upEmployee" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upAmount"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort((a, b) =>
+                                  a.AmountPaid < b.AmountPaid ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upAmount");
+                        }}
+                      >
+                        <div>
+                          Amount{" "}
+                          {upOrder === "upAmount" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                   {payoutLog === null
                     ? ""
                     : payoutLog.length === 0
@@ -2695,7 +2863,7 @@ function MyComponent() {
                         return (
                           (clickedPie === null ||
                             x.EmployeeName === clickedPie) && (
-                            <tr key={i + x.CreatedAt}>
+                            <tr key={i + x.PayoutID}>
                               <td>
                                 <div>
                                   {new Date(x.PaymentDate).toLocaleDateString(
