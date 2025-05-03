@@ -58,7 +58,6 @@ function MyComponent() {
   const [payoutLog, setPayoutLog] = useState(null);
   const [ioStatement, setIOStatement] = useState(null);
   const [ioMonths, setIOMonths] = useState([]);
-  const [ioMonth, setIOMonth] = useState("");
   const [ioHover, setIOHover] = useState("");
   const [accountBalances, setAccountBalances] = useState(null);
 
@@ -305,12 +304,13 @@ function MyComponent() {
       lineWidth={80}
     />
   );
+  const [selectedDate, setSelectedDate] = useState(null);
   var lastMonthsIOStatment = {};
   const thisMonthsIOStatement =
     ioStatement &&
     ioStatement.find((x, i) => {
       lastMonthsIOStatment = ioStatement.find((x, ii) => ii === i + 1);
-      return x.Month === ioMonth;
+      return getEndOfMonth(new Date(x.Month + "-05")) === selectedDate;
     });
   const changeInTotalRevenue =
     thisMonthsIOStatement && lastMonthsIOStatment
@@ -668,7 +668,6 @@ function MyComponent() {
   const { open: openPlaid, ready: readyPlaid } = usePlaidLink(config);
   const [revenueMonths, setRevenueMonth] = useState([]);
   const [expensesMonths, setExpensesMonth] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
   return (
     <div
       style={{
@@ -918,8 +917,11 @@ function MyComponent() {
                                 (a, b) => new Date(b.Month) - new Date(a.Month)
                               )
                               .map((x, i) => {
-                                if (i === 0) setIOMonth(x.Month);
-                                return x.Month;
+                                const date = getEndOfMonth(
+                                  new Date(x.Month + "-05")
+                                );
+                                if (i === 0) setSelectedDate(date);
+                                return date;
                               })
                           );
                           console.log(result.ioStatement);
@@ -1480,10 +1482,11 @@ function MyComponent() {
           {selection === "I/S" && (
             <div>
               <select
+                value={selectedDate ? selectedDate : ""}
                 style={{
                   margin: "10px",
                 }}
-                onChange={(e) => setIOMonth(e.target.value)}
+                onChange={(e) => setSelectedDate(e.target.value)}
               >
                 {ioMonths.map((month) => {
                   const zeroPad = (x) => {
@@ -1491,10 +1494,7 @@ function MyComponent() {
                   };
                   return (
                     <option value={month} key={month}>
-                      {month ===
-                      new Date().getFullYear() +
-                        "-" +
-                        zeroPad(new Date().getMonth() + 1)
+                      {month === getEndOfMonth(new Date())
                         ? "Current Month"
                         : month}
                     </option>
@@ -1551,8 +1551,12 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioMonth !== "" &&
-                          addCommas(String(thisMonthsIOStatement.TotalRevenue))}
+                        {thisMonthsIOStatement
+                          ? selectedDate &&
+                            addCommas(
+                              String(thisMonthsIOStatement.TotalRevenue)
+                            )
+                          : "-"}
                       </div>
                       <div
                         style={{
@@ -1608,13 +1612,22 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioMonth !== "" &&
-                          addCommas(
-                            String(
-                              ioStatement.find((x) => x.Month === ioMonth)
-                                .TotalExpenses
+                        {ioStatement.find(
+                          (x) =>
+                            getEndOfMonth(new Date(x.Month + "-05")) ===
+                            selectedDate
+                        )
+                          ? selectedDate &&
+                            addCommas(
+                              String(
+                                ioStatement.find(
+                                  (x) =>
+                                    getEndOfMonth(new Date(x.Month + "-05")) ===
+                                    selectedDate
+                                ).TotalExpenses
+                              )
                             )
-                          )}
+                          : "-"}
                       </div>
                       <div
                         style={{
@@ -1669,13 +1682,22 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioMonth !== "" &&
-                          addCommas(
-                            String(
-                              ioStatement.find((x) => x.Month === ioMonth)
-                                .NetProfit
+                        {ioStatement.find(
+                          (x) =>
+                            getEndOfMonth(new Date(x.Month + "-05")) ===
+                            selectedDate
+                        )
+                          ? selectedDate &&
+                            addCommas(
+                              String(
+                                ioStatement.find(
+                                  (x) =>
+                                    getEndOfMonth(new Date(x.Month + "-05")) ===
+                                    selectedDate
+                                ).NetProfit
+                              )
                             )
-                          )}
+                          : "-"}
                       </div>
                       <div
                         style={{
@@ -1933,6 +1955,7 @@ function MyComponent() {
                 </div>
               ) : null}
               <select
+                value={selectedDate ? selectedDate : ""}
                 style={{
                   margin: "10px",
                 }}
@@ -1947,6 +1970,7 @@ function MyComponent() {
                   const zeroPad = (x) => {
                     return x < 10 ? "0" + x : x;
                   };
+                  //console.log(date, getEndOfMonth(new Date()));
                   return (
                     <option value={date} key={date}>
                       {date === getEndOfMonth(new Date())
