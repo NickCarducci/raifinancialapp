@@ -2794,7 +2794,7 @@ function MyComponent() {
                 <div
                   style={{
                     margin: "20px 60px",
-                    minWidth: "300px",
+                    width: windowWidth - windowWidth / 3,
                   }}
                 >
                   {pieChart()}
@@ -3006,4 +3006,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
