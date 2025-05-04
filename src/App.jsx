@@ -310,7 +310,7 @@ function MyComponent() {
     ioStatement &&
     ioStatement.find((x, i) => {
       lastMonthsIOStatment = ioStatement.find((x, ii) => ii === i + 1);
-      return getEndOfMonth(new Date(x.Month + "-05")) === selectedDate;
+      return getEndOfMonth(new Date(x.PeriodStart)) === selectedDate;
     });
   const changeInTotalRevenue =
     thisMonthsIOStatement && lastMonthsIOStatment
@@ -383,7 +383,10 @@ function MyComponent() {
   if (ioStatement) {
     var quarterlyIOStatement = [];
     ioStatement.forEach((x) => {
-      const month = x.Month.split("-")[1];
+      const month = String(new Date(x.PeriodStart).getMonth() + 1).padStart(
+        2,
+        "0"
+      );
       const thisQuarter = ["01", "02", "03"].includes(month)
         ? "Q1"
         : ["04", "05", "06"].includes(month)
@@ -412,7 +415,7 @@ function MyComponent() {
     });
     var annualIOStatement = [];
     ioStatement.forEach((x) => {
-      const year = x.Month.split("-")[0];
+      const year = new Date(x.PeriodStart).getFullYear();
       const found = annualIOStatement.find((y) =>
         year === y.Year ? true : false
       );
@@ -440,7 +443,7 @@ function MyComponent() {
         selectedFrequency === "Monthly"
           ? ioStatement
               .map((x) => {
-                return x.Month;
+                return new Date(x.PeriodStart).toLocaleDateString();
               })
               .reverse()
           : selectedFrequency === "Quarterly"
@@ -914,18 +917,21 @@ function MyComponent() {
                           setIOMonths(
                             result.ioStatement
                               .sort(
-                                (a, b) => new Date(b.Month) - new Date(a.Month)
+                                (a, b) =>
+                                  new Date(b.PeriodStart) -
+                                  new Date(a.PeriodStart)
                               )
                               .map((x, i) => {
                                 const date = getEndOfMonth(
-                                  new Date(x.Month + "-05")
+                                  new Date(x.PeriodStart)
                                 );
                                 if (i === 0) setSelectedDate(date);
                                 return date;
                               })
                           );
                           console.log(result.ioStatement);
-                          setIOStatement(result.ioStatement);
+                          result.ioStatement &&
+                            setIOStatement(result.ioStatement);
                         })
                         .catch(() => {
                           setIOStatement([
@@ -1614,7 +1620,7 @@ function MyComponent() {
                         $
                         {ioStatement.find(
                           (x) =>
-                            getEndOfMonth(new Date(x.Month + "-05")) ===
+                            getEndOfMonth(new Date(x.PeriodStart)) ===
                             selectedDate
                         )
                           ? selectedDate &&
@@ -1622,7 +1628,7 @@ function MyComponent() {
                               String(
                                 ioStatement.find(
                                   (x) =>
-                                    getEndOfMonth(new Date(x.Month + "-05")) ===
+                                    getEndOfMonth(new Date(x.PeriodStart)) ===
                                     selectedDate
                                 ).TotalExpenses
                               )
@@ -1684,7 +1690,7 @@ function MyComponent() {
                         $
                         {ioStatement.find(
                           (x) =>
-                            getEndOfMonth(new Date(x.Month + "-05")) ===
+                            getEndOfMonth(new Date(x.PeriodStart)) ===
                             selectedDate
                         )
                           ? selectedDate &&
@@ -1692,7 +1698,7 @@ function MyComponent() {
                               String(
                                 ioStatement.find(
                                   (x) =>
-                                    getEndOfMonth(new Date(x.Month + "-05")) ===
+                                    getEndOfMonth(new Date(x.PeriodStart)) ===
                                     selectedDate
                                 ).NetProfit
                               )
