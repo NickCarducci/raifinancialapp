@@ -536,7 +536,7 @@ function MyComponent() {
                 ...new Set(
                   result.revenue.map((x, i) => {
                     const date = getEndOfMonth(new Date(x.Date));
-                    //if (i === result.revenue.length - 1) setSelectedDate(date);
+                    if (i === result.revenue.length - 1) setSelectedDate(date);
                     return date;
                   })
                 ),
@@ -588,7 +588,7 @@ function MyComponent() {
                 ...new Set(
                   result.expenses.map((x, i) => {
                     const date = getEndOfMonth(new Date(x.Date));
-                    //if (i === result.expenses.length - 1) setSelectedDate(date);
+                    if (i === result.expenses.length - 1) setSelectedDate(date);
                     return date;
                   })
                 ),
@@ -3006,3 +3006,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
