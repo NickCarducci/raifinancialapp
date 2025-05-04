@@ -500,13 +500,16 @@ function MyComponent() {
     };
   }
   const getRevenue = () => {
+    setSelectedIO("revenue");
     instance
       .acquireTokenSilent({
         ...loginRequest,
         account: accounts[0],
       })
       .then((response) => {
-        setSelectedIO("revenue");
+        setRevenue([
+          { Category: "Connecting to database...", Amount: 0, Color: "black" },
+        ]);
         fetch("https://raifinancial.azurewebsites.net/api/revenue", {
           method: "GET",
           headers: {
@@ -538,9 +541,10 @@ function MyComponent() {
               ].reverse()
             );
             if (result.revenue) return setRevenue(result.revenue);
-            setRevenue([{ Amount: "Try again" }]);
+            setRevenue([{ Category: "Try again", Amount: 0, Color: "black" }]);
           })
           .catch((error) => {
+            setRevenue([{ Category: "Try again", Amount: 0, Color: "black" }]);
             console.error(error);
           });
       });
@@ -553,6 +557,9 @@ function MyComponent() {
         account: accounts[0],
       })
       .then((response) => {
+        setExpenses([
+          { Category: "Connecting to database...", Amount: 0, Color: "black" },
+        ]);
         fetch("https://raifinancial.azurewebsites.net/api/expenses", {
           method: "GET",
           headers: {
@@ -569,7 +576,9 @@ function MyComponent() {
                 forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
-              return setExpenses([{ Amount: "Sign in again..." }]);
+              return setExpenses([
+                { Category: "Sign in again...", Amount: 0, Color: "black" },
+              ]);
             }
             setExpensess(result.expenses.map((x) => x.Amount));
             setExpensesMonth(
@@ -583,9 +592,10 @@ function MyComponent() {
                 ),
               ].reverse()
             );
-            result.expenses && setExpenses(result.expenses);
+            if (result.expenses) setExpenses(result.expenses);
           })
           .catch((error) => {
+            setExpenses([{ Category: "Try again", Amount: 0, Color: "black" }]);
             console.error(error);
           });
       });
@@ -671,6 +681,7 @@ function MyComponent() {
   const { open: openPlaid, ready: readyPlaid } = usePlaidLink(config);
   const [revenueMonths, setRevenueMonth] = useState([]);
   const [expensesMonths, setExpensesMonth] = useState([]);
+
   return (
     <div
       style={{
@@ -881,6 +892,14 @@ function MyComponent() {
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
                 onClick={() => {
+                  setSelectedIO("");
+                  setSelectedDate(null);
+                  setRevenue(null);
+                  setRevenues([]);
+                  setExpenses(null);
+                  setExpensess([]);
+                  setRevenueMonth([]);
+                  setExpensesMonth([]);
                   if (mobileView) setSelectionMenu(false);
                   setSelection("I/S");
                   setIOMonths(["Connecting to database..."]);
@@ -1822,8 +1841,9 @@ function MyComponent() {
                               data={revenue
                                 .filter((x) => {
                                   if (
+                                    !x.Color &&
                                     getEndOfMonth(new Date(x.Date)) !==
-                                    selectedDate
+                                      selectedDate
                                   )
                                     return null;
                                   return x;
@@ -1832,7 +1852,9 @@ function MyComponent() {
                                   return {
                                     title: x.Category,
                                     value: x.Amount,
-                                    color: pieChartColors[i],
+                                    color: x.Color
+                                      ? x.Color
+                                      : pieChartColors[i],
                                   };
                                 })}
                               //radius={100}
@@ -1845,22 +1867,20 @@ function MyComponent() {
                               data={expenses
                                 .filter((x) => {
                                   if (
+                                    !x.Color &&
                                     getEndOfMonth(new Date(x.Date)) !==
-                                    selectedDate
+                                      selectedDate
                                   )
                                     return null;
                                   return x;
                                 })
                                 .map((x, i) => {
-                                  if (
-                                    getEndOfMonth(new Date(x.Date)) !==
-                                    selectedDate
-                                  )
-                                    return null;
                                   return {
                                     title: x.Category,
                                     value: x.Amount,
-                                    color: pieChartColors[i],
+                                    color: x.Color
+                                      ? x.Color
+                                      : pieChartColors[i],
                                   };
                                 })
                                 .filter((x) => x)}
@@ -2965,4 +2985,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
