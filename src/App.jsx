@@ -310,39 +310,38 @@ function MyComponent() {
     ioStatement &&
     ioStatement.find((x, i) => {
       lastMonthsIOStatment = ioStatement.find((x, ii) => ii === i + 1);
-      return getEndOfMonth(new Date(x.PeriodStart)) === selectedDate;
+      return (
+        getEndOfMonth(new Date(new Date(x.Month).getTime() + 86400000 * 6)) ===
+        selectedDate
+      );
     });
   const changeInTotalRevenue =
     thisMonthsIOStatement && lastMonthsIOStatment
-      ? Math.sign(thisMonthsIOStatement.TotalRevenue) ===
-        Math.sign(lastMonthsIOStatment.TotalRevenue)
+      ? Math.sign(thisMonthsIOStatement.Revenue) ===
+        Math.sign(lastMonthsIOStatment.Revenue)
         ? (
-            ((thisMonthsIOStatement.TotalRevenue -
-              lastMonthsIOStatment.TotalRevenue) /
-              lastMonthsIOStatment.TotalRevenue) *
+            ((thisMonthsIOStatement.Revenue - lastMonthsIOStatment.Revenue) /
+              lastMonthsIOStatment.Revenue) *
             100
           ).toFixed(2)
         : (
-            ((thisMonthsIOStatement.TotalRevenue +
-              lastMonthsIOStatment.TotalRevenue) /
-              lastMonthsIOStatment.TotalRevenue) *
+            ((thisMonthsIOStatement.Revenue + lastMonthsIOStatment.Revenue) /
+              lastMonthsIOStatment.Revenue) *
             100
           ).toFixed(2)
       : 0;
   const changeInTotalExpenses =
     thisMonthsIOStatement && lastMonthsIOStatment
-      ? Math.sign(thisMonthsIOStatement.TotalExpenses) ===
-        Math.sign(lastMonthsIOStatment.TotalExpenses)
+      ? Math.sign(thisMonthsIOStatement.Expenses) ===
+        Math.sign(lastMonthsIOStatment.Expenses)
         ? (
-            ((thisMonthsIOStatement.TotalExpenses -
-              lastMonthsIOStatment.TotalExpenses) /
-              lastMonthsIOStatment.TotalExpenses) *
+            ((thisMonthsIOStatement.Expenses - lastMonthsIOStatment.Expenses) /
+              lastMonthsIOStatment.Expenses) *
             100
           ).toFixed(2)
         : (
-            ((thisMonthsIOStatement.TotalExpenses +
-              lastMonthsIOStatment.TotalExpenses) /
-              lastMonthsIOStatment.TotalExpenses) *
+            ((thisMonthsIOStatement.Expenses + lastMonthsIOStatment.Expenses) /
+              lastMonthsIOStatment.Expenses) *
             100
           ).toFixed(2)
       : 0;
@@ -383,10 +382,9 @@ function MyComponent() {
   if (ioStatement) {
     var quarterlyIOStatement = [];
     ioStatement.forEach((x) => {
-      const month = String(new Date(x.PeriodStart).getMonth() + 1).padStart(
-        2,
-        "0"
-      );
+      const month = String(
+        new Date(new Date(x.Month).getTime() + 86400000 * 6).getMonth() + 1
+      ).padStart(2, "0");
       const thisQuarter = ["01", "02", "03"].includes(month)
         ? "Q1"
         : ["04", "05", "06"].includes(month)
@@ -406,8 +404,8 @@ function MyComponent() {
         found
           ? {
               ...found,
-              TotalRevenue: found.TotalRevenue + x.TotalRevenue,
-              TotalExpenses: found.TotalExpenses + x.TotalExpenses,
+              Revenue: found.Revenue + x.Revenue,
+              Expenses: found.Expenses + x.Expenses,
               NetProfit: found.NetProfit + x.NetProfit,
             }
           : { ...x, Quarter: thisQuarter }
@@ -415,15 +413,17 @@ function MyComponent() {
     });
     var annualIOStatement = [];
     ioStatement.forEach((x) => {
-      const year = new Date(x.PeriodStart).getFullYear();
+      const year = new Date(
+        new Date(x.Month).getTime() + 86400000 * 6
+      ).getFullYear();
       const found = annualIOStatement.find((y) =>
         year === y.Year ? true : false
       );
       if (!found)
         annualIOStatement.push({
           NetProfit: 0,
-          TotalRevenue: 0,
-          TotalExpenses: 0,
+          Revenue: 0,
+          Expenses: 0,
           Year: year,
         });
       annualIOStatement = annualIOStatement.filter((y) => y.Year !== year);
@@ -431,8 +431,8 @@ function MyComponent() {
         found
           ? {
               ...found,
-              TotalRevenue: found.TotalRevenue + x.TotalRevenue,
-              TotalExpenses: found.TotalExpenses + x.TotalExpenses,
+              Revenue: found.Revenue + x.Revenue,
+              Expenses: found.Expenses + x.Expenses,
               NetProfit: found.NetProfit + x.NetProfit,
             }
           : { ...x, Year: year }
@@ -443,7 +443,9 @@ function MyComponent() {
         selectedFrequency === "Monthly"
           ? ioStatement
               .map((x) => {
-                return new Date(x.PeriodStart).toLocaleDateString();
+                return getEndOfMonth(
+                  new Date(new Date(x.Month).getTime() + 86400000 * 6)
+                );
               })
               .reverse()
           : selectedFrequency === "Quarterly"
@@ -471,8 +473,8 @@ function MyComponent() {
             : []
           )
             .map((x) => {
-              //console.log(x.TotalRevenue);
-              return x.TotalRevenue;
+              //console.log(x.Revenue);
+              return x.Revenue;
             })
             .reverse(),
           borderWidth: 1,
@@ -489,8 +491,8 @@ function MyComponent() {
             : []
           )
             .map((x) => {
-              //console.log(x.TotalRevenue);
-              return x.TotalExpenses;
+              //console.log(x.Revenue);
+              return x.Expenses;
             })
             .reverse(),
           borderWidth: 1,
@@ -930,19 +932,19 @@ function MyComponent() {
                               refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
                             });
                             return setIOStatement([
-                              { TotalRevenue: "please log in again..." },
+                              { Revenue: "please log in again..." },
                             ]);
                           }
                           setIOMonths(
                             result.ioStatement
                               .sort(
-                                (a, b) =>
-                                  new Date(b.PeriodStart) -
-                                  new Date(a.PeriodStart)
+                                (a, b) => new Date(b.Month) - new Date(a.Month)
                               )
                               .map((x, i) => {
                                 const date = getEndOfMonth(
-                                  new Date(x.PeriodStart)
+                                  new Date(
+                                    new Date(x.Month).getTime() + 86400000 * 6
+                                  )
                                 );
                                 if (i === 0) setSelectedDate(date);
                                 return date;
@@ -954,7 +956,7 @@ function MyComponent() {
                         })
                         .catch(() => {
                           setIOStatement([
-                            { TotalRevenue: "please log in again..." },
+                            { Revenue: "please log in again..." },
                           ]);
                         });
                     });
@@ -1578,9 +1580,7 @@ function MyComponent() {
                         $
                         {thisMonthsIOStatement
                           ? selectedDate &&
-                            addCommas(
-                              String(thisMonthsIOStatement.TotalRevenue)
-                            )
+                            addCommas(String(thisMonthsIOStatement.Revenue))
                           : "-"}
                       </div>
                       <div
@@ -1639,17 +1639,24 @@ function MyComponent() {
                         $
                         {ioStatement.find(
                           (x) =>
-                            getEndOfMonth(new Date(x.PeriodStart)) ===
-                            selectedDate
+                            getEndOfMonth(
+                              new Date(
+                                new Date(x.Month).getTime() + 86400000 * 6
+                              )
+                            ) === selectedDate
                         )
                           ? selectedDate &&
                             addCommas(
                               String(
                                 ioStatement.find(
                                   (x) =>
-                                    getEndOfMonth(new Date(x.PeriodStart)) ===
-                                    selectedDate
-                                ).TotalExpenses
+                                    getEndOfMonth(
+                                      new Date(
+                                        new Date(x.Month).getTime() +
+                                          86400000 * 6
+                                      )
+                                    ) === selectedDate
+                                ).Expenses
                               )
                             )
                           : "-"}
@@ -1709,16 +1716,23 @@ function MyComponent() {
                         $
                         {ioStatement.find(
                           (x) =>
-                            getEndOfMonth(new Date(x.PeriodStart)) ===
-                            selectedDate
+                            getEndOfMonth(
+                              new Date(
+                                new Date(x.Month).getTime() + 86400000 * 6
+                              )
+                            ) === selectedDate
                         )
                           ? selectedDate &&
                             addCommas(
                               String(
                                 ioStatement.find(
                                   (x) =>
-                                    getEndOfMonth(new Date(x.PeriodStart)) ===
-                                    selectedDate
+                                    getEndOfMonth(
+                                      new Date(
+                                        new Date(x.Month).getTime() +
+                                          86400000 * 6
+                                      )
+                                    ) === selectedDate
                                 ).NetProfit
                               )
                             )
@@ -1766,7 +1780,7 @@ function MyComponent() {
                       }}
                     >
                       {["Monthly", "Quarterly", "Yearly"].map((x) => {
-                        return <option>{x}</option>;
+                        return <option key={x}>{x}</option>;
                       })}
                     </select>
                     Revenue vs Expenses
