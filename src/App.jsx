@@ -1734,7 +1734,7 @@ function MyComponent() {
                     margin: "20px",
                     marginRight: "0px",
                     textAlign: "left",
-                    width: "400px",
+                    width: windowWidth < 500 ? windowWidth - 60 : "400px",
                     padding: "10px",
                   }}
                 >
@@ -1794,7 +1794,7 @@ function MyComponent() {
                     margin: "20px",
                     marginRight: "0px",
                     textAlign: "left",
-                    width: "400px",
+                    width: windowWidth < 500 ? windowWidth - 60 : "400px",
                     padding: "10px",
                     display: "block",
                   }}
@@ -1803,8 +1803,19 @@ function MyComponent() {
                     {selectedIO.substring(0, 1).toLocaleUpperCase() +
                       selectedIO.substring(1, selectedIO.length)}
                   </div>
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    <div style={{ width: "200px", marginRight: "30px" }}>
+                  <div
+                    style={{
+                      display: windowWidth < 300 ? "block" : "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width:
+                          windowWidth < 500 ? (windowWidth - 60) / 2 : "200px",
+                        marginRight: "30px",
+                      }}
+                    >
                       {selectedIO === "revenue"
                         ? revenue && (
                             <PieChart
@@ -2069,6 +2080,7 @@ function MyComponent() {
                   setHoverDivs(false);
                 }}
                 style={{
+                  width: "min-content",
                   display: generalLedger.length > 0 ? "block" : "none",
                   margin: "10px",
                   border:
