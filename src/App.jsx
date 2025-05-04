@@ -1513,7 +1513,10 @@ function MyComponent() {
                 style={{
                   margin: "10px",
                 }}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  setSelectedIO("");
+                  setSelectedDate(e.target.value);
+                }}
               >
                 {ioMonths.map((month) => {
                   const zeroPad = (x) => {
@@ -1849,60 +1852,64 @@ function MyComponent() {
                         marginRight: "30px",
                       }}
                     >
-                      {selectedIO === "revenue"
-                        ? revenue && (
-                            <PieChart
-                              data={revenue
-                                .filter((x) => {
-                                  if (
-                                    !x.Color &&
-                                    getEndOfMonth(new Date(x.Date)) !==
-                                      selectedDate
-                                  )
-                                    return null;
-                                  return x;
-                                })
-                                .map((x, i) => {
-                                  return {
-                                    title: x.Category,
-                                    value: x.Amount,
-                                    color: x.Color
-                                      ? x.Color
-                                      : pieChartColors[i],
-                                  };
-                                })}
-                              //radius={100}
-                              lineWidth={80}
-                            />
-                          )
-                        : selectedIO === "expenses"
-                        ? expenses && (
-                            <PieChart
-                              data={expenses
-                                .filter((x) => {
-                                  if (
-                                    !x.Color &&
-                                    getEndOfMonth(new Date(x.Date)) !==
-                                      selectedDate
-                                  )
-                                    return null;
-                                  return x;
-                                })
-                                .map((x, i) => {
-                                  return {
-                                    title: x.Category,
-                                    value: x.Amount,
-                                    color: x.Color
-                                      ? x.Color
-                                      : pieChartColors[i],
-                                  };
-                                })
-                                .filter((x) => x)}
-                              //radius={100}
-                              lineWidth={80}
-                            />
-                          )
-                        : "Click revenue or expenses"}
+                      {selectedIO === "revenue" &&
+                      revenue &&
+                      revenue.find(
+                        (x) =>
+                          x.Color ||
+                          getEndOfMonth(new Date(x.Date)) === selectedDate
+                      ) ? (
+                        <PieChart
+                          data={revenue
+                            .filter((x) => {
+                              if (
+                                !x.Color &&
+                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                              )
+                                return null;
+                              return x;
+                            })
+                            .map((x, i) => {
+                              return {
+                                title: x.Category,
+                                value: x.Amount,
+                                color: x.Color ? x.Color : pieChartColors[i],
+                              };
+                            })}
+                          //radius={100}
+                          lineWidth={80}
+                        />
+                      ) : selectedIO === "expenses" &&
+                        expenses &&
+                        expenses.find(
+                          (x) =>
+                            x.Color ||
+                            getEndOfMonth(new Date(x.Date)) === selectedDate
+                        ) ? (
+                        <PieChart
+                          data={expenses
+                            .filter((x) => {
+                              if (
+                                !x.Color &&
+                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                              )
+                                return null;
+                              return x;
+                            })
+                            .map((x, i) => {
+                              return {
+                                title: x.Category,
+                                value: x.Amount,
+                                color: x.Color ? x.Color : pieChartColors[i],
+                              };
+                            })
+                            .filter((x) => x)}
+                          //radius={100}
+                          lineWidth={80}
+                        />
+                      ) : (
+                        "Click revenue or expenses"
+                      )}
                     </div>
                     <div style={{ display: "block" }}>
                       {selectedIO === "revenue"
@@ -2999,3 +3006,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
