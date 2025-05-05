@@ -578,7 +578,7 @@ function MyComponent() {
                     const date = getEndOfMonth(
                       new Date(new Date(x.Date).getTime() + 86400000 * 5)
                     );
-                    if (i === result.revenue.length - 1) setSelectedDate(date);
+                    //if (i === result.revenue.length - 1) setSelectedDate(date);
                     return date;
                   })
                 ),
@@ -632,7 +632,7 @@ function MyComponent() {
                     const date = getEndOfMonth(
                       new Date(new Date(x.Date).getTime() + 86400000 * 5)
                     );
-                    if (i === result.expenses.length - 1) setSelectedDate(date);
+                    //if (i === result.expenses.length - 1) setSelectedDate(date);
                     return date;
                   })
                 ),
@@ -1933,40 +1933,45 @@ function MyComponent() {
                         marginRight: "30px",
                       }}
                     >
-                      {selectedIO === "revenue" &&
-                      revenue &&
-                      revenue.find(
-                        (x) =>
-                          x.Color ||
-                          getEndOfMonth(
-                            new Date(new Date(x.Date).getTime() + 86400000 * 5)
-                          ) === selectedDate
-                      ) ? (
-                        <PieChart
-                          data={revenue
-                            .filter((x) => {
-                              if (
-                                !x.Color &&
-                                getEndOfMonth(
-                                  new Date(
-                                    new Date(x.Date).getTime() + 86400000 * 5
-                                  )
-                                ) !== selectedDate
+                      {selectedIO === "revenue" ? (
+                        revenue &&
+                        revenue.find(
+                          (x) =>
+                            x.Color ||
+                            getEndOfMonth(
+                              new Date(
+                                new Date(x.Date).getTime() + 86400000 * 5
                               )
-                                return null;
-                              return x;
-                            })
-                            .map((x, i) => {
-                              return {
-                                title: x.Category,
-                                value: x.Amount,
-                                color: x.Color ? x.Color : pieChartColors[i],
-                              };
-                            })}
-                          //radius={100}
-                          lineWidth={80}
-                        />
-                      ) : selectedIO === "expenses" &&
+                            ) === selectedDate
+                        ) ? (
+                          <PieChart
+                            data={revenue
+                              .filter((x) => {
+                                if (
+                                  !x.Color &&
+                                  getEndOfMonth(
+                                    new Date(
+                                      new Date(x.Date).getTime() + 86400000 * 5
+                                    )
+                                  ) !== selectedDate
+                                )
+                                  return null;
+                                return x;
+                              })
+                              .map((x, i) => {
+                                return {
+                                  title: x.Category,
+                                  value: x.Amount,
+                                  color: x.Color ? x.Color : pieChartColors[i],
+                                };
+                              })}
+                            //radius={100}
+                            lineWidth={80}
+                          />
+                        ) : (
+                          "There is no revenue breakdown available for this time period."
+                        )
+                      ) : selectedIO === "expenses" ? (
                         expenses &&
                         expenses.find(
                           (x) =>
@@ -1977,31 +1982,34 @@ function MyComponent() {
                               )
                             ) === selectedDate
                         ) ? (
-                        <PieChart
-                          data={expenses
-                            .filter((x) => {
-                              if (
-                                !x.Color &&
-                                getEndOfMonth(
-                                  new Date(
-                                    new Date(x.Date).getTime() + 86400000 * 5
-                                  )
-                                ) !== selectedDate
-                              )
-                                return null;
-                              return x;
-                            })
-                            .map((x, i) => {
-                              return {
-                                title: x.Category,
-                                value: x.Amount,
-                                color: x.Color ? x.Color : pieChartColors[i],
-                              };
-                            })
-                            .filter((x) => x)}
-                          //radius={100}
-                          lineWidth={80}
-                        />
+                          <PieChart
+                            data={expenses
+                              .filter((x) => {
+                                if (
+                                  !x.Color &&
+                                  getEndOfMonth(
+                                    new Date(
+                                      new Date(x.Date).getTime() + 86400000 * 5
+                                    )
+                                  ) !== selectedDate
+                                )
+                                  return null;
+                                return x;
+                              })
+                              .map((x, i) => {
+                                return {
+                                  title: x.Category,
+                                  value: x.Amount,
+                                  color: x.Color ? x.Color : pieChartColors[i],
+                                };
+                              })
+                              .filter((x) => x)}
+                            //radius={100}
+                            lineWidth={80}
+                          />
+                        ) : (
+                          "There is no expense breakdown for this time period."
+                        )
                       ) : (
                         "Click revenue or expenses"
                       )}
