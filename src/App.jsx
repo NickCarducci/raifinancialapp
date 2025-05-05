@@ -289,7 +289,6 @@ function MyComponent() {
   const [payoutChart, setPayoutChart] = useState([]);
 
   const [clickedPie, setClickPie] = useState(null);
-  const [payoutLogSorted, setPayoutLogSorted] = useState([]);
   function getStartOfMonth(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
@@ -323,63 +322,9 @@ function MyComponent() {
     />
   );
   const [selectedDate, setSelectedDate] = useState(null);
-  var lastMonthsIOStatment = {};
-  const thisMonthsIOStatement =
-    ioStatement &&
-    ioStatement.find((x, i) => {
-      lastMonthsIOStatment = ioStatement.find((x, ii) => ii === i + 1);
-      return (
-        getEndOfMonth(new Date(new Date(x.Month).getTime() + 86400000 * 6)) ===
-        selectedDate
-      );
-    });
-  const changeInTotalRevenue =
-    thisMonthsIOStatement && lastMonthsIOStatment
-      ? Math.sign(thisMonthsIOStatement.Revenue) ===
-        Math.sign(lastMonthsIOStatment.Revenue)
-        ? (
-            ((thisMonthsIOStatement.Revenue - lastMonthsIOStatment.Revenue) /
-              lastMonthsIOStatment.Revenue) *
-            100
-          ).toFixed(2)
-        : (
-            ((thisMonthsIOStatement.Revenue + lastMonthsIOStatment.Revenue) /
-              lastMonthsIOStatment.Revenue) *
-            100
-          ).toFixed(2)
-      : 0;
-  const changeInTotalExpenses =
-    thisMonthsIOStatement && lastMonthsIOStatment
-      ? Math.sign(thisMonthsIOStatement.Expenses) ===
-        Math.sign(lastMonthsIOStatment.Expenses)
-        ? (
-            ((thisMonthsIOStatement.Expenses - lastMonthsIOStatment.Expenses) /
-              lastMonthsIOStatment.Expenses) *
-            100
-          ).toFixed(2)
-        : (
-            ((thisMonthsIOStatement.Expenses + lastMonthsIOStatment.Expenses) /
-              lastMonthsIOStatment.Expenses) *
-            100
-          ).toFixed(2)
-      : 0;
-  const changeInNetProfit =
-    thisMonthsIOStatement && lastMonthsIOStatment
-      ? Math.sign(thisMonthsIOStatement.NetProfit) ===
-        Math.sign(lastMonthsIOStatment.NetProfit)
-        ? (
-            ((thisMonthsIOStatement.NetProfit -
-              lastMonthsIOStatment.NetProfit) /
-              lastMonthsIOStatment.NetProfit) *
-            100
-          ).toFixed(2)
-        : (
-            ((Math.abs(thisMonthsIOStatement.NetProfit) +
-              Math.abs(lastMonthsIOStatment.NetProfit)) /
-              thisMonthsIOStatement.NetProfit) *
-            100
-          ).toFixed(2)
-      : 0;
+  const [selectedFrequency, setSelectedFrequency] = useState("Monthly");
+  var quarterlyIOStatement = [];
+  var annualIOStatement = [];
   const pieChartColors = [
     "salmon",
     "red",
@@ -396,21 +341,20 @@ function MyComponent() {
     "royalblue",
   ];
   var barChartData = null;
-  const [selectedFrequency, setSelectedFrequency] = useState("Monthly");
   if (ioStatement) {
-    var quarterlyIOStatement = [];
     ioStatement.forEach((x) => {
       const month = String(
         new Date(new Date(x.Month).getTime() + 86400000 * 6).getMonth() + 1
       ).padStart(2, "0");
+      const year = new Date(x.Month).getFullYear();
       const thisQuarter = ["01", "02", "03"].includes(month)
-        ? "Q1"
+        ? year + "-Q1"
         : ["04", "05", "06"].includes(month)
-        ? "Q2"
+        ? year + "-Q2"
         : ["07", "08", "09"].includes(month)
-        ? "Q3"
+        ? year + "-Q3"
         : ["10", "11", "12"].includes(month)
-        ? "Q4"
+        ? year + "-Q4"
         : "";
       const found = quarterlyIOStatement.find((y) =>
         thisQuarter === y.Quarter ? true : false
@@ -429,7 +373,6 @@ function MyComponent() {
           : { ...x, Quarter: thisQuarter }
       );
     });
-    var annualIOStatement = [];
     ioStatement.forEach((x) => {
       const year = new Date(
         new Date(x.Month).getTime() + 86400000 * 6
@@ -519,6 +462,81 @@ function MyComponent() {
       ],
     };
   }
+  const io =
+    selectedFrequency === "Monthly"
+      ? ioStatement
+      : selectedFrequency === "Quarterly"
+      ? quarterlyIOStatement
+      : selectedFrequency === "Yearly"
+      ? annualIOStatement
+      : [];
+  var lastMonthsIOStatement = {};
+  //console.log(io);
+  const thisMonthsIOStatement = !ioStatement
+    ? null
+    : io.find((x, i) => {
+        const go =
+          selectedFrequency === "Monthly"
+            ? getEndOfMonth(
+                new Date(new Date(x.Month).getTime() + 86400000 * 6)
+              ) === selectedDate
+            : selectedFrequency === "Quarterly"
+            ? x.Quarter === selectedDate
+            : selectedFrequency === "Yearly"
+            ? x.Year === selectedDate
+            : false;
+        if (go) lastMonthsIOStatement = io.find((y, ii) => ii === i + 1);
+        //console.log(x);
+        return go;
+      });
+  //console.log(thisMonthsIOStatement, selectedDate);
+  const changeInTotalRevenue =
+    thisMonthsIOStatement && lastMonthsIOStatement
+      ? Math.sign(thisMonthsIOStatement.Revenue) ===
+        Math.sign(lastMonthsIOStatement.Revenue)
+        ? (
+            ((thisMonthsIOStatement.Revenue - lastMonthsIOStatement.Revenue) /
+              lastMonthsIOStatement.Revenue) *
+            100
+          ).toFixed(2)
+        : (
+            ((thisMonthsIOStatement.Revenue + lastMonthsIOStatement.Revenue) /
+              lastMonthsIOStatement.Revenue) *
+            100
+          ).toFixed(2)
+      : 0;
+  const changeInTotalExpenses =
+    thisMonthsIOStatement && lastMonthsIOStatement
+      ? Math.sign(thisMonthsIOStatement.Expenses) ===
+        Math.sign(lastMonthsIOStatement.Expenses)
+        ? (
+            ((thisMonthsIOStatement.Expenses - lastMonthsIOStatement.Expenses) /
+              lastMonthsIOStatement.Expenses) *
+            100
+          ).toFixed(2)
+        : (
+            ((thisMonthsIOStatement.Expenses + lastMonthsIOStatement.Expenses) /
+              lastMonthsIOStatement.Expenses) *
+            100
+          ).toFixed(2)
+      : 0;
+  const changeInNetProfit =
+    thisMonthsIOStatement && lastMonthsIOStatement
+      ? Math.sign(thisMonthsIOStatement.NetProfit) ===
+        Math.sign(lastMonthsIOStatement.NetProfit)
+        ? (
+            ((thisMonthsIOStatement.NetProfit -
+              lastMonthsIOStatement.NetProfit) /
+              lastMonthsIOStatement.NetProfit) *
+            100
+          ).toFixed(2)
+        : (
+            ((Math.abs(thisMonthsIOStatement.NetProfit) +
+              Math.abs(lastMonthsIOStatement.NetProfit)) /
+              thisMonthsIOStatement.NetProfit) *
+            100
+          ).toFixed(2)
+      : 0;
   const getRevenue = () => {
     setSelectedIO("revenue");
     instance
@@ -553,7 +571,9 @@ function MyComponent() {
               [
                 ...new Set(
                   result.revenue.map((x, i) => {
-                    const date = getEndOfMonth(new Date(x.Date));
+                    const date = getEndOfMonth(
+                      new Date(new Date(x.Date).getTime() + 86400000 * 5)
+                    );
                     if (i === result.revenue.length - 1) setSelectedDate(date);
                     return date;
                   })
@@ -605,7 +625,9 @@ function MyComponent() {
               [
                 ...new Set(
                   result.expenses.map((x, i) => {
-                    const date = getEndOfMonth(new Date(x.Date));
+                    const date = getEndOfMonth(
+                      new Date(new Date(x.Date).getTime() + 86400000 * 5)
+                    );
                     if (i === result.expenses.length - 1) setSelectedDate(date);
                     return date;
                   })
@@ -1195,13 +1217,6 @@ function MyComponent() {
                                 new Date(a.PaymentDate)
                             )
                           );
-                          setPayoutLogSorted(
-                            payoutLog.sort(
-                              (a, b) =>
-                                new Date(b.PaymentDate) -
-                                new Date(a.PaymentDate)
-                            )
-                          );
                         })
                         .catch((e) => {
                           console.log(e);
@@ -1600,8 +1615,11 @@ function MyComponent() {
                       <div style={{ fontWeight: "bolder" }}>
                         $
                         {thisMonthsIOStatement
-                          ? selectedDate &&
-                            addCommas(String(thisMonthsIOStatement.Revenue))
+                          ? !selectedDate
+                            ? ""
+                            : addCommas(
+                                thisMonthsIOStatement.Revenue.toFixed(2)
+                              )
                           : "-"}
                       </div>
                       <div
@@ -1658,28 +1676,12 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioStatement.find(
-                          (x) =>
-                            getEndOfMonth(
-                              new Date(
-                                new Date(x.Month).getTime() + 86400000 * 6
+                        {ioStatement
+                          ? !selectedDate
+                            ? ""
+                            : addCommas(
+                                thisMonthsIOStatement.Expenses.toFixed(2)
                               )
-                            ) === selectedDate
-                        )
-                          ? selectedDate &&
-                            addCommas(
-                              String(
-                                ioStatement.find(
-                                  (x) =>
-                                    getEndOfMonth(
-                                      new Date(
-                                        new Date(x.Month).getTime() +
-                                          86400000 * 6
-                                      )
-                                    ) === selectedDate
-                                ).Expenses
-                              )
-                            )
                           : "-"}
                       </div>
                       <div
@@ -1735,28 +1737,12 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioStatement.find(
-                          (x) =>
-                            getEndOfMonth(
-                              new Date(
-                                new Date(x.Month).getTime() + 86400000 * 6
+                        {ioStatement
+                          ? !selectedDate
+                            ? ""
+                            : addCommas(
+                                thisMonthsIOStatement.NetProfit.toFixed(2)
                               )
-                            ) === selectedDate
-                        )
-                          ? selectedDate &&
-                            addCommas(
-                              String(
-                                ioStatement.find(
-                                  (x) =>
-                                    getEndOfMonth(
-                                      new Date(
-                                        new Date(x.Month).getTime() +
-                                          86400000 * 6
-                                      )
-                                    ) === selectedDate
-                                ).NetProfit
-                              )
-                            )
                           : "-"}
                       </div>
                       <div
@@ -1804,7 +1790,72 @@ function MyComponent() {
                       value={selectedFrequency}
                       style={{ position: "absolute", right: "10px" }}
                       onChange={(e) => {
-                        setSelectedFrequency(e.target.value);
+                        const value = e.target.value;
+                        setSelectedFrequency(value);
+                        if (value === "Monthly") {
+                          setIOMonths(
+                            ioStatement
+                              .sort(
+                                (a, b) => new Date(b.Month) - new Date(a.Month)
+                              )
+                              .map((x, i) => {
+                                const date = getEndOfMonth(
+                                  new Date(
+                                    new Date(x.Month).getTime() + 86400000 * 6
+                                  )
+                                );
+                                if (i === 0) setSelectedDate(date);
+                                return date;
+                              })
+                          );
+                        } else if (value === "Quarterly") {
+                          var ioMonths = [];
+
+                          ioStatement
+                            .sort(
+                              (a, b) => new Date(b.Month) - new Date(a.Month)
+                            )
+                            .forEach((x, i) => {
+                              const month = String(
+                                new Date(
+                                  new Date(x.Month).getTime() + 86400000 * 6
+                                ).getMonth() + 1
+                              ).padStart(2, "0");
+                              const year = new Date(x.Month).getFullYear();
+                              const thisQuarter = ["01", "02", "03"].includes(
+                                month
+                              )
+                                ? year + "-Q1"
+                                : ["04", "05", "06"].includes(month)
+                                ? year + "-Q2"
+                                : ["07", "08", "09"].includes(month)
+                                ? year + "-Q3"
+                                : ["10", "11", "12"].includes(month)
+                                ? year + "-Q4"
+                                : "";
+                              const found = ioMonths.find(
+                                (y) => y === thisQuarter
+                              );
+                              if (!found) ioMonths.push(thisQuarter);
+                            });
+                          setSelectedDate(ioMonths[0]);
+                          setIOMonths(ioMonths);
+                        } else if (value === "Yearly") {
+                          var ioMonths = [];
+
+                          ioStatement
+                            .sort(
+                              (a, b) => new Date(b.Month) - new Date(a.Month)
+                            )
+                            .forEach((x, i) => {
+                              const year = new Date(x.Month).getFullYear();
+
+                              const found = ioMonths.find((y) => y === year);
+                              if (!found) ioMonths.push(year);
+                            });
+                          setSelectedDate(ioMonths[0]);
+                          setIOMonths(ioMonths);
+                        }
                       }}
                     >
                       {["Monthly", "Quarterly", "Yearly"].map((x) => {
@@ -1882,14 +1933,20 @@ function MyComponent() {
                       revenue.find(
                         (x) =>
                           x.Color ||
-                          getEndOfMonth(new Date(x.Date)) === selectedDate
+                          getEndOfMonth(
+                            new Date(new Date(x.Date).getTime() + 86400000 * 5)
+                          ) === selectedDate
                       ) ? (
                         <PieChart
                           data={revenue
                             .filter((x) => {
                               if (
                                 !x.Color &&
-                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                                getEndOfMonth(
+                                  new Date(
+                                    new Date(x.Date).getTime() + 86400000 * 5
+                                  )
+                                ) !== selectedDate
                               )
                                 return null;
                               return x;
@@ -1909,14 +1966,22 @@ function MyComponent() {
                         expenses.find(
                           (x) =>
                             x.Color ||
-                            getEndOfMonth(new Date(x.Date)) === selectedDate
+                            getEndOfMonth(
+                              new Date(
+                                new Date(x.Date).getTime() + 86400000 * 5
+                              )
+                            ) === selectedDate
                         ) ? (
                         <PieChart
                           data={expenses
                             .filter((x) => {
                               if (
                                 !x.Color &&
-                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                                getEndOfMonth(
+                                  new Date(
+                                    new Date(x.Date).getTime() + 86400000 * 5
+                                  )
+                                ) !== selectedDate
                               )
                                 return null;
                               return x;
@@ -1942,7 +2007,11 @@ function MyComponent() {
                           revenue
                             .filter((x) => {
                               if (
-                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                                getEndOfMonth(
+                                  new Date(
+                                    new Date(x.Date).getTime() + 86400000 * 5
+                                  )
+                                ) !== selectedDate
                               )
                                 return null;
                               return x;
@@ -1965,7 +2034,11 @@ function MyComponent() {
                           expenses
                             .filter((x) => {
                               if (
-                                getEndOfMonth(new Date(x.Date)) !== selectedDate
+                                getEndOfMonth(
+                                  new Date(
+                                    new Date(x.Date).getTime() + 86400000 * 5
+                                  )
+                                ) !== selectedDate
                               )
                                 return null;
                               return x;
@@ -2116,7 +2189,9 @@ function MyComponent() {
                   ).map((x, i) => {
                     if (
                       selectedDate === null ||
-                      getEndOfMonth(new Date(x.Date)) !== selectedDate
+                      getEndOfMonth(
+                        new Date(new Date(x.Date).getTime() + 86400000 * 5)
+                      ) !== selectedDate
                     )
                       return null;
                     return (
@@ -3039,4 +3114,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
