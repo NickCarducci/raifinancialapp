@@ -187,8 +187,7 @@ function MyComponent() {
   const [editCategory, setEditCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [maxHeightDivs, setMaxHeightsDivs] = useState(0);
-  const [filteredGeneralLedgerObjects, setFilteredGeneralLedgerObjects] =
-    useState([]);
+  const [generalLedgerTicks, setGeneralLedgerTicks] = useState([]);
   const getGeneralLedger = () => {
     if (mobileView) setSelectionMenu(false);
     setGeneralLedger([{ Amount: "Connecting to database..." }]);
@@ -236,40 +235,39 @@ function MyComponent() {
               });
               return setGeneralLedger([{ Amount: "please log in again..." }]);
             }
-            const filteredGeneralLedger = result.generalLedger
+            const generalLedger = result.generalLedger
               .filter((x) => {
                 if (x.Category === "End of month balance") return false;
                 return true;
               })
               .sort((a, b) => new Date(b.Date) - new Date(a.Date));
-            var filteredGeneralLedgerObjectss = [];
-            filteredGeneralLedger.forEach((x, i) => {
-              var found = filteredGeneralLedgerObjectss.find(
+            var generalLedgerTicks = [];
+            generalLedger.forEach((x, i) => {
+              var found = generalLedgerTicks.find(
                 (y) => y[x.Date.split("T")[0]]
               );
               if (!found)
-                filteredGeneralLedgerObjectss.push({
+                generalLedgerTicks.push({
                   [x.Date.split("T")[0]]: 0,
                 });
-              filteredGeneralLedgerObjectss =
-                filteredGeneralLedgerObjectss.filter(
-                  (y) => Object.keys(y)[0] !== x.Date.split("T")[0]
-                );
-              filteredGeneralLedgerObjectss.push({
+              generalLedgerTicks = generalLedgerTicks.filter(
+                (y) => Object.keys(y)[0] !== x.Date.split("T")[0]
+              );
+              generalLedgerTicks.push({
                 [x.Date.split("T")[0]]:
                   (found ? Object.values(found)[0] : 0) + x.Amount,
               });
-              //console.log(filteredGeneralLedgerObjectss);
+              //console.log(generalLedgerTicks);
             });
-            //console.log(filteredGeneralLedgerObjectss);
-            setFilteredGeneralLedgerObjects(filteredGeneralLedgerObjectss);
-            const heights = filteredGeneralLedgerObjectss.map((x) => {
+            //console.log(generalLedgerTicks);
+            setGeneralLedgerTicks(generalLedgerTicks);
+            const heights = generalLedgerTicks.map((x) => {
               const amount = Object.values(x)[0];
               return typeof amount === "number" ? Math.abs(amount) : 0;
             });
             const maxHeightDivs = Math.max(...heights);
             setMaxHeightsDivs(maxHeightDivs);
-            setGeneralLedger(filteredGeneralLedger);
+            setGeneralLedger(generalLedger);
           })
           .catch(() => {
             setGeneralLedger([{ Amount: "reload or log in again..." }]);
@@ -2639,7 +2637,7 @@ function MyComponent() {
               style={{
                 overflowX: "auto",
                 overflowY: "hidden",
-                width: mobileView ? "100%" : "calc(100vw - 300px",
+                width: mobileView ? "100%" : windowWidth - 300,
               }}
             >
               <div
@@ -2669,9 +2667,10 @@ function MyComponent() {
                     alignItems: "flex-end",
                   }}
                 >
-                  {filteredGeneralLedgerObjects.map((x, i) => {
+                  {generalLedgerTicks.map((x, i) => {
                     const width =
-                      (windowWidth - 22) / filteredGeneralLedgerObjects.length;
+                      ((mobileView ? windowWidth : windowWidth - 300) - 22) /
+                      generalLedgerTicks.length;
                     const height = Object.values(x)[0] / maxHeightDivs;
                     //console.log(maxHeightDivs);
                     return (
@@ -2714,9 +2713,10 @@ function MyComponent() {
                     alignItems: "flex-start",
                   }}
                 >
-                  {filteredGeneralLedgerObjects.map((x, i) => {
+                  {generalLedgerTicks.map((x, i) => {
                     const width =
-                      (windowWidth - 22) / filteredGeneralLedgerObjects.length;
+                      ((mobileView ? windowWidth : windowWidth - 300) - 22) /
+                      generalLedgerTicks.length;
                     const height = Object.values(x)[0] / maxHeightDivs;
                     //console.log(maxHeightDivs);
                     return (
@@ -2854,41 +2854,36 @@ function MyComponent() {
                             cursor: "pointer",
                           }}
                           onClick={() => {
-                            const generalLedgerr =
+                            const gL =
                               upOrder === "upDate"
                                 ? generalLedger.reverse()
                                 : generalLedger.sort(
                                     (a, b) =>
                                       new Date(a.Date) - new Date(b.Date)
                                   );
-                            setGeneralLedger(generalLedgerr);
-                            const filteredGeneralLedger = generalLedgerr.filter(
-                              (x) => {
-                                if (x.Category === "End of month balance")
-                                  return false;
-                                return true;
-                              }
-                            );
-                            var filteredGeneralLedgerObjectss = [];
-                            filteredGeneralLedger.forEach((x, i) => {
-                              var found = filteredGeneralLedgerObjectss.find(
+                            setGeneralLedger(gL);
+                            const generalLedger = gL.filter((x) => {
+                              if (x.Category === "End of month balance")
+                                return false;
+                              return true;
+                            });
+                            var generalLedgerTicks = [];
+                            generalLedger.forEach((x, i) => {
+                              var found = generalLedgerTicks.find(
                                 (y) => y[x.Date.split("T")[0]]
                               );
-                              filteredGeneralLedgerObjectss =
-                                filteredGeneralLedgerObjectss.filter(
-                                  (y) =>
-                                    Object.keys(y)[0] !== x.Date.split("T")[0]
-                                );
-                              filteredGeneralLedgerObjectss.push({
+                              generalLedgerTicks = generalLedgerTicks.filter(
+                                (y) =>
+                                  Object.keys(y)[0] !== x.Date.split("T")[0]
+                              );
+                              generalLedgerTicks.push({
                                 [x.Date.split("T")[0]]:
                                   (found ? Object.values(found)[0] : 0) +
                                   x.Amount,
                               });
-                              //console.log(filteredGeneralLedgerObjectss);
+                              //console.log(generalLedgerTicks);
                             });
-                            setFilteredGeneralLedgerObjects(
-                              filteredGeneralLedgerObjectss
-                            );
+                            setGeneralLedgerTicks(generalLedgerTicks);
                             setUpOrder(upOrder ? false : "upDate");
                           }}
                         >
