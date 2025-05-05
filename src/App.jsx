@@ -1562,8 +1562,35 @@ function MyComponent() {
                   };
                   return (
                     <option value={month} key={month}>
-                      {month === getEndOfMonth(new Date())
-                        ? "Current Month"
+                      {selectedFrequency === "Monthly"
+                        ? month === getEndOfMonth(new Date())
+                          ? "Current Month"
+                          : month
+                        : selectedFrequency === "Quarterly"
+                        ? month ===
+                          new Date().getFullYear() +
+                            {
+                              "01": "-Q1",
+                              "02": "-Q1",
+                              "03": "-Q1",
+                              "04": "-Q2",
+                              "05": "-Q2",
+                              "06": "-Q2",
+                              "07": "-Q3",
+                              "08": "-Q3",
+                              "09": "-Q3",
+                              10: "-Q4",
+                              11: "-Q4",
+                              12: "-Q4",
+                            }[
+                              String(new Date().getMonth() + 1).padStart(2, "0")
+                            ]
+                          ? "Current Quarter"
+                          : month
+                        : selectedFrequency === "Yearly"
+                        ? month === new Date().getFullYear()
+                          ? "Current Year"
+                          : month
                         : month}
                     </option>
                   );
@@ -2008,7 +2035,7 @@ function MyComponent() {
                             lineWidth={80}
                           />
                         ) : (
-                          "There is no expense breakdown for this time period."
+                          "There is no expense breakdown available for this time period."
                         )
                       ) : (
                         "Click revenue or expenses"
@@ -3127,3 +3154,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
