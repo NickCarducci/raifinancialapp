@@ -2809,13 +2809,20 @@ function MyComponent() {
             <div
               style={{
                 alignItems: "flex-start",
-                display: windowWidth < 500 ? "block" : "flex",
+                display:
+                  true ||
+                  windowWidth < 500 ||
+                  (windowWidth < 900 && !mobileView)
+                    ? "block"
+                    : "flex",
                 overflowX: "auto",
                 overflowY: "hidden",
                 width: mobileView ? "100%" : "calc(100vw - 300px",
               }}
             >
-              {windowWidth < 500 && (
+              {(true ||
+                windowWidth < 500 ||
+                (windowWidth < 900 && !mobileView)) && (
                 <div
                   style={{
                     margin: "20px 60px",
@@ -2996,16 +3003,17 @@ function MyComponent() {
                       })}
                 </tbody>
               </table>
-              {!(windowWidth < 500) && (
-                <div
-                  style={{
-                    margin: "20px 60px",
-                    minWidth: "300px",
-                  }}
-                >
-                  {pieChart()}
-                </div>
-              )}
+              {false &&
+                !(windowWidth < 500 || (windowWidth < 900 && !mobileView)) && (
+                  <div
+                    style={{
+                      margin: "20px 60px",
+                      minWidth: "300px",
+                    }}
+                  >
+                    {pieChart()}
+                  </div>
+                )}
             </div>
           )}
         </div>
@@ -3031,3 +3039,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
