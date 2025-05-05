@@ -284,8 +284,8 @@ function MyComponent() {
   const [hoverDiv, setHoverDiv] = useState("");
   const [hoverDivs, setHoverDivs] = useState(false);
   const [clickedDiv, setClickDiv] = useState("");
-  const [revenues, setRevenues] = useState([]);
-  const [expensess, setExpensess] = useState([]);
+  const [revenueAmounts, setRevenueAmounts] = useState([]);
+  const [expensesAmounts, setExpensesAmounts] = useState([]);
   const [payoutChart, setPayoutChart] = useState([]);
 
   const [clickedPie, setClickPie] = useState(null);
@@ -570,8 +570,87 @@ function MyComponent() {
               });
               return setRevenue([{ Amount: "Sign in again..." }]);
             }
-            setRevenues(result.revenue.map((x) => x.Amount));
-            setRevenueMonth(
+            var revenueByQuarter = [];
+            var revenueByYear = [];
+            result.revenue.forEach((x) => {
+              const found = revenueByQuarter.find(
+                (y) => y.Quarter === x.Quarter && y.Category === x.Category
+              );
+              const thisQuarter =
+                new Date(x.Date).getFullYear() +
+                {
+                  "01": "-Q1",
+                  "02": "-Q1",
+                  "03": "-Q1",
+                  "04": "-Q2",
+                  "05": "-Q2",
+                  "06": "-Q2",
+                  "07": "-Q3",
+                  "08": "-Q3",
+                  "09": "-Q3",
+                  10: "-Q4",
+                  11: "-Q4",
+                  12: "-Q4",
+                }[
+                  String(
+                    new Date(
+                      new Date(x.Date).getTime() + 86400000 * 5
+                    ).getMonth() + 1
+                  ).padStart(2, "0")
+                ];
+
+              if (!found)
+                revenueByQuarter.push({
+                  ...x,
+                  Quarter: thisQuarter,
+                });
+              revenueByQuarter = revenueByQuarter.filter(
+                (y) => y.Quarter !== thisQuarter || y.Category !== x.Category
+              );
+              revenueByQuarter.push(
+                found
+                  ? {
+                      ...x,
+                    }
+                  : {
+                      ...x,
+                      Quarter: thisQuarter,
+                    }
+              );
+              const found1 = revenueByYear.find(
+                (y) => y.Year === x.Year && y.Category === x.Category
+              );
+              const year = new Date(x.Date).getFullYear();
+              if (!found1)
+                revenueByYear.push({
+                  ...x,
+                  Year: year,
+                });
+              revenueByYear = revenueByYear.filter(
+                (y) => y.Year !== year || y.Category !== x.Category
+              );
+              revenueByYear.push(
+                found1
+                  ? {
+                      ...x,
+                      Amount: found1.Amount + x.Amount,
+                    }
+                  : {
+                      ...x,
+                      Year: year,
+                    }
+              );
+            });
+            setRevenueAmountsByYear(revenueByYear.map((x) => x.Amount));
+            setRevenueAmountsByQuarter(revenueByQuarter.map((x) => x.Amount));
+            setRevenueAmounts(result.revenue.map((x) => x.Amount));
+            setRevenueMonthsByYear(
+              [...new Set(revenueByYear.map((x) => x.Year))].reverse()
+            );
+            setRevenueMonthsByQuarter(
+              [...new Set(revenueByQuarter.map((x) => x.Quarter))].reverse()
+            );
+            setRevenueMonths(
               [
                 ...new Set(
                   result.revenue.map((x, i) => {
@@ -584,7 +663,11 @@ function MyComponent() {
                 ),
               ].reverse()
             );
-            if (result.revenue) return setRevenue(result.revenue);
+            if (result.revenue) {
+              setRevenueByYear(revenueByYear);
+              setRevenueByQuarter(revenueByQuarter);
+              return setRevenue(result.revenue);
+            }
             setRevenue([{ Category: "Try again", Amount: 0, Color: "black" }]);
           })
           .catch((error) => {
@@ -624,8 +707,88 @@ function MyComponent() {
                 { Category: "Sign in again...", Amount: 0, Color: "black" },
               ]);
             }
-            setExpensess(result.expenses.map((x) => x.Amount));
-            setExpensesMonth(
+            var expensesByQuarter = [];
+            var expensesByYear = [];
+            result.expenses.forEach((x) => {
+              const found = expensesByQuarter.find(
+                (y) => y.Quarter === x.Quarter && y.Category === x.Category
+              );
+              const thisQuarter =
+                new Date(x.Date).getFullYear() +
+                {
+                  "01": "-Q1",
+                  "02": "-Q1",
+                  "03": "-Q1",
+                  "04": "-Q2",
+                  "05": "-Q2",
+                  "06": "-Q2",
+                  "07": "-Q3",
+                  "08": "-Q3",
+                  "09": "-Q3",
+                  10: "-Q4",
+                  11: "-Q4",
+                  12: "-Q4",
+                }[
+                  String(
+                    new Date(
+                      new Date(x.Date).getTime() + 86400000 * 5
+                    ).getMonth() + 1
+                  ).padStart(2, "0")
+                ];
+
+              if (!found)
+                expensesByQuarter.push({
+                  ...x,
+                  Quarter: thisQuarter,
+                });
+              expensesByQuarter = expensesByQuarter.filter(
+                (y) => y.Quarter !== thisQuarter || y.Category !== x.Category
+              );
+              expensesByQuarter.push(
+                found
+                  ? {
+                      ...x,
+                      Amount: found.Amount + x.Amount,
+                    }
+                  : {
+                      ...x,
+                      Quarter: thisQuarter,
+                    }
+              );
+              const found1 = expensesByYear.find(
+                (y) => y.Year === x.Year && y.Category === x.Category
+              );
+              const year = new Date(x.Date).getFullYear();
+              if (!found1)
+                expensesByYear.push({
+                  ...x,
+                  Year: year,
+                });
+              expensesByYear = expensesByYear.filter(
+                (y) => y.Year !== year || y.Category !== x.Category
+              );
+              expensesByYear.push(
+                found1
+                  ? {
+                      ...x,
+                      Amount: found1.Amount + x.Amount,
+                    }
+                  : {
+                      ...x,
+                      Year: year,
+                    }
+              );
+            });
+            setExpensesAmountsByYear(expensesByYear.map((x) => x.Amount));
+            setExpensesAmountsByQuarter(expensesByQuarter.map((x) => x.Amount));
+            setExpensesAmounts(result.expenses.map((x) => x.Amount));
+            setExpensesMonthsByYear(
+              [...new Set(expensesByYear.map((x) => x.Year))].reverse()
+            );
+            setExpensesMonthsByQuarter(
+              [...new Set(expensesByQuarter.map((x) => x.Quarter))].reverse()
+            );
+            setExpensesMonths(
               [
                 ...new Set(
                   result.expenses.map((x, i) => {
@@ -638,7 +801,12 @@ function MyComponent() {
                 ),
               ].reverse()
             );
-            if (result.expenses) setExpenses(result.expenses);
+            if (result.expenses) {
+              setExpensesByYear(expensesByYear);
+              setExpensesByQuarter(expensesByQuarter);
+              return setExpenses(result.expenses);
+            }
+            setExpenses([{ Category: "Try again", Amount: 0, Color: "black" }]);
           })
           .catch((error) => {
             setExpenses([{ Category: "Try again", Amount: 0, Color: "black" }]);
@@ -725,9 +893,67 @@ function MyComponent() {
   };
 
   const { open: openPlaid, ready: readyPlaid } = usePlaidLink(config);
-  const [revenueMonths, setRevenueMonth] = useState([]);
-  const [expensesMonths, setExpensesMonth] = useState([]);
+  const [revenueMonths, setRevenueMonths] = useState([]);
+  const [expensesMonths, setExpensesMonths] = useState([]);
+  const [revenueByQuarter, setRevenueByQuarter] = useState([]);
+  const [revenueAmountsByQuarter, setRevenueAmountsByQuarter] = useState([]);
+  const [revenueMonthsByQuarter, setRevenueMonthsByQuarter] = useState([]);
+  const [expensesByQuarter, setExpensesByQuarter] = useState([]);
+  const [expensesAmountsByQuarter, setExpensesAmountsByQuarter] = useState([]);
+  const [expensesMonthsByQuarter, setExpensesMonthsByQuarter] = useState([]);
+  const [revenueByYear, setRevenueByYear] = useState([]);
+  const [revenueAmountsByYear, setRevenueAmountsByYear] = useState([]);
+  const [revenueMonthsByYear, setRevenueMonthsByYear] = useState([]);
+  const [expensesByYear, setExpensesByYear] = useState([]);
+  const [expensesAmountsByYear, setExpensesAmountsByYear] = useState([]);
+  const [expensesMonthsByYear, setExpensesMonthsByYear] = useState([]);
 
+  const showRevenue =
+    (selectedFrequency === "Monthly" &&
+      revenue &&
+      revenue.length > 0 &&
+      revenue.find((x) => {
+        return (
+          x.Color ||
+          getEndOfMonth(new Date(new Date(x.Date).getTime() + 86400000 * 5)) ===
+            selectedDate
+        );
+      })) ||
+    (selectedFrequency === "Quarterly" &&
+      revenueByQuarter &&
+      revenueByQuarter.length > 0 &&
+      revenueByQuarter.find((x) => {
+        return x.Color || x.Quarter === selectedDate;
+      })) ||
+    (selectedFrequency === "Yearly" &&
+      revenueByYear &&
+      revenueByYear.length > 0 &&
+      revenueByYear.find((x) => {
+        return x.Color || x.Year === selectedDate;
+      }));
+  const showExpenses =
+    (selectedFrequency === "Monthly" &&
+      expenses &&
+      expenses.length > 0 &&
+      expenses.find((x) => {
+        return (
+          x.Color ||
+          getEndOfMonth(new Date(new Date(x.Date).getTime() + 86400000 * 5)) ===
+            selectedDate
+        );
+      })) ||
+    (selectedFrequency === "Quarterly" &&
+      expensesByQuarter &&
+      expensesByQuarter.length > 0 &&
+      expensesByQuarter.find((x) => {
+        return x.Color || x.Quarter === selectedDate;
+      })) ||
+    (selectedFrequency === "Yearly" &&
+      expensesByYear &&
+      expensesByYear.length > 0 &&
+      expensesByYear.find((x) => {
+        return x.Color || x.Year === selectedDate;
+      }));
   return (
     <div
       style={{
@@ -941,11 +1167,11 @@ function MyComponent() {
                   setSelectedIO("");
                   setSelectedDate(null);
                   setRevenue(null);
-                  setRevenues([]);
+                  setRevenueAmounts([]);
                   setExpenses(null);
-                  setExpensess([]);
-                  setRevenueMonth([]);
-                  setExpensesMonth([]);
+                  setExpensesAmounts([]);
+                  setRevenueMonths([]);
+                  setExpensesMonths([]);
                   if (mobileView) setSelectionMenu(false);
                   setSelection("I/S");
                   setIOMonths(["Connecting to database..."]);
@@ -1961,7 +2187,7 @@ function MyComponent() {
                       }}
                     >
                       {selectedIO === "revenue" ? (
-                        revenue &&
+                        showRevenue /*&&
                         revenue.find(
                           (x) =>
                             x.Color ||
@@ -1970,28 +2196,42 @@ function MyComponent() {
                                 new Date(x.Date).getTime() + 86400000 * 5
                               )
                             ) === selectedDate
-                        ) ? (
+                        )*/ ? (
                           <PieChart
-                            data={revenue
-                              .filter((x) => {
-                                if (
-                                  !x.Color &&
-                                  getEndOfMonth(
-                                    new Date(
-                                      new Date(x.Date).getTime() + 86400000 * 5
-                                    )
-                                  ) !== selectedDate
-                                )
-                                  return null;
-                                return x;
-                              })
-                              .map((x, i) => {
-                                return {
-                                  title: x.Category,
-                                  value: x.Amount,
-                                  color: x.Color ? x.Color : pieChartColors[i],
-                                };
-                              })}
+                            data={(selectedFrequency === "Monthly"
+                              ? revenue.filter((x) => {
+                                  if (
+                                    !x.Color &&
+                                    getEndOfMonth(
+                                      new Date(
+                                        new Date(x.Date).getTime() +
+                                          86400000 * 5
+                                      )
+                                    ) !== selectedDate
+                                  )
+                                    return null;
+                                  return x;
+                                })
+                              : selectedFrequency === "Quarterly"
+                              ? revenueByQuarter.filter((x) => {
+                                  if (!x.Color && x.Quarter !== selectedDate)
+                                    return null;
+                                  return x;
+                                })
+                              : selectedFrequency === "Yearly"
+                              ? revenueByYear.filter((x) => {
+                                  if (!x.Color && x.Year !== selectedDate)
+                                    return null;
+                                  return x;
+                                })
+                              : []
+                            ).map((x, i) => {
+                              return {
+                                title: x.Category,
+                                value: x.Amount,
+                                color: x.Color ? x.Color : pieChartColors[i],
+                              };
+                            })}
                             //radius={100}
                             lineWidth={80}
                           />
@@ -1999,7 +2239,7 @@ function MyComponent() {
                           "There is no revenue breakdown available for this time period."
                         )
                       ) : selectedIO === "expenses" ? (
-                        expenses &&
+                        showExpenses /*&&
                         expenses.find(
                           (x) =>
                             x.Color ||
@@ -2008,21 +2248,36 @@ function MyComponent() {
                                 new Date(x.Date).getTime() + 86400000 * 5
                               )
                             ) === selectedDate
-                        ) ? (
+                        )*/ ? (
                           <PieChart
-                            data={expenses
-                              .filter((x) => {
-                                if (
-                                  !x.Color &&
-                                  getEndOfMonth(
-                                    new Date(
-                                      new Date(x.Date).getTime() + 86400000 * 5
-                                    )
-                                  ) !== selectedDate
-                                )
-                                  return null;
-                                return x;
-                              })
+                            data={(selectedFrequency === "Monthly"
+                              ? expenses.filter((x) => {
+                                  if (
+                                    !x.Color &&
+                                    getEndOfMonth(
+                                      new Date(
+                                        new Date(x.Date).getTime() +
+                                          86400000 * 5
+                                      )
+                                    ) !== selectedDate
+                                  )
+                                    return null;
+                                  return x;
+                                })
+                              : selectedFrequency === "Quarterly"
+                              ? expensesByQuarter.filter((x) => {
+                                  if (!x.Color && x.Quarter !== selectedDate)
+                                    return null;
+                                  return x;
+                                })
+                              : selectedFrequency === "Yearly"
+                              ? expensesByYear.filter((x) => {
+                                  if (!x.Color && x.Year !== selectedDate)
+                                    return null;
+                                  return x;
+                                })
+                              : []
+                            )
                               .map((x, i) => {
                                 return {
                                   title: x.Category,
@@ -2043,206 +2298,340 @@ function MyComponent() {
                     </div>
                     <div style={{ display: "block" }}>
                       {selectedIO === "revenue"
-                        ? revenue &&
-                          revenue
-                            .filter((x) => {
-                              if (
-                                getEndOfMonth(
-                                  new Date(
-                                    new Date(x.Date).getTime() + 86400000 * 5
+                        ? (selectedFrequency === "Monthly"
+                            ? !revenue
+                              ? []
+                              : revenue.filter((x) => {
+                                  if (
+                                    getEndOfMonth(
+                                      new Date(
+                                        new Date(x.Date).getTime() +
+                                          86400000 * 5
+                                      )
+                                    ) !== selectedDate
                                   )
-                                ) !== selectedDate
-                              )
-                                return null;
-                              return x;
-                            })
-                            .map((x, i) => {
-                              return (
-                                <div key={i} style={{ display: "flex" }}>
-                                  <div
-                                    style={{
-                                      width: "40px",
-                                      height: "20px",
-                                      backgroundColor: pieChartColors[i],
-                                    }}
-                                  ></div>
-                                  <div>{x.Category}</div>
-                                </div>
-                              );
-                            })
-                        : expenses &&
-                          expenses
-                            .filter((x) => {
-                              if (
-                                getEndOfMonth(
-                                  new Date(
-                                    new Date(x.Date).getTime() + 86400000 * 5
-                                  )
-                                ) !== selectedDate
-                              )
-                                return null;
-                              return x;
-                            })
-                            .map((x, i) => {
-                              return (
-                                <div key={i} style={{ display: "flex" }}>
-                                  <div
-                                    style={{
-                                      width: "40px",
-                                      height: "20px",
-                                      backgroundColor: pieChartColors[i],
-                                    }}
-                                  ></div>
-                                  <div>{x.Category}</div>
-                                </div>
-                              );
-                            })}
+                                    return null;
+                                  return x;
+                                })
+                            : selectedFrequency === "Quarterly"
+                            ? !revenueByQuarter
+                              ? []
+                              : revenueByQuarter.filter((x) => {
+                                  if (x.Quarter !== selectedDate) return null;
+                                  return x;
+                                })
+                            : selectedFrequency === "Yearly"
+                            ? !revenueByYear
+                              ? []
+                              : revenueByYear.filter((x) => {
+                                  if (x.Year !== selectedDate) return null;
+                                  return x;
+                                })
+                            : []
+                          ).map((x, i) => {
+                            return (
+                              <div key={i} style={{ display: "flex" }}>
+                                <div
+                                  style={{
+                                    width: "40px",
+                                    height: "20px",
+                                    backgroundColor: pieChartColors[i],
+                                  }}
+                                ></div>
+                                <div>{x.Category}</div>
+                              </div>
+                            );
+                          })
+                        : selectedIO === "expenses"
+                        ? (selectedFrequency === "Monthly"
+                            ? expenses &&
+                              expenses.filter((x) => {
+                                if (
+                                  getEndOfMonth(
+                                    new Date(
+                                      new Date(x.Date).getTime() + 86400000 * 5
+                                    )
+                                  ) !== selectedDate
+                                )
+                                  return null;
+                                return x;
+                              })
+                            : selectedFrequency === "Quarterly"
+                            ? expensesByQuarter &&
+                              expensesByQuarter.filter((x) => {
+                                if (x.Quarter !== selectedDate) return null;
+                                return x;
+                              })
+                            : selectedFrequency === "Yearly"
+                            ? expensesByYear &&
+                              expensesByYear.filter((x) => {
+                                if (x.Year !== selectedDate) return null;
+                                return x;
+                              })
+                            : []
+                          ).map((x, i) => {
+                            return (
+                              <div key={i} style={{ display: "flex" }}>
+                                <div
+                                  style={{
+                                    width: "40px",
+                                    height: "20px",
+                                    backgroundColor: pieChartColors[i],
+                                  }}
+                                ></div>
+                                <div>{x.Category}</div>
+                              </div>
+                            );
+                          })
+                        : ""}
                     </div>
                   </div>
                 </div>
               </div>
               {true ? null : selectedIO === "revenue" ? (
                 <div>
-                  {revenue !== null &&
-                    revenue.map((x, i) => {
-                      var total = 0;
-                      revenues.forEach((amount) => {
-                        total = total + amount;
-                      });
-                      return (
-                        <div key={i} style={{ display: "block" }}>
-                          <div>
-                            ${addCommas(String(x.Amount))} ({x.Category})
-                          </div>
-                          <div
-                            style={{
-                              width: `${(x.Amount / total) * 100}%`,
-                              height: "10px",
-                              backgroundColor: "dodgerblue",
-                            }}
-                          ></div>
+                  {(selectedFrequency === "Monthly"
+                    ? revenue !== null && revenue
+                    : selectedFrequency === "Quarterly"
+                    ? revenueByQuarter !== null && revenueByQuarter
+                    : selectedFrequency === "Yearly"
+                    ? revenueByYear !== null && revenueByYear
+                    : []
+                  ).map((x, i) => {
+                    var total = 0;
+                    (selectedFrequency === "Monthly"
+                      ? revenueAmounts
+                      : selectedFrequency === "Quarterly"
+                      ? revenueAmountsByQuarter
+                      : selectedFrequency === "Yearly"
+                      ? revenueAmountsByYear
+                      : []
+                    ).forEach((amount) => {
+                      total = total + amount;
+                    });
+                    return (
+                      <div key={i} style={{ display: "block" }}>
+                        <div>
+                          ${addCommas(String(x.Amount))} ({x.Category})
                         </div>
-                      );
-                    })}
+                        <div
+                          style={{
+                            width: `${(x.Amount / total) * 100}%`,
+                            height: "10px",
+                            backgroundColor: "dodgerblue",
+                          }}
+                        ></div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : selectedIO === "expenses" ? (
                 <div>
-                  {expenses !== null &&
-                    expenses.map((x, i) => {
-                      var total = 0;
-                      expensess.forEach((amount) => {
-                        total = total + amount;
-                      });
-                      return (
-                        <div key={i} style={{ display: "block" }}>
-                          <div>
-                            ${addCommas(String(x.Amount))} ({x.Category})
-                          </div>
-                          <div
-                            style={{
-                              width: `${(x.Amount / total) * 100}%`,
-                              height: "10px",
-                              backgroundColor: "dodgerblue",
-                            }}
-                          ></div>
-                        </div>
-                      );
-                    })}
-                </div>
-              ) : null}
-              <select
-                value={selectedDate ? selectedDate : ""}
-                style={{
-                  margin: "10px",
-                }}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              >
-                {(selectedIO === "revenue"
-                  ? revenueMonths
-                  : selectedIO === "expenses"
-                  ? expensesMonths
-                  : []
-                ).map((date) => {
-                  const zeroPad = (x) => {
-                    return x < 10 ? "0" + x : x;
-                  };
-                  //console.log(date, getEndOfMonth(new Date()));
-                  return (
-                    <option value={date} key={date}>
-                      {date === getEndOfMonth(new Date())
-                        ? "Current Month"
-                        : date}
-                    </option>
-                  );
-                })}
-              </select>
-              <table>
-                <caption
-                  style={{
-                    display: "flex",
-                    width: "max-content",
-                    position: "relative",
-                    fontSize: "20px",
-                    fontWeight: "bolder",
-                    paddingBottom: "14px",
-                    colspan: "2",
-                  }}
-                >
-                  {selectedIO.substring(0, 1).toLocaleUpperCase() +
-                    selectedIO.substring(1, selectedIO.length)}
-                </caption>
-                <tbody>
-                  {ioStatement !== null && ioStatement.length > 0 && (
-                    <tr>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                      >
-                        CATEGORY
-                      </td>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                      >
-                        AMOUNT
-                      </td>
-                    </tr>
-                  )}
-
-                  {(selectedIO === "revenue"
-                    ? revenue !== null && revenue.length > 0
-                      ? revenue
-                      : []
-                    : selectedIO === "expenses"
-                    ? expenses !== null && expenses.length > 0
-                      ? expenses
-                      : []
+                  {(selectedFrequency === "Monthly"
+                    ? expenses !== null && expenses
+                    : selectedFrequency === "Quarterly"
+                    ? expensesByQuarter !== null && expensesByQuarter
+                    : selectedFrequency === "Yearly"
+                    ? expensesByYear !== null && expensesByYear
                     : []
                   ).map((x, i) => {
-                    if (
-                      selectedDate === null ||
-                      getEndOfMonth(
-                        new Date(new Date(x.Date).getTime() + 86400000 * 5)
-                      ) !== selectedDate
-                    )
-                      return null;
+                    var total = 0;
+                    (selectedFrequency === "Monthly"
+                      ? expensesAmounts
+                      : selectedFrequency === "Quarterly"
+                      ? expensesAmountsByQuarter
+                      : selectedFrequency === "Yearly"
+                      ? expensesAmountsByYear
+                      : []
+                    ).forEach((amount) => {
+                      total = total + amount;
+                    });
                     return (
-                      <tr key={i + x.Date}>
-                        <td>{x.Category}</td>
-                        <td>${addCommas(String(x.Amount))}</td>
-                      </tr>
+                      <div key={i} style={{ display: "block" }}>
+                        <div>
+                          ${addCommas(String(x.Amount))} ({x.Category})
+                        </div>
+                        <div
+                          style={{
+                            width: `${(x.Amount / total) * 100}%`,
+                            height: "10px",
+                            backgroundColor: "dodgerblue",
+                          }}
+                        ></div>
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
+                </div>
+              ) : null}
+              {((selectedIO === "revenue" && showRevenue) ||
+                (selectedIO === "expenses" && showExpenses)) && (
+                <select
+                  value={selectedDate ? selectedDate : ""}
+                  style={{
+                    margin: "10px",
+                  }}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                >
+                  {(selectedIO === "revenue"
+                    ? selectedFrequency === "Monthly"
+                      ? revenueMonths
+                      : selectedFrequency === "Quarterly"
+                      ? revenueMonthsByQuarter
+                      : selectedFrequency === "Yearly"
+                      ? revenueMonthsByYear
+                      : []
+                    : selectedIO === "expenses"
+                    ? selectedFrequency === "Monthly"
+                      ? expensesMonths
+                      : selectedFrequency === "Quarterly"
+                      ? expensesMonthsByQuarter
+                      : selectedFrequency === "Yearly"
+                      ? expensesMonthsByYear
+                      : []
+                    : []
+                  ).map((date) => {
+                    const zeroPad = (x) => {
+                      return x < 10 ? "0" + x : x;
+                    };
+                    //console.log(date, getEndOfMonth(new Date()));
+                    return (
+                      <option value={date} key={date}>
+                        {selectedFrequency === "Monthly"
+                          ? date === getEndOfMonth(new Date())
+                            ? "Current Month"
+                            : date
+                          : selectedFrequency === "Quarterly"
+                          ? date ===
+                            new Date().getFullYear() +
+                              {
+                                "01": "-Q1",
+                                "02": "-Q1",
+                                "03": "-Q1",
+                                "04": "-Q2",
+                                "05": "-Q2",
+                                "06": "-Q2",
+                                "07": "-Q3",
+                                "08": "-Q3",
+                                "09": "-Q3",
+                                10: "-Q4",
+                                11: "-Q4",
+                                12: "-Q4",
+                              }[
+                                String(new Date().getMonth() + 1).padStart(
+                                  2,
+                                  "0"
+                                )
+                              ]
+                            ? "Current Quarter"
+                            : date
+                          : selectedFrequency === "Yearly"
+                          ? date === new Date().getFullYear()
+                            ? "Current Year"
+                            : date
+                          : date}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+              {((selectedIO === "revenue" && showRevenue) ||
+                (selectedIO === "expenses" && showExpenses)) && (
+                <table>
+                  <caption
+                    style={{
+                      display: "flex",
+                      width: "max-content",
+                      position: "relative",
+                      fontSize: "20px",
+                      fontWeight: "bolder",
+                      paddingBottom: "14px",
+                      colspan: "2",
+                    }}
+                  >
+                    {selectedIO.substring(0, 1).toLocaleUpperCase() +
+                      selectedIO.substring(1, selectedIO.length)}
+                  </caption>
+                  <tbody>
+                    {ioStatement !== null && ioStatement.length > 0 && (
+                      <tr>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          CATEGORY
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          AMOUNT
+                        </td>
+                      </tr>
+                    )}
+
+                    {(selectedIO === "revenue"
+                      ? selectedFrequency === "Monthly"
+                        ? revenue !== null && revenue.length > 0
+                          ? revenue
+                          : []
+                        : selectedFrequency === "Quarterly"
+                        ? revenueByQuarter !== null &&
+                          revenueByQuarter.length > 0
+                          ? revenueByQuarter
+                          : []
+                        : selectedFrequency === "Yearly"
+                        ? revenueByYear !== null && revenueByYear.length > 0
+                          ? revenueByYear
+                          : []
+                        : []
+                      : selectedIO === "expenses"
+                      ? selectedFrequency === "Monthly"
+                        ? expenses !== null && expenses.length > 0
+                          ? expenses
+                          : []
+                        : selectedFrequency === "Quarterly"
+                        ? expensesByQuarter !== null &&
+                          expensesByQuarter.length > 0
+                          ? expensesByQuarter
+                          : []
+                        : selectedFrequency === "Yearly"
+                        ? expensesByYear !== null && expensesByYear.length > 0
+                          ? expensesByYear
+                          : []
+                        : []
+                      : []
+                    ).map((x, i) => {
+                      const doesntMatch =
+                        selectedFrequency === "Monthly"
+                          ? getEndOfMonth(
+                              new Date(
+                                new Date(x.Date).getTime() + 86400000 * 5
+                              )
+                            ) !== selectedDate
+                          : selectedFrequency === "Quarterly"
+                          ? x.Quarter !== selectedDate
+                          : selectedFrequency === "Yearly"
+                          ? x.Year !== selectedDate
+                          : true;
+                      if (selectedDate === null || doesntMatch) return null;
+                      return (
+                        <tr key={i + x.Date}>
+                          <td>{x.Category}</td>
+                          <td>${addCommas(String(x.Amount))}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           )}
           {selection === "General Ledger" && (
@@ -3154,4 +3543,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
