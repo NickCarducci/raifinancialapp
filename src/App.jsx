@@ -492,8 +492,10 @@ function MyComponent() {
   //console.log(thisMonthsIOStatement, selectedDate);
   const changeInTotalRevenue =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.Revenue) ===
-        Math.sign(lastMonthsIOStatement.Revenue)
+      ? Math.sign(thisMonthsIOStatement.Revenue) === 0 ||
+        Math.sign(lastMonthsIOStatement.Revenue) === 0 ||
+        Math.sign(thisMonthsIOStatement.Revenue) ===
+          Math.sign(lastMonthsIOStatement.Revenue)
         ? (
             ((thisMonthsIOStatement.Revenue - lastMonthsIOStatement.Revenue) /
               lastMonthsIOStatement.Revenue) *
@@ -507,8 +509,10 @@ function MyComponent() {
       : 0;
   const changeInTotalExpenses =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.Expenses) ===
-        Math.sign(lastMonthsIOStatement.Expenses)
+      ? Math.sign(thisMonthsIOStatement.Expenses) === 0 ||
+        Math.sign(lastMonthsIOStatement.Expenses) === 0 ||
+        Math.sign(thisMonthsIOStatement.Expenses) ===
+          Math.sign(lastMonthsIOStatement.Expenses)
         ? (
             ((thisMonthsIOStatement.Expenses - lastMonthsIOStatement.Expenses) /
               lastMonthsIOStatement.Expenses) *
@@ -993,6 +997,7 @@ function MyComponent() {
                           console.log(result.ioStatement);
                           result.ioStatement &&
                             setIOStatement(result.ioStatement);
+                          getExpenses();
                         })
                         .catch(() => {
                           setIOStatement([
@@ -1547,7 +1552,7 @@ function MyComponent() {
                   margin: "10px",
                 }}
                 onChange={(e) => {
-                  setSelectedIO("");
+                  //setSelectedIO("");
                   setSelectedDate(e.target.value);
                 }}
               >
