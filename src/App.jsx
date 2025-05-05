@@ -609,6 +609,7 @@ function MyComponent() {
                 found
                   ? {
                       ...x,
+                      Amount: found.Amount + x.Amount,
                     }
                   : {
                       ...x,
