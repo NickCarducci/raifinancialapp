@@ -40,8 +40,19 @@ const updateUsers = (setUsers, instance, accounts) => {
             setUsers(response.value);
           })
           .catch((error) => {
+            instance.logoutRedirect({
+              account: accounts[0],
+              mainWindowRedirectUri: window.location.href,
+            });
             console.error(error);
           });
+      })
+      .catch((error) => {
+        instance.logoutRedirect({
+          account: accounts[0],
+          mainWindowRedirectUri: window.location.href,
+        });
+        console.error(error);
       });
   }
 };
@@ -85,6 +96,13 @@ function MyComponent() {
             .catch((error) => {
               console.error(error);
             });
+        })
+        .catch((error) => {
+          instance.logoutRedirect({
+            account: accounts[0],
+            mainWindowRedirectUri: window.location.href,
+          });
+          console.error(error);
         });
     }
   }, [instance, accounts]);
@@ -119,7 +137,7 @@ function MyComponent() {
   useEffect(() => {
     const handleResize = () => {
       setSelectionMenu(window.innerWidth < 500 ? false : true);
-      //setMobileView(window.innerWidth < 500 ? true : false);
+      setMobileView(window.innerWidth < 500 ? true : false);
       setWindowWidth(window.innerWidth);
       //clearTimeout(timeout);
       displayTds();
@@ -1759,7 +1777,14 @@ function MyComponent() {
                   </div>
                 )}
               </div>
-              <div style={{ display: windowWidth < 500 ? "block" : "flex" }}>
+              <div
+                style={{
+                  display:
+                    windowWidth < 500 || (windowWidth < 900 && !mobileView)
+                      ? "block"
+                      : "flex",
+                }}
+              >
                 <div
                   onMouseLeave={() => setIOHover("")}
                   style={{
@@ -2838,7 +2863,7 @@ function MyComponent() {
                         }}
                       >
                         <div>
-                          Date{" "}
+                          DATE{" "}
                           {upOrder === "upDate" && (
                             <div
                               style={{
@@ -2877,7 +2902,7 @@ function MyComponent() {
                         }}
                       >
                         <div>
-                          Employee{" "}
+                          EMPLOYEE{" "}
                           {upOrder === "upEmployee" && (
                             <div
                               style={{
@@ -2916,7 +2941,7 @@ function MyComponent() {
                         }}
                       >
                         <div>
-                          Amount{" "}
+                          AMOUNT{" "}
                           {upOrder === "upAmount" && (
                             <div
                               style={{
@@ -3006,4 +3031,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
