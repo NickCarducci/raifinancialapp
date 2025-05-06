@@ -162,8 +162,7 @@ function MyComponent() {
       setSelectionHeight(selectionMenuRef.current.offsetHeight);
       if (!(window.innerWidth < 500))
         if (window.scrollY > window.innerHeight) {
-          //if (!mobileView)
-          setMobileView(true);
+          if (!mobileView) setMobileView(true);
           //
         }
 
