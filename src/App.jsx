@@ -2154,6 +2154,7 @@ function MyComponent() {
                     style={{
                       display: windowWidth < 300 ? "block" : "flex",
                       justifyContent: "center",
+                      alignItems: "flex-start",
                     }}
                   >
                     <div
@@ -2539,7 +2540,7 @@ function MyComponent() {
                             cursor: "pointer",
                           }}
                         >
-                          CATEGORY
+                          <div>CATEGORY</div>
                         </td>
                         <td
                           style={{
@@ -2549,7 +2550,7 @@ function MyComponent() {
                             cursor: "pointer",
                           }}
                         >
-                          AMOUNT
+                          <div>AMOUNT</div>
                         </td>
                       </tr>
                     )}
@@ -2601,8 +2602,12 @@ function MyComponent() {
                       if (selectedDate === null || doesntMatch) return null;
                       return (
                         <tr key={i + x.Date}>
-                          <td>{x.Category}</td>
-                          <td>${addCommas(String(x.Amount.toFixed(2)))}</td>
+                          <td>
+                            <div>{x.Category}</div>
+                          </td>
+                          <td>
+                            <div>${addCommas(String(x.Amount.toFixed(2)))}</div>
+                          </td>
                         </tr>
                       );
                     })}
@@ -3304,7 +3309,8 @@ function MyComponent() {
                 <div
                   style={{
                     margin: "20px 60px",
-                    width: windowWidth - windowWidth / 3,
+                    width:
+                      windowWidth < 500 ? windowWidth - windowWidth / 3 : 300,
                   }}
                 >
                   {pieChart()}
