@@ -524,8 +524,10 @@ function MyComponent() {
       : 0;
   const changeInNetProfit =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.NetProfit) ===
-        Math.sign(lastMonthsIOStatement.NetProfit)
+      ? Math.sign(thisMonthsIOStatement.NetProfit) === 0 ||
+        Math.sign(lastMonthsIOStatement.NetProfit) === 0 ||
+        Math.sign(thisMonthsIOStatement.NetProfit) ===
+          Math.sign(lastMonthsIOStatement.NetProfit)
         ? (
             ((thisMonthsIOStatement.NetProfit -
               lastMonthsIOStatement.NetProfit) /
@@ -2600,7 +2602,7 @@ function MyComponent() {
                       return (
                         <tr key={i + x.Date}>
                           <td>{x.Category}</td>
-                          <td>${addCommas(String(x.Amount))}</td>
+                          <td>${addCommas(String(x.Amount.toFixed(2)))}</td>
                         </tr>
                       );
                     })}
