@@ -571,9 +571,6 @@ function MyComponent() {
             var revenueByQuarter = [];
             var revenueByYear = [];
             result.revenue.forEach((x) => {
-              const found = revenueByQuarter.find(
-                (y) => y.Quarter === x.Quarter && y.Category === x.Category
-              );
               const thisQuarter =
                 new Date(x.Date).getFullYear() +
                 {
@@ -596,6 +593,9 @@ function MyComponent() {
                     ).getMonth() + 1
                   ).padStart(2, "0")
                 ];
+              const found = revenueByQuarter.find(
+                (y) => y.Quarter === thisQuarter && y.Category === x.Category
+              );
 
               if (!found)
                 revenueByQuarter.push({
@@ -605,21 +605,15 @@ function MyComponent() {
               revenueByQuarter = revenueByQuarter.filter(
                 (y) => y.Quarter !== thisQuarter || y.Category !== x.Category
               );
-              revenueByQuarter.push(
-                found
-                  ? {
-                      ...x,
-                      Amount: found.Amount + x.Amount,
-                    }
-                  : {
-                      ...x,
-                      Quarter: thisQuarter,
-                    }
-              );
-              const found1 = revenueByYear.find(
-                (y) => y.Year === x.Year && y.Category === x.Category
-              );
+              revenueByQuarter.push({
+                ...x,
+                Amount: (found ? found.Amount : 0) + x.Amount,
+                Quarter: thisQuarter,
+              });
               const year = new Date(x.Date).getFullYear();
+              const found1 = revenueByYear.find(
+                (y) => y.Year === year && y.Category === x.Category
+              );
               if (!found1)
                 revenueByYear.push({
                   ...x,
@@ -628,17 +622,11 @@ function MyComponent() {
               revenueByYear = revenueByYear.filter(
                 (y) => y.Year !== year || y.Category !== x.Category
               );
-              revenueByYear.push(
-                found1
-                  ? {
-                      ...x,
-                      Amount: found1.Amount + x.Amount,
-                    }
-                  : {
-                      ...x,
-                      Year: year,
-                    }
-              );
+              revenueByYear.push({
+                ...x,
+                Amount: (found1 ? found1.Amount : 0) + x.Amount,
+                Year: year,
+              });
             });
             setRevenueAmountsByYear(revenueByYear.map((x) => x.Amount));
             setRevenueAmountsByQuarter(revenueByQuarter.map((x) => x.Amount));
@@ -709,9 +697,6 @@ function MyComponent() {
             var expensesByQuarter = [];
             var expensesByYear = [];
             result.expenses.forEach((x) => {
-              const found = expensesByQuarter.find(
-                (y) => y.Quarter === x.Quarter && y.Category === x.Category
-              );
               const thisQuarter =
                 new Date(x.Date).getFullYear() +
                 {
@@ -735,6 +720,9 @@ function MyComponent() {
                   ).padStart(2, "0")
                 ];
 
+              const found = expensesByQuarter.find(
+                (y) => y.Quarter === thisQuarter && y.Category === x.Category
+              );
               if (!found)
                 expensesByQuarter.push({
                   ...x,
@@ -743,21 +731,15 @@ function MyComponent() {
               expensesByQuarter = expensesByQuarter.filter(
                 (y) => y.Quarter !== thisQuarter || y.Category !== x.Category
               );
-              expensesByQuarter.push(
-                found
-                  ? {
-                      ...x,
-                      Amount: found.Amount + x.Amount,
-                    }
-                  : {
-                      ...x,
-                      Quarter: thisQuarter,
-                    }
-              );
-              const found1 = expensesByYear.find(
-                (y) => y.Year === x.Year && y.Category === x.Category
-              );
+              expensesByQuarter.push({
+                ...x,
+                Amount: (found ? found.Amount : 0) + x.Amount,
+                Quarter: thisQuarter,
+              });
               const year = new Date(x.Date).getFullYear();
+              const found1 = expensesByYear.find(
+                (y) => y.Year === year && y.Category === x.Category
+              );
               if (!found1)
                 expensesByYear.push({
                   ...x,
@@ -766,17 +748,11 @@ function MyComponent() {
               expensesByYear = expensesByYear.filter(
                 (y) => y.Year !== year || y.Category !== x.Category
               );
-              expensesByYear.push(
-                found1
-                  ? {
-                      ...x,
-                      Amount: found1.Amount + x.Amount,
-                    }
-                  : {
-                      ...x,
-                      Year: year,
-                    }
-              );
+              expensesByYear.push({
+                ...x,
+                Amount: (found1 ? found1.Amount : 0) + x.Amount,
+                Year: year,
+              });
             });
             setExpensesAmountsByYear(expensesByYear.map((x) => x.Amount));
             setExpensesAmountsByQuarter(expensesByQuarter.map((x) => x.Amount));
