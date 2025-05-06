@@ -793,33 +793,7 @@ function MyComponent() {
   const [needsRelinkList, setNeedsRelinkList] = useState([]);
   const [needsRelink, setNeedsRelink] = useState({ ID: -1 });
 
-  useEffect(() => {
-    return () => {};
-    ///api/needs_relink?userId=1
-    authenticatedUser &&
-      fetch("https://raifinancial.azurewebsites.net/api/needsrelinklist")
-        .then(async (res) => await res.json())
-        .then((result) => {
-          if (result.needsRelinkList.length > 0) {
-            setNeedsRelinkList(result.needsRelinkList);
-          }
-        })
-        .catch((e) => console.log(e.message));
-  }, [authenticatedUser]);
   const [linkToken, setLinkToken] = useState(null);
-  useEffect(() => {
-    return () => {};
-    ///api/create_link_token
-    authenticatedUser &&
-      fetch("https://raifinancial.azurewebsites.net/api/get_link_token", {
-        method: "GET",
-      })
-        .then(async (res) => await res.json())
-        .then((result) => {
-          setLinkToken(result.link_token);
-        })
-        .catch((e) => console.log(e.message));
-  }, [authenticatedUser]);
   const config = {
     token: linkToken,
     onSuccess: (public_token, metadata) => {
@@ -1459,13 +1433,11 @@ function MyComponent() {
 
               <div
                 style={{
-                  backgroundColor: "yellow",
                   padding: "1em",
                   marginBottom: "1em",
-                  display: "none",
                 }}
               >
-                {needsRelinkList.length > 0 && (
+                {needsRelinkList.length > 0 ? (
                   <div>
                     ⚠️ Please reconnect the following bank(s):{" "}
                     {needsRelinkList.map((x) => {
@@ -1482,16 +1454,85 @@ function MyComponent() {
                       );
                     })}
                   </div>
+                ) : (
+                  authenticatedUser && (
+                    <button
+                      onClick={() => {
+                        ///api/needs_relink?userId=1
+                        instance
+                          .acquireTokenSilent({
+                            ...loginRequest,
+                            account: accounts[0],
+                          })
+                          .then((response) => {
+                            fetch(
+                              "https://raifinancial.azurewebsites.net/api/needsrelinklist",
+                              {
+                                method: "GET",
+                                headers: {
+                                  Authorization: "Bearer " + response.idToken,
+                                  "Content-Type": "application/JSON",
+                                },
+                              }
+                            )
+                              .then(async (res) => await res.json())
+                              .then(async (result) => {
+                                if (result.code === 401) {
+                                  return await instance.acquireTokenRedirect({
+                                    account: accounts[0],
+                                    forceRefresh: true,
+                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                  });
+                                }
+                                if (result.needsRelinkList.length > 0) {
+                                  setNeedsRelinkList(result.needsRelinkList);
+                                }
+                              })
+                              .catch((e) => console.log(e.message));
+                            ///api/create_link_token
+                            fetch(
+                              "https://raifinancial.azurewebsites.net/api/get_link_token",
+                              {
+                                method: "POST",
+                                headers: {
+                                  Authorization: "Bearer " + response.idToken,
+                                  "Content-Type": "application/JSON",
+                                },
+                                body: JSON.stringify({
+                                  referer: window.location.href,
+                                }),
+                              }
+                            )
+                              .then(async (res) => await res.json())
+                              .then(async (result) => {
+                                if (result.code === 401) {
+                                  return await instance.acquireTokenRedirect({
+                                    account: accounts[0],
+                                    forceRefresh: true,
+                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                  });
+                                }
+                                setLinkToken(result.link_token);
+                              })
+                              .catch((e) => console.log(e.message));
+                          });
+                      }}
+                    >
+                      Bank Accounts
+                    </button>
+                  )
                 )}
-                <button
-                  onClick={() => {
-                    openPlaid();
-                    setNeedsRelink({ ID: -1 });
-                  }}
-                  disabled={!readyPlaid || !linkTokenPlaid}
-                >
-                  Connect New Bank Account
-                </button>
+                {readyPlaid && linkTokenPlaid && (
+                  <button
+                    onClick={() => {
+                      openPlaid();
+                      setNeedsRelink({ ID: -1 });
+                    }}
+                    disabled={!readyPlaid || !linkTokenPlaid}
+                  >
+                    Connect New Bank Account
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -2847,14 +2888,14 @@ function MyComponent() {
                                     (a, b) =>
                                       new Date(a.Date) - new Date(b.Date)
                                   );
-                            setGeneralLedger(gL);
-                            const generalLedger = gL.filter((x) => {
+                            const generalLedger2 = gL.filter((x) => {
                               if (x.Category === "End of month balance")
                                 return false;
                               return true;
                             });
+                            setGeneralLedger(generalLedger2);
                             var generalLedgerTicks = [];
-                            generalLedger.forEach((x, i) => {
+                            generalLedger2.forEach((x, i) => {
                               var found = generalLedgerTicks.find(
                                 (y) => y[x.Date.split("T")[0]]
                               );
@@ -3292,6 +3333,11 @@ function MyComponent() {
           )}
           {selection === "Payroll" && (
             <div
+              /*onScroll={(e) => {
+                if (!mobileView) {
+                  setMobileView(e.target.scrollLeft > 300);
+                }
+              }}*/
               style={{
                 alignItems: "flex-start",
                 display:
