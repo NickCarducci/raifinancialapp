@@ -1141,6 +1141,7 @@ function MyComponent() {
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
                 onClick={() => {
+                  setSelectedFrequency("Monthly");
                   setSelectedIO("");
                   setSelectedDate(null);
                   setRevenue(null);
@@ -1911,7 +1912,7 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioStatement
+                        {thisMonthsIOStatement
                           ? !selectedDate
                             ? ""
                             : addCommas(
@@ -1972,7 +1973,7 @@ function MyComponent() {
                       </div>
                       <div style={{ fontWeight: "bolder" }}>
                         $
-                        {ioStatement
+                        {thisMonthsIOStatement
                           ? !selectedDate
                             ? ""
                             : addCommas(
