@@ -2159,6 +2159,8 @@ function MyComponent() {
                   >
                     <div
                       style={{
+                        height:
+                          windowWidth < 500 ? (windowWidth - 60) / 2 : "200px",
                         width:
                           windowWidth < 500 ? (windowWidth - 60) / 2 : "200px",
                         marginRight: "30px",
