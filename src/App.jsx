@@ -815,7 +815,6 @@ function MyComponent() {
                   ItemId: x.id,
                   BankName: metadata.institution.name,
                   NeedsRelink: null,
-                  AccessToken: result.access_token,
                 };
             fetch(
               "https://raifinancial.azurewebsites.net/api/updateuserbanktoken",
@@ -1459,9 +1458,10 @@ function MyComponent() {
                       </div>
                       {bankAccounts.map((x) => {
                         return (
-                          <div disabled={!readyPlaid || !linkTokenPlaid}>
+                          <div>
                             {x.NeedsRelink && (
                               <button
+                                disabled={!readyPlaid || !linkTokenPlaid}
                                 onClick={() => {
                                   setNeedsRelink(x);
                                   openPlaid();
