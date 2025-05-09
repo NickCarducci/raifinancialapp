@@ -40,18 +40,10 @@ const updateUsers = (setUsers, instance, accounts) => {
             setUsers(response.value);
           })
           .catch((error) => {
-            instance.logoutRedirect({
-              account: accounts[0],
-              mainWindowRedirectUri: window.location.href,
-            });
             console.error(error);
           });
       })
       .catch((error) => {
-        instance.logoutRedirect({
-          account: accounts[0],
-          mainWindowRedirectUri: window.location.href,
-        });
         console.error(error);
       });
   }
@@ -98,10 +90,11 @@ function MyComponent() {
             });
         })
         .catch((error) => {
-          instance.logoutRedirect({
+          window.location.reload();
+          /*instance.logoutRedirect({
             account: accounts[0],
             mainWindowRedirectUri: window.location.href,
-          });
+          });*/
           console.error(error);
         });
     }
@@ -790,12 +783,12 @@ function MyComponent() {
           });
       });
   };
-  const [needsRelinkList, setNeedsRelinkList] = useState([]);
-  const [needsRelink, setNeedsRelink] = useState({ ID: -1 });
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [needsRelink, setNeedsRelink] = useState(false);
 
-  const [linkToken, setLinkToken] = useState(null);
+  const [linkTokenPlaid, setLinkToken] = useState(null);
   const config = {
-    token: linkToken,
+    token: linkTokenPlaid,
     onSuccess: (public_token, metadata) => {
       // Handle successful connection
       console.log("public_token", public_token);
@@ -814,29 +807,36 @@ function MyComponent() {
         .then((result) => {
           console.log("access_token", result.access_token);
           //console.log("item_id", result.item_id);
-          var needsRelinkWithOrWithoutID = needsRelink;
-          if (needsRelinkWithOrWithoutID.ID === -1) {
-            delete needsRelinkWithOrWithoutID.ID;
-          }
-          fetch(
-            "https://raifinancial.azurewebsites.net/api/updateuserbanktoken",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                ...needsRelinkWithOrWithoutID,
-                AccessToken: result.access_token,
-              }),
-            }
-          )
-            .then(async (res) => await res.json())
-            .then((resu) => {
-              console.log("Updated access_token for item " + resu.item_id);
-              setNeedsRelink({ ID: -1 });
-            })
-            .catch((e) => console.log(e.message));
+          metadata.accounts.forEach(async (x) => {
+            var needsRelinkWithOrWithoutID = needsRelink
+              ? needsRelink
+              : {
+                  UserId: "1",
+                  ItemId: x.id,
+                  BankName: metadata.institution.name,
+                  NeedsRelink: null,
+                  AccessToken: result.access_token,
+                };
+            fetch(
+              "https://raifinancial.azurewebsites.net/api/updateuserbanktoken",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  ...needsRelinkWithOrWithoutID,
+                  AccessToken: result.access_token,
+                }),
+              }
+            )
+              .then(async (res) => await res.json())
+              .then((resu) => {
+                console.log("Updated access_token for item " + resu.item_id);
+                setNeedsRelink(false);
+              })
+              .catch((e) => console.log(e.message));
+          });
         })
         .catch((e) => console.log(e.message));
     },
@@ -904,6 +904,7 @@ function MyComponent() {
       expensesByYear.find((x) => {
         return x.Color || x.Year === selectedDate;
       }));
+  const [showBankAccounts, setShowBankAccounts] = useState(false);
   return (
     <div
       style={{
@@ -1437,27 +1438,55 @@ function MyComponent() {
                   marginBottom: "1em",
                 }}
               >
-                {needsRelinkList.length > 0 ? (
-                  <div>
-                    ⚠️ Please reconnect the following bank(s):{" "}
-                    {needsRelinkList.map((x) => {
-                      return (
-                        <button
-                          onClick={() => {
-                            openPlaid();
-                            setNeedsRelink(x);
-                          }}
-                          disabled={!readyPlaid || !linkTokenPlaid}
-                        >
-                          Reconnect {x.BankName}
-                        </button>
-                      );
-                    })}
-                  </div>
+                {showBankAccounts ? (
+                  bankAccounts.length > 0 ? (
+                    <div style={{ display: "block" }}>
+                      <div
+                        onClick={() => {
+                          setShowBankAccounts(false);
+                          setBankAccounts([]);
+                          setNeedsRelink(false);
+                        }}
+                        style={{
+                          width: "min-content",
+                          margin: "10px",
+                          padding: "10px",
+                          borderRadius: "6px",
+                          border: "2px solid",
+                        }}
+                      >
+                        &times;
+                      </div>
+                      {bankAccounts.map((x) => {
+                        return (
+                          <div disabled={!readyPlaid || !linkTokenPlaid}>
+                            {x.NeedsRelink && (
+                              <button
+                                onClick={() => {
+                                  setNeedsRelink(x);
+                                  openPlaid();
+                                }}
+                              >
+                                <span role="img" aria-label="hazard-sign">
+                                  ⚠️
+                                </span>
+                                {space}Reconnect
+                              </button>
+                            )}
+                            {space}
+                            {x.BankName}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    "No bank account is connected yet."
+                  )
                 ) : (
                   authenticatedUser && (
                     <button
                       onClick={() => {
+                        setShowBankAccounts(true);
                         ///api/needs_relink?userId=1
                         instance
                           .acquireTokenSilent({
@@ -1466,7 +1495,7 @@ function MyComponent() {
                           })
                           .then((response) => {
                             fetch(
-                              "https://raifinancial.azurewebsites.net/api/needsrelinklist",
+                              "https://raifinancial.azurewebsites.net/api/userbanktokens",
                               {
                                 method: "GET",
                                 headers: {
@@ -1484,8 +1513,8 @@ function MyComponent() {
                                     refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
                                   });
                                 }
-                                if (result.needsRelinkList.length > 0) {
-                                  setNeedsRelinkList(result.needsRelinkList);
+                                if (result.userBankTokens.length > 0) {
+                                  setBankAccounts(result.userBankTokens);
                                 }
                               })
                               .catch((e) => console.log(e.message));
@@ -1522,16 +1551,18 @@ function MyComponent() {
                     </button>
                   )
                 )}
-                {readyPlaid && linkTokenPlaid && (
+                {readyPlaid && linkTokenPlaid ? (
                   <button
                     onClick={() => {
+                      setNeedsRelink(false);
                       openPlaid();
-                      setNeedsRelink({ ID: -1 });
                     }}
                     disabled={!readyPlaid || !linkTokenPlaid}
                   >
                     Connect New Bank Account
                   </button>
+                ) : (
+                  showBankAccounts && "Connecting to plaid..."
                 )}
               </div>
             </div>
