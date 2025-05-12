@@ -91,10 +91,10 @@ function MyComponent() {
         })
         .catch((error) => {
           //window.location.reload();
-          /*instance.logoutRedirect({
+          instance.logoutRedirect({
             account: accounts[0],
             mainWindowRedirectUri: window.location.href,
-          });*/
+          });
           console.error(error);
         });
     }
