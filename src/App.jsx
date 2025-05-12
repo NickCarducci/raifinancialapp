@@ -429,7 +429,7 @@ function MyComponent() {
             })
             .reverse(),
           borderWidth: 1,
-          backgroundColor: "green",
+          backgroundColor: "sandybrown",
         },
         {
           label: "Expenses",
@@ -447,7 +447,7 @@ function MyComponent() {
             })
             .reverse(),
           borderWidth: 1,
-          backgroundColor: "red",
+          backgroundColor: "salmon",
         },
       ],
     };
@@ -1950,11 +1950,14 @@ function MyComponent() {
                             : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
+                        transform: `translateY(${
+                          ioHover === "Revenue" ? "-10px" : "0px"
+                        })`,
                         boxShadow:
                           ioHover === "Revenue"
                             ? "5px 5px 5px 1px rgb(0,0,0,.2)"
                             : "",
-                        transition: ".3s ease-in",
+                        transition: ".2s ease-out",
                       }}
                     >
                       <div
@@ -1993,8 +1996,8 @@ function MyComponent() {
                             changeInTotalRevenue === 0
                               ? "grey"
                               : changeInTotalRevenue > 0
-                              ? "green"
-                              : "red",
+                              ? "mediumseagreen"
+                              : "crimson",
                         }}
                       >
                         {Number(changeInTotalRevenue) >= 0 ? (
@@ -2032,11 +2035,14 @@ function MyComponent() {
                             : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
+                        transform: `translateY(${
+                          ioHover === "Expenses" ? "-10px" : "0px"
+                        })`,
                         boxShadow:
                           ioHover === "Expenses"
                             ? "5px 5px 5px 1px rgb(0,0,0,.2)"
                             : "",
-                        transition: ".3s ease-in",
+                        transition: ".2s ease-out",
                       }}
                     >
                       <div
@@ -2075,8 +2081,8 @@ function MyComponent() {
                             changeInTotalExpenses === 0
                               ? "grey"
                               : changeInTotalExpenses > 0
-                              ? "green"
-                              : "red",
+                              ? "mediumseagreen"
+                              : "crimson",
                         }}
                       >
                         {Number(changeInTotalExpenses) >= 0 ? (
@@ -2113,11 +2119,14 @@ function MyComponent() {
                             : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
+                        transform: `translateY(${
+                          ioHover === "Profit" ? "-10px" : "0px"
+                        })`,
                         boxShadow:
                           ioHover === "Profit"
                             ? "5px 5px 5px 1px rgb(0,0,0,.2)"
                             : "",
-                        transition: ".3s ease-in",
+                        transition: ".2s ease-out",
                       }}
                     >
                       <div
@@ -2156,8 +2165,8 @@ function MyComponent() {
                             changeInNetProfit === 0
                               ? "grey"
                               : changeInNetProfit > 0
-                              ? "green"
-                              : "red",
+                              ? "mediumseagreen"
+                              : "crimson",
                         }}
                       >
                         {Number(changeInNetProfit) >= 0 ? (
@@ -2198,7 +2207,7 @@ function MyComponent() {
                     padding: "10px",
                   }}
                 >
-                  <div style={{ paddingBottom: "20px" }}>
+                  <div style={{ paddingBottom: "20px", fontWeight: "bolder" }}>
                     <select
                       value={selectedFrequency}
                       style={{ position: "absolute", right: "10px" }}
@@ -2277,38 +2286,70 @@ function MyComponent() {
                     </select>
                     Revenue vs Expenses
                   </div>
-                  {ioStatement && (
-                    <Bar
-                      options={{
-                        onClick: (event, elements) => {
-                          if (elements.length > 0) {
-                            const elementIndex = elements[0].index;
-                            const datasetIndex = elements[0].datasetIndex;
-                            const value =
-                              barChartData.datasets[datasetIndex].data[
-                                elementIndex
-                              ];
-                            const label =
-                              barChartData.datasets[datasetIndex].label;
-                            //const label = barChartData.labels[elementIndex];
-                            console.log(label);
-                            setSelectedIO(label);
-                            if (label === "Revenue") {
-                              getRevenue();
-                            } else if (label === "Expenses") {
-                              getExpenses();
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div style={{ display: "flex" }}>
+                      <div style={{ display: "flex" }}>
+                        <div
+                          style={{
+                            margin: "0px 10px",
+                            width: "40px",
+                            height: "20px",
+                            backgroundColor: "sandybrown",
+                          }}
+                        ></div>
+                        Revenue
+                      </div>
+                      <div style={{ display: "flex" }}>
+                        <div
+                          style={{
+                            margin: "0px 10px",
+                            width: "40px",
+                            height: "20px",
+                            backgroundColor: "salmon",
+                          }}
+                        ></div>
+                        Expenses
+                      </div>
+                    </div>
+                    {ioStatement && (
+                      <Bar
+                        options={{
+                          onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                              const elementIndex = elements[0].index;
+                              const datasetIndex = elements[0].datasetIndex;
+                              const value =
+                                barChartData.datasets[datasetIndex].data[
+                                  elementIndex
+                                ];
+                              const label =
+                                barChartData.datasets[datasetIndex].label;
+                              //const label = barChartData.labels[elementIndex];
+                              console.log(label);
+                              setSelectedIO(label);
+                              if (label === "Revenue") {
+                                getRevenue();
+                              } else if (label === "Expenses") {
+                                getExpenses();
+                              }
                             }
-                          }
-                        },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
                           },
-                        },
-                      }}
-                      data={barChartData}
-                    />
-                  )}
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                            },
+                          },
+                        }}
+                        data={barChartData}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div
                   onMouseLeave={() => setIOHover("")}
@@ -2324,7 +2365,11 @@ function MyComponent() {
                     display: "block",
                   }}
                 >
-                  <div>
+                  <div
+                    style={{
+                      fontWeight: "bolder",
+                    }}
+                  >
                     {selectedIO.substring(0, 1).toLocaleUpperCase() +
                       selectedIO.substring(1, selectedIO.length)}
                   </div>
