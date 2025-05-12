@@ -318,7 +318,7 @@ function MyComponent() {
   const pieChartColors = [
     "salmon",
     "red",
-    "orange",
+    "darkorange",
     "pink",
     "black",
     "blue",
@@ -904,6 +904,7 @@ function MyComponent() {
         return x.Color || x.Year === selectedDate;
       }));
   const [showBankAccounts, setShowBankAccounts] = useState(false);
+  const [hoverMobileView, setHoverMobileView] = useState(false);
   return (
     <div
       style={{
@@ -918,12 +919,12 @@ function MyComponent() {
           position: "relative",
           fontWeight: "bolder",
           color: "white",
-          backgroundColor: "orange",
+          backgroundColor: "darkorange",
           borderBottom: mobileView ? "5px solid rgba(0,0,0,.3)" : "",
           borderRight: !mobileView ? "5px solid rgba(0,0,0,.3)" : "",
           width: mobileView ? "100vw" : "300px",
           height: mobileView ? "min-content" : "100vh",
-          transition: ".3s ease-out",
+          transition: ".3s ease-in",
         }}
       >
         <div
@@ -935,16 +936,27 @@ function MyComponent() {
         >
           {!(windowWidth < 500) && (
             <div
+              onMouseEnter={() => {
+                setHoverMobileView(true);
+              }}
+              onMouseLeave={() => {
+                setHoverMobileView(false);
+              }}
               onClick={() => {
                 setSelectionMenu(mobileView ? true : false);
                 setMobileView(!mobileView);
               }}
               style={{
+                transition: ".3s ease-out",
                 right: "0px",
                 position: "absolute",
                 margin: "6px 0px",
-                borderLeft: "4px solid white",
-                borderBottom: "4px solid white",
+                borderLeft: hoverMobileView
+                  ? "4px solid white"
+                  : "4px solid antiquewhite",
+                borderBottom: hoverMobileView
+                  ? "4px solid white"
+                  : "4px solid antiquewhite",
                 height: "20px",
                 width: "20px",
                 borderRadius: "5px",
@@ -989,16 +1001,25 @@ function MyComponent() {
               ></div>
             </div>
           )}
-          <div style={{ padding: "10px" }}>RAI Finance</div>
+          <div
+            style={{
+              padding: "0px 10px",
+              paddingTop: "5px",
+              fontSize: windowWidth < 500 ? "" : "20px",
+            }}
+          >
+            RAI Finance
+          </div>
         </div>
         <div
           style={{
             display: selectionMenu ? "block" : "none",
             textAlign: "center",
-            margin: "10px",
+            margin: "20px",
+            marginBottom: "20px",
             borderRadius: "8px",
             padding: "10px",
-            backgroundColor: "rgba(250,250,250,0.25)",
+            backgroundColor: "rgba(250,250,250,0.15)",
           }}
         >
           {accounts[0] ? (
@@ -1024,7 +1045,7 @@ function MyComponent() {
                     width: "10px",
                     height: "10px",
                     borderRadius: "10px",
-                    backgroundColor: "orange",
+                    backgroundColor: "darkorange",
                   }}
                 ></div>
                 <div
@@ -1033,7 +1054,7 @@ function MyComponent() {
                     height: "12px",
                     borderTopLeftRadius: "8px",
                     borderTopRightRadius: "8px",
-                    backgroundColor: "orange",
+                    backgroundColor: "darkorange",
                   }}
                 ></div>
               </div>
@@ -1102,15 +1123,19 @@ function MyComponent() {
                 onMouseLeave={(e) => setSelector("")}
                 onMouseEnter={(e) => setSelector("I/S")}
                 style={{
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  padding: "6px 10px",
+                  margin: "0px 10px",
+                  borderRadius: "3px",
+
                   borderLeft: selection === "I/S" ? "2px solid white" : "",
-                  padding: "3px 10px",
-                  margin: "3px 10px",
-                  transition: ".3s ease-in",
+                  transition: ".3s ease-out",
                   backgroundColor:
-                    selection === "I/S" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration: selector === "I/S" ? "underline" : "none",
+                    selector === "I/S"
+                      ? "rgba(250,250,250,.15)"
+                      : selection === "I/S"
+                      ? "rgba(250,250,250,.3)"
+                      : "",
+                  //textDecoration: selector === "I/S" ? "underline" : "none",
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -1190,19 +1215,20 @@ function MyComponent() {
               <div
                 onMouseEnter={(e) => setSelector("General Ledger")}
                 style={{
-                  padding: "3px 10px",
-                  margin: "3px 10px",
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  padding: "6px 10px",
+                  margin: "0px 10px",
+                  borderRadius: "3px",
+
                   borderLeft:
                     selection === "General Ledger" ? "2px solid white" : "",
-                  transition: ".3s ease-in",
+                  transition: ".3s ease-out",
                   backgroundColor:
-                    selection === "General Ledger"
+                    selector === "General Ledger"
+                      ? "rgba(250,250,250,.15)"
+                      : selection === "General Ledger"
                       ? "rgba(250,250,250,.3)"
                       : "",
-                  textDecoration:
-                    selector === "General Ledger" ? "underline" : "none",
+                  //textDecoration:selector === "General Ledger" ? "underline" : "none",
                   listStyleType:
                     selector === "General Ledger" ? "initial" : "none",
                 }}
@@ -1216,15 +1242,19 @@ function MyComponent() {
               <div
                 onMouseEnter={(e) => setSelector("Charts")}
                 style={{
-                  padding: "3px 10px",
-                  margin: "3px 10px",
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  padding: "6px 10px",
+                  margin: "0px 10px",
+                  borderRadius: "3px",
+
                   borderLeft: selection === "Charts" ? "2px solid white" : "",
-                  transition: ".3s ease-in",
+                  transition: ".3s ease-out",
                   backgroundColor:
-                    selection === "Charts" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration: selector === "Charts" ? "underline" : "none",
+                    selector === "Charts"
+                      ? "rgba(250,250,250,.15)"
+                      : selection === "Charts"
+                      ? "rgba(250,250,250,.3)"
+                      : "",
+                  //textDecoration: selector === "Charts" ? "underline" : "none",
                   listStyleType: selector === "Charts" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -1237,16 +1267,19 @@ function MyComponent() {
               <div
                 onMouseEnter={(e) => setSelector("Balances")}
                 style={{
-                  padding: "3px 10px",
-                  margin: "3px 10px",
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  padding: "6px 10px",
+                  margin: "0px 10px",
+                  borderRadius: "3px",
+
                   borderLeft: selection === "Balances" ? "2px solid white" : "",
-                  transition: ".3s ease-in",
+                  transition: ".3s ease-out",
                   backgroundColor:
-                    selection === "Balances" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration:
-                    selector === "Balances" ? "underline" : "none",
+                    selector === "Balances"
+                      ? "rgba(250,250,250,.15)"
+                      : selection === "Balances"
+                      ? "rgba(250,250,250,.3)"
+                      : "",
+                  //textDecoration:selector === "Balances" ? "underline" : "none",
                   listStyleType: selector === "Balances" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -1299,15 +1332,19 @@ function MyComponent() {
               <div
                 onMouseEnter={(e) => setSelector("Payroll")}
                 style={{
-                  padding: "3px 10px",
-                  margin: "3px 10px",
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  padding: "6px 10px",
+                  margin: "0px 10px",
+                  borderRadius: "3px",
+
                   borderLeft: selection === "Payroll" ? "2px solid white" : "",
-                  transition: ".3s ease-in",
+                  transition: ".3s ease-out",
                   backgroundColor:
-                    selection === "Payroll" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration: selector === "Payroll" ? "underline" : "none",
+                    selector === "Payroll"
+                      ? "rgba(250,250,250,.15)"
+                      : selection === "Payroll"
+                      ? "rgba(250,250,250,.3)"
+                      : "",
+                  //textDecoration: selector === "Payroll" ? "underline" : "none",
                   listStyleType: selector === "Payroll" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -1411,16 +1448,19 @@ function MyComponent() {
               <div
                 onMouseEnter={(e) => setSelector("Invoices")}
                 style={{
-                  padding: "3px 10px",
-                  margin: "3px 10px",
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  padding: "6px 10px",
+                  margin: "0px 10px",
+                  borderRadius: "3px",
+
                   borderLeft: selection === "Invoices" ? "2px solid white" : "",
-                  transition: ".3s ease-in",
+                  transition: ".3s ease-out",
                   backgroundColor:
-                    selection === "Invoices" ? "rgba(250,250,250,.3)" : "",
-                  textDecoration:
-                    selector === "Invoices" ? "underline" : "none",
+                    selector === "Invoices"
+                      ? "rgba(250,250,250,.15)"
+                      : selection === "Invoices"
+                      ? "rgba(250,250,250,.3)"
+                      : "",
+                  //textDecoration:selector === "Invoices" ? "underline" : "none",
                   listStyleType: selector === "Invoices" ? "initial" : "none",
                 }}
                 onClick={() => {
@@ -1577,7 +1617,7 @@ function MyComponent() {
       >
         <div
           style={{
-            cursor: "pointer",
+            fontWeight: mobileView ? "" : "bolder",
             textIndent: "20px",
             padding: "20px 0px",
             width: mobileView ? "100%" : "calc(100vw - 300px)",
@@ -1593,7 +1633,7 @@ function MyComponent() {
               height: "40px",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "orange",
+              backgroundColor: "darkorange",
               borderRadius: "10px",
               position: "absolute",
               right: "0px",
@@ -1646,7 +1686,7 @@ function MyComponent() {
                         width: "10px",
                         height: "10px",
                         borderRadius: "10px",
-                        backgroundColor: "orange",
+                        backgroundColor: "darkorange",
                       }}
                     ></div>
                     <div
@@ -1655,7 +1695,7 @@ function MyComponent() {
                         height: "12px",
                         borderTopLeftRadius: "8px",
                         borderTopRightRadius: "8px",
-                        backgroundColor: "orange",
+                        backgroundColor: "darkorange",
                       }}
                     ></div>
                   </div>
@@ -1874,9 +1914,9 @@ function MyComponent() {
               <div
                 style={{
                   width: mobileView ? "100vw" : "calc(100vw - 300px)",
-                  overflowX: "auto",
+                  overflowX: windowWidth < 500 ? "" : "auto",
                   overflowY: "hidden",
-                  height: "170px",
+                  height: windowWidth < 500 ? "" : "170px",
                 }}
               >
                 {ioStatement === null ? (
@@ -1884,19 +1924,25 @@ function MyComponent() {
                 ) : ioStatement.length === 0 ? (
                   "No results"
                 ) : (
-                  <div style={{ display: "flex" }}>
+                  <div
+                    style={{
+                      display: windowWidth < 500 ? "block" : "flex",
+                    }}
+                  >
                     <div
                       onClick={getRevenue}
                       onMouseEnter={() => setIOHover("Revenue")}
                       onMouseLeave={() => setIOHover("")}
                       style={{
                         cursor: "pointer",
-                        borderLeft: "4px solid orange",
+                        borderLeft: "4px solid darkorange",
                         backgroundColor: "white",
                         borderRadius: "10px",
                         marginLeft: "20px",
+                        marginBottom: "20px",
                         textAlign: "left",
-                        width: "200px",
+                        width:
+                          windowWidth < 500 ? "calc(100% - 60px)" : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
                         boxShadow:
@@ -1906,20 +1952,26 @@ function MyComponent() {
                         transition: ".3s ease-in",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-end",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         Revenue
                         <div
                           class="fas fa-chart-line"
                           style={{
                             margin: "4px",
-                            color: "orange",
+                            color: "darkorange",
                             padding: "10px",
                             borderRadius: "8px",
                             backgroundColor: "peachpuff",
                           }}
                         ></div>
                       </div>
-                      <div style={{ fontWeight: "bolder" }}>
+                      <div style={{ fontWeight: "bolder", fontSize: "20px" }}>
                         $
                         {thisMonthsIOStatement
                           ? !selectedDate
@@ -1932,7 +1984,12 @@ function MyComponent() {
                       <div
                         style={{
                           width: "max-content",
-                          color: changeInTotalRevenue === 0 ? "grey" : "black",
+                          color:
+                            changeInTotalRevenue === 0
+                              ? "grey"
+                              : changeInTotalRevenue > 0
+                              ? "green"
+                              : "red",
                         }}
                       >
                         {Number(changeInTotalRevenue) >= 0 ? (
@@ -1953,12 +2010,14 @@ function MyComponent() {
                       onMouseLeave={() => setIOHover("")}
                       style={{
                         cursor: "pointer",
-                        borderLeft: "4px solid orange",
+                        borderLeft: "4px solid darkorange",
                         backgroundColor: "white",
                         borderRadius: "10px",
                         marginLeft: "20px",
+                        marginBottom: "20px",
                         textAlign: "left",
-                        width: "200px",
+                        width:
+                          windowWidth < 500 ? "calc(100% - 60px)" : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
                         boxShadow:
@@ -1968,20 +2027,26 @@ function MyComponent() {
                         transition: ".3s ease-in",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-end",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         Expenses
                         <div
                           class="fas fa-file-invoice-dollar"
                           style={{
                             margin: "4px",
-                            color: "orange",
+                            color: "darkorange",
                             padding: "10px",
                             borderRadius: "8px",
                             backgroundColor: "peachpuff",
                           }}
                         ></div>
                       </div>
-                      <div style={{ fontWeight: "bolder" }}>
+                      <div style={{ fontWeight: "bolder", fontSize: "20px" }}>
                         $
                         {thisMonthsIOStatement
                           ? !selectedDate
@@ -1994,7 +2059,12 @@ function MyComponent() {
                       <div
                         style={{
                           width: "max-content",
-                          color: changeInTotalExpenses === 0 ? "grey" : "black",
+                          color:
+                            changeInTotalExpenses === 0
+                              ? "grey"
+                              : changeInTotalExpenses > 0
+                              ? "green"
+                              : "red",
                         }}
                       >
                         {Number(changeInTotalExpenses) >= 0 ? (
@@ -2014,12 +2084,14 @@ function MyComponent() {
                       onMouseLeave={() => setIOHover("")}
                       style={{
                         cursor: "pointer",
-                        borderLeft: "4px solid orange",
+                        borderLeft: "4px solid darkorange",
                         backgroundColor: "white",
                         borderRadius: "10px",
                         marginLeft: "20px",
+                        marginBottom: "20px",
                         textAlign: "left",
-                        width: "200px",
+                        width:
+                          windowWidth < 500 ? "calc(100% - 60px)" : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
                         boxShadow:
@@ -2029,20 +2101,26 @@ function MyComponent() {
                         transition: ".3s ease-in",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-end",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         Profit
                         <div
                           class="fas fa-wallet"
                           style={{
                             margin: "4px",
-                            color: "orange",
+                            color: "darkorange",
                             padding: "10px",
                             borderRadius: "8px",
                             backgroundColor: "peachpuff",
                           }}
                         ></div>
                       </div>
-                      <div style={{ fontWeight: "bolder" }}>
+                      <div style={{ fontWeight: "bolder", fontSize: "20px" }}>
                         $
                         {thisMonthsIOStatement
                           ? !selectedDate
@@ -2055,7 +2133,12 @@ function MyComponent() {
                       <div
                         style={{
                           width: "max-content",
-                          color: changeInNetProfit === 0 ? "grey" : "black",
+                          color:
+                            changeInNetProfit === 0
+                              ? "grey"
+                              : changeInNetProfit > 0
+                              ? "green"
+                              : "red",
                         }}
                       >
                         {Number(changeInNetProfit) >= 0 ? (
@@ -2712,7 +2795,7 @@ function MyComponent() {
                   border:
                     "2px solid " + (hoverDivs === true ? "black" : "lightgrey"),
                   borderRadius: "10px",
-                  transition: ".3s ease-out",
+                  transition: ".3s ease-in",
                 }}
               >
                 <div
