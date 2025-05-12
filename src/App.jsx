@@ -1979,7 +1979,7 @@ function MyComponent() {
                           }}
                         ></div>
                       </div>
-                      <div style={{ fontWeight: "bolder", fontSize: "20px" }}>
+                      <div style={{ fontWeight: "bolder", fontSize: "30px" }}>
                         $
                         {thisMonthsIOStatement
                           ? !selectedDate
@@ -1991,7 +1991,7 @@ function MyComponent() {
                       </div>
                       <div
                         style={{
-                          width: "max-content",
+                          width: !(windowWidth < 500) ? "150px" : "",
                           color:
                             changeInTotalRevenue === 0
                               ? "grey"
@@ -2064,7 +2064,7 @@ function MyComponent() {
                           }}
                         ></div>
                       </div>
-                      <div style={{ fontWeight: "bolder", fontSize: "20px" }}>
+                      <div style={{ fontWeight: "bolder", fontSize: "30px" }}>
                         $
                         {thisMonthsIOStatement
                           ? !selectedDate
@@ -2076,7 +2076,7 @@ function MyComponent() {
                       </div>
                       <div
                         style={{
-                          width: "max-content",
+                          width: !(windowWidth < 500) ? "150px" : "",
                           color:
                             changeInTotalExpenses === 0
                               ? "grey"
@@ -2148,7 +2148,7 @@ function MyComponent() {
                           }}
                         ></div>
                       </div>
-                      <div style={{ fontWeight: "bolder", fontSize: "20px" }}>
+                      <div style={{ fontWeight: "bolder", fontSize: "30px" }}>
                         $
                         {thisMonthsIOStatement
                           ? !selectedDate
@@ -2160,7 +2160,7 @@ function MyComponent() {
                       </div>
                       <div
                         style={{
-                          width: "max-content",
+                          width: !(windowWidth < 500) ? "150px" : "",
                           color:
                             changeInNetProfit === 0
                               ? "grey"
