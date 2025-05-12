@@ -90,7 +90,7 @@ function MyComponent() {
             });
         })
         .catch((error) => {
-          window.location.reload();
+          //window.location.reload();
           /*instance.logoutRedirect({
             account: accounts[0],
             mainWindowRedirectUri: window.location.href,
