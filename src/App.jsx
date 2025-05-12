@@ -490,12 +490,12 @@ function MyComponent() {
             ((thisMonthsIOStatement.Revenue - lastMonthsIOStatement.Revenue) /
               lastMonthsIOStatement.Revenue) *
             100
-          ).toFixed(2)
+          ).toFixed(1)
         : (
             ((thisMonthsIOStatement.Revenue + lastMonthsIOStatement.Revenue) /
               lastMonthsIOStatement.Revenue) *
             100
-          ).toFixed(2)
+          ).toFixed(1)
       : 0;
   const changeInTotalExpenses =
     thisMonthsIOStatement && lastMonthsIOStatement
@@ -507,12 +507,12 @@ function MyComponent() {
             ((thisMonthsIOStatement.Expenses - lastMonthsIOStatement.Expenses) /
               lastMonthsIOStatement.Expenses) *
             100
-          ).toFixed(2)
+          ).toFixed(1)
         : (
             ((thisMonthsIOStatement.Expenses + lastMonthsIOStatement.Expenses) /
               lastMonthsIOStatement.Expenses) *
             100
-          ).toFixed(2)
+          ).toFixed(1)
       : 0;
   const changeInNetProfit =
     thisMonthsIOStatement && lastMonthsIOStatement
@@ -525,13 +525,13 @@ function MyComponent() {
               lastMonthsIOStatement.NetProfit) /
               lastMonthsIOStatement.NetProfit) *
             100
-          ).toFixed(2)
+          ).toFixed(1)
         : (
             ((Math.abs(thisMonthsIOStatement.NetProfit) +
               Math.abs(lastMonthsIOStatement.NetProfit)) /
               thisMonthsIOStatement.NetProfit) *
             100
-          ).toFixed(2)
+          ).toFixed(1)
       : 0;
   const getRevenue = () => {
     setSelectedIO("revenue");
@@ -1914,9 +1914,9 @@ function MyComponent() {
               <div
                 style={{
                   width: mobileView ? "100vw" : "calc(100vw - 300px)",
-                  overflowX: windowWidth < 500 ? "" : "auto",
-                  overflowY: "hidden",
-                  height: windowWidth < 500 ? "" : "170px",
+                  //overflowX: windowWidth < 500 ? "" : "auto",
+                  //overflowY: "hidden",
+                  //height: windowWidth < 500 ? "" : "170px",
                 }}
               >
                 {ioStatement === null ? (
@@ -1926,6 +1926,7 @@ function MyComponent() {
                 ) : (
                   <div
                     style={{
+                      flexWrap: "wrap",
                       display: windowWidth < 500 ? "block" : "flex",
                     }}
                   >
@@ -1942,7 +1943,11 @@ function MyComponent() {
                         marginBottom: "20px",
                         textAlign: "left",
                         width:
-                          windowWidth < 500 ? "calc(100% - 60px)" : "200px",
+                          !mobileView && windowWidth - 300 < 500
+                            ? "calc(100vw - 360px)"
+                            : windowWidth < 500
+                            ? "calc(100% - 60px)"
+                            : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
                         boxShadow:
@@ -1977,7 +1982,7 @@ function MyComponent() {
                           ? !selectedDate
                             ? ""
                             : addCommas(
-                                thisMonthsIOStatement.Revenue.toFixed(2)
+                                thisMonthsIOStatement.Revenue.toFixed(0)
                               )
                           : "-"}
                       </div>
@@ -2001,7 +2006,10 @@ function MyComponent() {
                         {changeInTotalRevenue === 0
                           ? "-"
                           : changeInTotalRevenue}
-                        %
+                        % vs last{space}
+                        {selectedFrequency
+                          .toLocaleLowerCase()
+                          .substring(0, selectedFrequency.length - 2)}
                       </div>
                     </div>
                     <div
@@ -2017,7 +2025,11 @@ function MyComponent() {
                         marginBottom: "20px",
                         textAlign: "left",
                         width:
-                          windowWidth < 500 ? "calc(100% - 60px)" : "200px",
+                          !mobileView && windowWidth - 300 < 500
+                            ? "calc(100vw - 360px)"
+                            : windowWidth < 500
+                            ? "calc(100% - 60px)"
+                            : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
                         boxShadow:
@@ -2052,7 +2064,7 @@ function MyComponent() {
                           ? !selectedDate
                             ? ""
                             : addCommas(
-                                thisMonthsIOStatement.Expenses.toFixed(2)
+                                thisMonthsIOStatement.Expenses.toFixed(0)
                               )
                           : "-"}
                       </div>
@@ -2076,7 +2088,10 @@ function MyComponent() {
                         {changeInTotalExpenses === 0
                           ? "-"
                           : changeInTotalExpenses}
-                        %
+                        % vs last{space}
+                        {selectedFrequency
+                          .toLocaleLowerCase()
+                          .substring(0, selectedFrequency.length - 2)}
                       </div>
                     </div>
                     <div
@@ -2091,7 +2106,11 @@ function MyComponent() {
                         marginBottom: "20px",
                         textAlign: "left",
                         width:
-                          windowWidth < 500 ? "calc(100% - 60px)" : "200px",
+                          !mobileView && windowWidth - 300 < 500
+                            ? "calc(100vw - 360px)"
+                            : windowWidth < 500
+                            ? "calc(100% - 60px)"
+                            : "200px",
                         padding: "40px 10px",
                         paddingTop: "30px",
                         boxShadow:
@@ -2126,7 +2145,7 @@ function MyComponent() {
                           ? !selectedDate
                             ? ""
                             : addCommas(
-                                thisMonthsIOStatement.NetProfit.toFixed(2)
+                                thisMonthsIOStatement.NetProfit.toFixed(0)
                               )
                           : "-"}
                       </div>
@@ -2147,7 +2166,11 @@ function MyComponent() {
                           <span class="fa fa-arrow-trend-down"></span>
                         )}
                         {space}
-                        {changeInNetProfit === 0 ? "-" : changeInNetProfit}%
+                        {changeInNetProfit === 0 ? "-" : changeInNetProfit}% vs
+                        last{space}
+                        {selectedFrequency
+                          .toLocaleLowerCase()
+                          .substring(0, selectedFrequency.length - 2)}
                       </div>
                     </div>
                   </div>
@@ -3685,3 +3708,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
