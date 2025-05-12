@@ -1207,7 +1207,6 @@ function MyComponent() {
                           ]);
                         });
                     });
-                  getGeneralLedger();
                 }}
               >
                 <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
@@ -1948,8 +1947,8 @@ function MyComponent() {
                             : windowWidth < 500
                             ? "calc(100% - 60px)"
                             : "200px",
-                        padding: "40px 10px",
-                        paddingTop: "30px",
+                        padding: "10px",
+                        paddingBottom: "20px",
                         transform: `translateY(${
                           ioHover === "Revenue" ? "-10px" : "0px"
                         })`,
@@ -2033,8 +2032,8 @@ function MyComponent() {
                             : windowWidth < 500
                             ? "calc(100% - 60px)"
                             : "200px",
-                        padding: "40px 10px",
-                        paddingTop: "30px",
+                        padding: "10px",
+                        paddingBottom: "20px",
                         transform: `translateY(${
                           ioHover === "Expenses" ? "-10px" : "0px"
                         })`,
@@ -2117,8 +2116,8 @@ function MyComponent() {
                             : windowWidth < 500
                             ? "calc(100% - 60px)"
                             : "200px",
-                        padding: "40px 10px",
-                        paddingTop: "30px",
+                        padding: "10px",
+                        paddingBottom: "20px",
                         transform: `translateY(${
                           ioHover === "Profit" ? "-10px" : "0px"
                         })`,
@@ -2203,7 +2202,12 @@ function MyComponent() {
                     margin: "20px",
                     marginRight: "0px",
                     textAlign: "left",
-                    width: windowWidth < 500 ? windowWidth - 60 : "400px",
+                    width:
+                      windowWidth < 500
+                        ? windowWidth < 200
+                          ? "200px"
+                          : windowWidth - 60
+                        : "400px",
                     padding: "10px",
                   }}
                 >
@@ -2360,7 +2364,12 @@ function MyComponent() {
                     margin: "20px",
                     marginRight: "0px",
                     textAlign: "left",
-                    width: windowWidth < 500 ? windowWidth - 60 : "400px",
+                    width:
+                      windowWidth < 500
+                        ? windowWidth < 200
+                          ? "200px"
+                          : windowWidth - 60
+                        : "400px",
                     padding: "10px",
                     display: "block",
                   }}
@@ -2966,20 +2975,31 @@ function MyComponent() {
                   display: selection !== "I/S" ? "flex" : "none",
                 }}
               >
-                <span
-                  class="fa fa-refresh"
-                  style={{
-                    marginLeft: "20px",
-                    marginRight: "10px",
-                    padding: "6px",
-                    borderRadius: "10px",
-                    border: "1px solid black",
-                  }}
-                  onClick={() => {
-                    getGeneralLedger();
-                    setSelection("General Ledger");
-                  }}
-                ></span>
+                {clickedDiv !== "" || clickedPie !== null ? (
+                  <button
+                    onClick={() => {
+                      setClickDiv("");
+                      setClickPie(null);
+                    }}
+                  >
+                    See all.
+                  </button>
+                ) : (
+                  <span
+                    class="fa fa-refresh"
+                    style={{
+                      marginLeft: "20px",
+                      marginRight: "10px",
+                      padding: "6px",
+                      borderRadius: "10px",
+                      border: "1px solid black",
+                    }}
+                    onClick={() => {
+                      getGeneralLedger();
+                      setSelection("General Ledger");
+                    }}
+                  ></span>
+                )}
                 {space}starting date:
                 <input
                   type="date"
@@ -3436,7 +3456,7 @@ function MyComponent() {
               style={{
                 overflowX: "auto",
                 overflowY: "hidden",
-                width: mobileView ? "100%" : "calc(100vw - 300px",
+                width: mobileView ? "100%" : "calc(100vw - 300px)",
               }}
             >
               <table>
@@ -3530,7 +3550,7 @@ function MyComponent() {
                     : "flex",
                 overflowX: "auto",
                 overflowY: "hidden",
-                width: mobileView ? "100%" : "calc(100vw - 300px",
+                width: mobileView ? "100%" : "calc(100vw - 300px)",
               }}
             >
               {(true ||
