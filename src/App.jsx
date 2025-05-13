@@ -995,20 +995,19 @@ function MyComponent() {
       >
         <div
           style={{
+            top: "46px",
+            position: "absolute",
+            borderBottom: mobileView ? "" : "2px solid papayawhip",
+            width: "100%",
+          }}
+        ></div>
+        <div
+          style={{
             display: "flex",
             cursor: "pointer",
             padding: "5px",
           }}
         >
-          <div
-            style={{
-              top: "46px",
-              left: "10%",
-              position: "absolute",
-              borderBottom: mobileView ? "" : "2px solid papayawhip",
-              width: "80%",
-            }}
-          ></div>
           {!(windowWidth < 500) && (
             <div
               onMouseEnter={() => {
@@ -4111,4 +4110,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
