@@ -973,7 +973,7 @@ function MyComponent() {
       authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
     )
       getIOStatement();
-  }, []);
+  }, [authenticatedUser]);
   const [allowUpdate, setAllowUpdate] = useState(true);
   return (
     <div
