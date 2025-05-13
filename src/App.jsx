@@ -2253,7 +2253,7 @@ function MyComponent() {
                       windowWidth - (mobileView ? 0 : 360) < 500
                         ? windowWidth - (mobileView ? 0 : 360) < 300
                           ? "200px"
-                          : windowWidth - (mobileView ? 0 : 360)
+                          : windowWidth - (mobileView ? 60 : 360)
                         : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                   }}
@@ -2415,7 +2415,7 @@ function MyComponent() {
                       windowWidth - (mobileView ? 0 : 360) < 500
                         ? windowWidth - (mobileView ? 0 : 360) < 300
                           ? "200px"
-                          : windowWidth - (mobileView ? 0 : 360)
+                          : windowWidth - (mobileView ? 60 : 360)
                         : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                     display: "block",
@@ -2797,7 +2797,7 @@ function MyComponent() {
               )}
               <div
                 style={{
-                  display: !showRevenue && !showExpenses ? "none" : "flex",
+                  display: "flex",
                   alignItems: "flex-start",
                 }}
               >
