@@ -3311,10 +3311,10 @@ function MyComponent() {
                                 : generalLedger.sort(
                                     (a, b) =>
                                       a.Category === null
-                                        ? 1
-                                        : b.Category === null
                                         ? -1
-                                        : a.Category.localeCompare(b.Category) //a.Category < b.Category ? 1 : -1
+                                        : b.Category === null
+                                        ? 1
+                                        : b.Category.localeCompare(a.Category) //a.Category < b.Category ? 1 : -1
                                   )
                             );
                             setUpOrder(upOrder ? false : "upCategory");
