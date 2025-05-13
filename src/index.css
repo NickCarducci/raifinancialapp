@@ -92,20 +92,20 @@ select:focus-visible {
   }
 }
 table {
-  padding: 10px;
+  padding: 20px;
   border-radius: 5px;
-  margin: 10px;
+  margin: 16px;
   background-color: white;
   border-spacing: 0;
   table-layout: fixed;
 }
 td {
   border: 0px solid grey;
+  border-bottom: 2px solid whitesmoke;
   margin: 0px;
 }
 td div {
   display: block;
   width: max-content;
-
-  margin: auto 10px;
+  margin: 7px 14px;
 }
