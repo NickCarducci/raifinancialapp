@@ -3776,7 +3776,13 @@ function MyComponent() {
                             upOrder === "upEmployee"
                               ? payoutLog.reverse()
                               : payoutLog.sort((a, b) =>
-                                  a.EmployeeName < b.EmployeeName ? 1 : -1
+                                  a.EmployeeName === null
+                                    ? -1
+                                    : b.EmployeeName === null
+                                    ? 1
+                                    : b.EmployeeName.localeCompare(
+                                        a.EmployeeName
+                                      )
                                 )
                           );
                           setUpOrder(upOrder ? false : "upEmployee");
@@ -3855,7 +3861,7 @@ function MyComponent() {
                       return (
                         (clickedPie === null ||
                           x.EmployeeName === clickedPie) && (
-                          <tr key={i + x.PayoutID}>
+                          <tr key={i + String(x.PayoutID)}>
                             <td>
                               <div>
                                 {new Date(x.PaymentDate).toLocaleDateString(
