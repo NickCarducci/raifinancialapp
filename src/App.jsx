@@ -2228,8 +2228,9 @@ function MyComponent() {
               </div>
               <div
                 style={{
+                  //justifyContent: "space-evenly",
                   display:
-                    windowWidth < 500 || (windowWidth < 900 && !mobileView)
+                    windowWidth - (mobileView ? 0 : 360) < 500 //|| (windowWidth < 900 && !mobileView)
                       ? "block"
                       : "flex",
                 }}
@@ -2245,11 +2246,11 @@ function MyComponent() {
                     marginRight: "0px",
                     textAlign: "left",
                     width:
-                      windowWidth < 500
-                        ? windowWidth < 200
+                      windowWidth - (mobileView ? 0 : 360) < 500
+                        ? windowWidth - (mobileView ? 0 : 360) < 300
                           ? "200px"
-                          : windowWidth - 60
-                        : "400px",
+                          : windowWidth - (mobileView ? 0 : 360)
+                        : (windowWidth - (mobileView ? 0 : 420)) / 2,
                     padding: "10px",
                   }}
                 >
@@ -2407,11 +2408,11 @@ function MyComponent() {
                     marginRight: "0px",
                     textAlign: "left",
                     width:
-                      windowWidth < 500
-                        ? windowWidth < 200
+                      windowWidth - (mobileView ? 0 : 360) < 500
+                        ? windowWidth - (mobileView ? 0 : 360) < 300
                           ? "200px"
-                          : windowWidth - 60
-                        : "400px",
+                          : windowWidth - (mobileView ? 0 : 360)
+                        : (windowWidth - (mobileView ? 0 : 420)) / 2,
                     padding: "10px",
                     display: "block",
                   }}
@@ -2788,51 +2789,49 @@ function MyComponent() {
                   })}
                 </select>
               )}
-              {((selectedIO === "revenue" && showRevenue) ||
-                (selectedIO === "expenses" && showExpenses)) && (
-                <table>
-                  <caption
-                    style={{
-                      display: "flex",
-                      width: "max-content",
-                      position: "relative",
-                      fontSize: "20px",
-                      fontWeight: "bolder",
-                      paddingBottom: "14px",
-                      colspan: "2",
-                    }}
-                  >
-                    {selectedIO.substring(0, 1).toLocaleUpperCase() +
-                      selectedIO.substring(1, selectedIO.length)}
-                  </caption>
-                  <tbody>
-                    {ioStatement !== null && ioStatement.length > 0 && (
-                      <tr>
-                        <td
-                          style={{
-                            textAlign: "left",
-                            backgroundColor: "whitesmoke",
-                            color: "grey",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <div>CATEGORY</div>
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "left",
-                            backgroundColor: "whitesmoke",
-                            color: "grey",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <div>AMOUNT</div>
-                        </td>
-                      </tr>
-                    )}
+              <div style={{ display: "flex", alignItems: "flex-start" }}>
+                {showRevenue && (
+                  <table>
+                    <caption
+                      style={{
+                        display: "flex",
+                        width: "max-content",
+                        position: "relative",
+                        fontSize: "20px",
+                        fontWeight: "bolder",
+                        paddingBottom: "14px",
+                        colspan: "2",
+                      }}
+                    >
+                      Revenue
+                    </caption>
+                    <tbody>
+                      {ioStatement !== null && ioStatement.length > 0 && (
+                        <tr>
+                          <td
+                            style={{
+                              textAlign: "left",
+                              backgroundColor: "whitesmoke",
+                              color: "grey",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div>CATEGORY</div>
+                          </td>
+                          <td
+                            style={{
+                              textAlign: "left",
+                              backgroundColor: "whitesmoke",
+                              color: "grey",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div>AMOUNT</div>
+                          </td>
+                        </tr>
+                      )}
 
-                    {(selectedIO === "revenue"
-                      ? selectedFrequency === "Monthly"
+                      {(selectedFrequency === "Monthly"
                         ? revenue !== null && revenue.length > 0
                           ? revenue
                           : []
@@ -2846,8 +2845,80 @@ function MyComponent() {
                           ? revenueByYear
                           : []
                         : []
-                      : selectedIO === "expenses"
-                      ? selectedFrequency === "Monthly"
+                      ).map((x, i) => {
+                        const doesntMatch =
+                          selectedFrequency === "Monthly"
+                            ? getEndOfMonth(
+                                new Date(
+                                  new Date(x.Date).getTime() + 86400000 * 5
+                                )
+                              ) !== selectedDate
+                            : selectedFrequency === "Quarterly"
+                            ? x.Quarter !== selectedDate
+                            : selectedFrequency === "Yearly"
+                            ? x.Year !== selectedDate
+                            : true;
+                        if (selectedDate === null || doesntMatch) return null;
+                        return (
+                          <tr key={i + x.Date}>
+                            <td>
+                              <div>{x.Category}</div>
+                            </td>
+                            <td>
+                              <div>
+                                ${addCommas(String(x.Amount.toFixed(2)))}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+                {showExpenses && (
+                  <table>
+                    <caption
+                      style={{
+                        display: "flex",
+                        width: "max-content",
+                        position: "relative",
+                        fontSize: "20px",
+                        fontWeight: "bolder",
+                        paddingBottom: "14px",
+                        colspan: "2",
+                      }}
+                    >
+                      Expenses
+                      {/*selectedIO.substring(0, 1).toLocaleUpperCase() +
+                        selectedIO.substring(1, selectedIO.length)*/}
+                    </caption>
+                    <tbody>
+                      {ioStatement !== null && ioStatement.length > 0 && (
+                        <tr>
+                          <td
+                            style={{
+                              textAlign: "left",
+                              backgroundColor: "whitesmoke",
+                              color: "grey",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div>CATEGORY</div>
+                          </td>
+                          <td
+                            style={{
+                              textAlign: "left",
+                              backgroundColor: "whitesmoke",
+                              color: "grey",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div>AMOUNT</div>
+                          </td>
+                        </tr>
+                      )}
+
+                      {(selectedFrequency === "Monthly"
                         ? expenses !== null && expenses.length > 0
                           ? expenses
                           : []
@@ -2861,35 +2932,37 @@ function MyComponent() {
                           ? expensesByYear
                           : []
                         : []
-                      : []
-                    ).map((x, i) => {
-                      const doesntMatch =
-                        selectedFrequency === "Monthly"
-                          ? getEndOfMonth(
-                              new Date(
-                                new Date(x.Date).getTime() + 86400000 * 5
-                              )
-                            ) !== selectedDate
-                          : selectedFrequency === "Quarterly"
-                          ? x.Quarter !== selectedDate
-                          : selectedFrequency === "Yearly"
-                          ? x.Year !== selectedDate
-                          : true;
-                      if (selectedDate === null || doesntMatch) return null;
-                      return (
-                        <tr key={i + x.Date}>
-                          <td>
-                            <div>{x.Category}</div>
-                          </td>
-                          <td>
-                            <div>${addCommas(String(x.Amount.toFixed(2)))}</div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
+                      ).map((x, i) => {
+                        const doesntMatch =
+                          selectedFrequency === "Monthly"
+                            ? getEndOfMonth(
+                                new Date(
+                                  new Date(x.Date).getTime() + 86400000 * 5
+                                )
+                              ) !== selectedDate
+                            : selectedFrequency === "Quarterly"
+                            ? x.Quarter !== selectedDate
+                            : selectedFrequency === "Yearly"
+                            ? x.Year !== selectedDate
+                            : true;
+                        if (selectedDate === null || doesntMatch) return null;
+                        return (
+                          <tr key={i + x.Date}>
+                            <td>
+                              <div>{x.Category}</div>
+                            </td>
+                            <td>
+                              <div>
+                                ${addCommas(String(x.Amount.toFixed(2)))}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </div>
           )}
           {selection === "General Ledger" && (
