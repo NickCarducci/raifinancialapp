@@ -905,6 +905,7 @@ function MyComponent() {
       }));
   const [showBankAccounts, setShowBankAccounts] = useState(false);
   const [hoverMobileView, setHoverMobileView] = useState(false);
+  const [invoices, setInvoices] = useState([]);
   return (
     <div
       style={{
@@ -919,7 +920,7 @@ function MyComponent() {
           position: "relative",
           fontWeight: "bolder",
           color: "white",
-          backgroundColor: "darkorange",
+          background: `linear-gradient(to bottom, darkorange, orange 70.71%)`,
           borderBottom: mobileView ? "5px solid rgba(0,0,0,.3)" : "",
           borderRight: !mobileView ? "5px solid rgba(0,0,0,.3)" : "",
           width: mobileView ? "100vw" : "300px",
@@ -1465,6 +1466,47 @@ function MyComponent() {
                 onClick={() => {
                   if (mobileView) setSelectionMenu(false);
                   setSelection("Invoices");
+                  setInvoices([{ Description: "Connecting to database..." }]);
+                  instance
+                    .acquireTokenSilent({
+                      ...loginRequest,
+                      account: accounts[0],
+                    })
+                    .then((response) => {
+                      fetch(
+                        "https://raifinancial.azurewebsites.net/api/invoices",
+                        {
+                          method: "GET",
+                          headers: {
+                            Authorization: "Bearer " + response.idToken,
+                            "Content-Type": "application/JSON",
+                          },
+                        }
+                      )
+                        .then(async (res) => await res.json())
+                        .then(async (result) => {
+                          console.log(result);
+                          if (result.code === 401) {
+                            await instance.acquireTokenRedirect({
+                              account: accounts[0],
+                              forceRefresh: true,
+                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                            });
+                            return setInvoices([
+                              { Description: "please log in again..." },
+                            ]);
+                          }
+
+                          setInvoices(
+                            result.invoices.sort(
+                              (a, b) => new Date(b.Date) - new Date(a.Date)
+                            )
+                          );
+                        })
+                        .catch((e) => {
+                          console.log(e);
+                        });
+                    });
                 }}
               >
                 <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
@@ -3405,6 +3447,11 @@ function MyComponent() {
                                         }
                                       }}
                                     >
+                                      <div
+                                        onClick={() => setEditCategory(false)}
+                                      >
+                                        &times;
+                                      </div>
                                       <input
                                         placeholder={x.Category}
                                         value={newCategory}
@@ -3412,11 +3459,6 @@ function MyComponent() {
                                           setNewCategory(e.target.value);
                                         }}
                                       />
-                                      <div
-                                        onClick={() => setEditCategory(false)}
-                                      >
-                                        &times;
-                                      </div>
                                     </form>
                                   ) : (
                                     x.Category
@@ -3508,27 +3550,31 @@ function MyComponent() {
                       </td>
                     </tr>
                   )}
-                  {accountBalances === null
-                    ? ""
-                    : accountBalances.length === 0
-                    ? "No results"
-                    : accountBalances.map((x, i) => {
-                        return (
-                          <tr key={i + x.LastUpdated}>
-                            <td>
-                              <div>{x.AccountName}</div>
-                            </td>
-                            <td>
-                              <div>${addCommas(String(x.CurrentBalance))}</div>
-                            </td>
-                            <td>
-                              <div>
-                                {new Date(x.LastUpdated).toLocaleDateString()}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                  {accountBalances === null ? (
+                    ""
+                  ) : accountBalances.length === 0 ? (
+                    <tr>
+                      <td>No results</td>
+                    </tr>
+                  ) : (
+                    accountBalances.map((x, i) => {
+                      return (
+                        <tr key={i + x.LastUpdated}>
+                          <td>
+                            <div>{x.AccountName}</div>
+                          </td>
+                          <td>
+                            <div>${addCommas(String(x.CurrentBalance))}</div>
+                          </td>
+                          <td>
+                            <div>
+                              {new Date(x.LastUpdated).toLocaleDateString()}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -3704,37 +3750,41 @@ function MyComponent() {
                       </td>
                     </tr>
                   )}
-                  {payoutLog === null
-                    ? ""
-                    : payoutLog.length === 0
-                    ? "No results"
-                    : payoutLog.map((x, i) => {
-                        return (
-                          (clickedPie === null ||
-                            x.EmployeeName === clickedPie) && (
-                            <tr key={i + x.PayoutID}>
-                              <td>
-                                <div>
-                                  {new Date(x.PaymentDate).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                    }
-                                  )}
-                                </div>
-                              </td>
-                              <td>
-                                <div>{x.EmployeeName}</div>
-                              </td>
-                              <td>
-                                <div>${addCommas(String(x.AmountPaid))}</div>
-                              </td>
-                            </tr>
-                          )
-                        );
-                      })}
+                  {payoutLog === null ? (
+                    ""
+                  ) : payoutLog.length === 0 ? (
+                    <tr>
+                      <td>No results</td>
+                    </tr>
+                  ) : (
+                    payoutLog.map((x, i) => {
+                      return (
+                        (clickedPie === null ||
+                          x.EmployeeName === clickedPie) && (
+                          <tr key={i + x.PayoutID}>
+                            <td>
+                              <div>
+                                {new Date(x.PaymentDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  }
+                                )}
+                              </div>
+                            </td>
+                            <td>
+                              <div>{x.EmployeeName}</div>
+                            </td>
+                            <td>
+                              <div>${addCommas(String(x.AmountPaid))}</div>
+                            </td>
+                          </tr>
+                        )
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
               {false &&
@@ -3748,6 +3798,192 @@ function MyComponent() {
                     {pieChart()}
                   </div>
                 )}
+            </div>
+          )}
+          {selection === "Invoices" && (
+            <div
+              /*onScroll={(e) => {
+                if (!mobileView) {
+                  setMobileView(e.target.scrollLeft > 300);
+                }
+              }}*/
+              style={{
+                alignItems: "flex-start",
+                display: "block",
+                overflowX: "auto",
+                overflowY: "hidden",
+                width: mobileView ? "100%" : "calc(100vw - 300px)",
+              }}
+            >
+              <table>
+                <caption
+                  style={{
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    paddingBottom: "14px",
+                    colspan: "2",
+                  }}
+                >
+                  Invoices
+                </caption>
+                <tbody>
+                  {invoices !== null && invoices.length > 0 && (
+                    <tr>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setInvoices(
+                            upOrder === "upDate"
+                              ? invoices.reverse()
+                              : invoices.sort(
+                                  (a, b) =>
+                                    new Date(a.PaymentDate) -
+                                    new Date(b.PaymentDate)
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upDate");
+                        }}
+                      >
+                        <div>
+                          DATE{" "}
+                          {upOrder === "upDate" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setInvoices(
+                            upOrder === "upDescription"
+                              ? invoices.reverse()
+                              : invoices.sort((a, b) =>
+                                  a.Description < b.Description ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upDescription");
+                        }}
+                      >
+                        <div>
+                          DESCRIPTION{" "}
+                          {upOrder === "upDescription" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setPayoutLog(
+                            upOrder === "upAmount"
+                              ? payoutLog.reverse()
+                              : payoutLog.sort((a, b) =>
+                                  a.Amount < b.Amount ? 1 : -1
+                                )
+                          );
+                          setUpOrder(upOrder ? false : "upAmount");
+                        }}
+                      >
+                        <div>
+                          AMOUNT{" "}
+                          {upOrder === "upAmount" && (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                margin: "6px 0px",
+                                borderLeft: "4px solid black",
+                                borderBottom: "4px solid black",
+                                height: "6px",
+                                width: "6px",
+                                borderRadius: "3px",
+                                backgroundColor: "transparent",
+                                transform: `rotate(${
+                                  upOrder ? "315" : "135"
+                                }deg)`,
+                              }}
+                            ></div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {invoices === null ? (
+                    ""
+                  ) : invoices.length === 0 ? (
+                    <tr>
+                      <td>No results</td>
+                    </tr>
+                  ) : (
+                    invoices.map((x, i) => {
+                      return (
+                        <tr key={i + x.InvoiceID}>
+                          <td>
+                            <div>
+                              {new Date(x.Date).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </div>
+                          </td>
+                          <td>
+                            <div>{x.Description}</div>
+                          </td>
+                          <td>
+                            <div>${addCommas(String(x.Amount))}</div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
