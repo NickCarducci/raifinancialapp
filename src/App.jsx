@@ -2430,8 +2430,8 @@ function MyComponent() {
                   <div
                     style={{
                       display: windowWidth < 300 ? "block" : "flex",
-                      justifyContent: "center",
-                      alignItems: "flex-start",
+                      justifyContent: "space-evenly",
+                      alignItems: "center",
                     }}
                   >
                     <div
@@ -2553,7 +2553,7 @@ function MyComponent() {
                         "Click revenue or expenses"
                       )}
                     </div>
-                    <div style={{ display: "block" }}>
+                    <div style={{ display: "block", fontSize: "12px" }}>
                       {selectedIO === "revenue"
                         ? (selectedFrequency === "Monthly"
                             ? !revenue
@@ -2590,8 +2590,9 @@ function MyComponent() {
                               <div key={i} style={{ display: "flex" }}>
                                 <div
                                   style={{
-                                    width: "40px",
-                                    height: "20px",
+                                    margin: "6px",
+                                    width: "30px",
+                                    height: "10px",
                                     backgroundColor: pieChartColors[i],
                                   }}
                                 ></div>
@@ -2631,8 +2632,9 @@ function MyComponent() {
                               <div key={i} style={{ display: "flex" }}>
                                 <div
                                   style={{
-                                    width: "40px",
-                                    height: "20px",
+                                    margin: "6px",
+                                    width: "30px",
+                                    height: "10px",
                                     backgroundColor: pieChartColors[i],
                                   }}
                                 ></div>
@@ -4084,4 +4086,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
