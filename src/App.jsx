@@ -3938,9 +3938,7 @@ function MyComponent() {
                             upOrder === "upDate"
                               ? invoices.reverse()
                               : invoices.sort(
-                                  (a, b) =>
-                                    new Date(a.PaymentDate) -
-                                    new Date(b.PaymentDate)
+                                  (a, b) => new Date(a.Date) - new Date(b.Date)
                                 )
                           );
                           setUpOrder(upOrder ? false : "upDate");
@@ -3979,7 +3977,11 @@ function MyComponent() {
                             upOrder === "upDescription"
                               ? invoices.reverse()
                               : invoices.sort((a, b) =>
-                                  a.Description < b.Description ? 1 : -1
+                                  a.Description === null
+                                    ? -1
+                                    : b.Description === null
+                                    ? 1
+                                    : b.Description.localeCompare(a.Description)
                                 )
                           );
                           setUpOrder(upOrder ? false : "upDescription");
@@ -4014,10 +4016,10 @@ function MyComponent() {
                           cursor: "pointer",
                         }}
                         onClick={() => {
-                          setPayoutLog(
+                          setInvoices(
                             upOrder === "upAmount"
-                              ? payoutLog.reverse()
-                              : payoutLog.sort((a, b) =>
+                              ? invoices.reverse()
+                              : invoices.sort((a, b) =>
                                   a.Amount < b.Amount ? 1 : -1
                                 )
                           );
@@ -4103,3 +4105,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
