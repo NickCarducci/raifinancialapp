@@ -1203,6 +1203,7 @@ function MyComponent() {
                           result.ioStatement &&
                             setIOStatement(result.ioStatement);
                           getExpenses();
+                          getRevenue();
                         })
                         .catch(() => {
                           setIOStatement([
@@ -2793,179 +2794,179 @@ function MyComponent() {
                   })}
                 </select>
               )}
-              <div style={{ display: "flex", alignItems: "flex-start" }}>
-                {showRevenue && (
-                  <table>
-                    <caption
-                      style={{
-                        display: "flex",
-                        width: "max-content",
-                        position: "relative",
-                        fontSize: "20px",
-                        fontWeight: "bolder",
-                        paddingBottom: "14px",
-                        colspan: "2",
-                      }}
-                    >
-                      Revenue
-                    </caption>
-                    <tbody>
-                      {ioStatement !== null && ioStatement.length > 0 && (
-                        <tr>
-                          <td
-                            style={{
-                              textAlign: "left",
-                              backgroundColor: "whitesmoke",
-                              color: "grey",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <div>CATEGORY</div>
+              <div
+                style={{
+                  display: !showRevenue && !showExpenses ? "none" : "flex",
+                  alignItems: "flex-start",
+                }}
+              >
+                <table>
+                  <caption
+                    style={{
+                      display: "flex",
+                      width: "max-content",
+                      position: "relative",
+                      fontSize: "20px",
+                      fontWeight: "bolder",
+                      paddingBottom: "14px",
+                      colspan: "2",
+                    }}
+                  >
+                    Revenue
+                  </caption>
+                  <tbody>
+                    {ioStatement !== null && ioStatement.length > 0 && (
+                      <tr>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>CATEGORY</div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>AMOUNT</div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {(!showRevenue
+                      ? []
+                      : selectedFrequency === "Monthly"
+                      ? revenue !== null && revenue.length > 0
+                        ? revenue
+                        : []
+                      : selectedFrequency === "Quarterly"
+                      ? revenueByQuarter !== null && revenueByQuarter.length > 0
+                        ? revenueByQuarter
+                        : []
+                      : selectedFrequency === "Yearly"
+                      ? revenueByYear !== null && revenueByYear.length > 0
+                        ? revenueByYear
+                        : []
+                      : []
+                    ).map((x, i) => {
+                      const doesntMatch =
+                        selectedFrequency === "Monthly"
+                          ? getEndOfMonth(
+                              new Date(
+                                new Date(x.Date).getTime() + 86400000 * 5
+                              )
+                            ) !== selectedDate
+                          : selectedFrequency === "Quarterly"
+                          ? x.Quarter !== selectedDate
+                          : selectedFrequency === "Yearly"
+                          ? x.Year !== selectedDate
+                          : true;
+                      if (selectedDate === null || doesntMatch) return null;
+                      return (
+                        <tr key={i + x.Date}>
+                          <td>
+                            <div>{x.Category}</div>
                           </td>
-                          <td
-                            style={{
-                              textAlign: "left",
-                              backgroundColor: "whitesmoke",
-                              color: "grey",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <div>AMOUNT</div>
+                          <td>
+                            <div>${addCommas(String(x.Amount.toFixed(2)))}</div>
                           </td>
                         </tr>
-                      )}
-
-                      {(selectedFrequency === "Monthly"
-                        ? revenue !== null && revenue.length > 0
-                          ? revenue
-                          : []
-                        : selectedFrequency === "Quarterly"
-                        ? revenueByQuarter !== null &&
-                          revenueByQuarter.length > 0
-                          ? revenueByQuarter
-                          : []
-                        : selectedFrequency === "Yearly"
-                        ? revenueByYear !== null && revenueByYear.length > 0
-                          ? revenueByYear
-                          : []
-                        : []
-                      ).map((x, i) => {
-                        const doesntMatch =
-                          selectedFrequency === "Monthly"
-                            ? getEndOfMonth(
-                                new Date(
-                                  new Date(x.Date).getTime() + 86400000 * 5
-                                )
-                              ) !== selectedDate
-                            : selectedFrequency === "Quarterly"
-                            ? x.Quarter !== selectedDate
-                            : selectedFrequency === "Yearly"
-                            ? x.Year !== selectedDate
-                            : true;
-                        if (selectedDate === null || doesntMatch) return null;
-                        return (
-                          <tr key={i + x.Date}>
-                            <td>
-                              <div>{x.Category}</div>
-                            </td>
-                            <td>
-                              <div>
-                                ${addCommas(String(x.Amount.toFixed(2)))}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-                {showExpenses && (
-                  <table>
-                    <caption
-                      style={{
-                        display: "flex",
-                        width: "max-content",
-                        position: "relative",
-                        fontSize: "20px",
-                        fontWeight: "bolder",
-                        paddingBottom: "14px",
-                        colspan: "2",
-                      }}
-                    >
-                      Expenses
-                      {/*selectedIO.substring(0, 1).toLocaleUpperCase() +
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <table>
+                  <caption
+                    style={{
+                      display: "flex",
+                      width: "max-content",
+                      position: "relative",
+                      fontSize: "20px",
+                      fontWeight: "bolder",
+                      paddingBottom: "14px",
+                      colspan: "2",
+                    }}
+                  >
+                    Expenses
+                    {/*selectedIO.substring(0, 1).toLocaleUpperCase() +
                         selectedIO.substring(1, selectedIO.length)*/}
-                    </caption>
-                    <tbody>
-                      {ioStatement !== null && ioStatement.length > 0 && (
-                        <tr>
-                          <td
-                            style={{
-                              textAlign: "left",
-                              backgroundColor: "whitesmoke",
-                              color: "grey",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <div>CATEGORY</div>
+                  </caption>
+                  <tbody>
+                    {ioStatement !== null && ioStatement.length > 0 && (
+                      <tr>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>CATEGORY</div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>AMOUNT</div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {(!showExpenses
+                      ? []
+                      : selectedFrequency === "Monthly"
+                      ? expenses !== null && expenses.length > 0
+                        ? expenses
+                        : []
+                      : selectedFrequency === "Quarterly"
+                      ? expensesByQuarter !== null &&
+                        expensesByQuarter.length > 0
+                        ? expensesByQuarter
+                        : []
+                      : selectedFrequency === "Yearly"
+                      ? expensesByYear !== null && expensesByYear.length > 0
+                        ? expensesByYear
+                        : []
+                      : []
+                    ).map((x, i) => {
+                      const doesntMatch =
+                        selectedFrequency === "Monthly"
+                          ? getEndOfMonth(
+                              new Date(
+                                new Date(x.Date).getTime() + 86400000 * 5
+                              )
+                            ) !== selectedDate
+                          : selectedFrequency === "Quarterly"
+                          ? x.Quarter !== selectedDate
+                          : selectedFrequency === "Yearly"
+                          ? x.Year !== selectedDate
+                          : true;
+                      if (selectedDate === null || doesntMatch) return null;
+                      return (
+                        <tr key={i + x.Date}>
+                          <td>
+                            <div>{x.Category}</div>
                           </td>
-                          <td
-                            style={{
-                              textAlign: "left",
-                              backgroundColor: "whitesmoke",
-                              color: "grey",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <div>AMOUNT</div>
+                          <td>
+                            <div>${addCommas(String(x.Amount.toFixed(2)))}</div>
                           </td>
                         </tr>
-                      )}
-
-                      {(selectedFrequency === "Monthly"
-                        ? expenses !== null && expenses.length > 0
-                          ? expenses
-                          : []
-                        : selectedFrequency === "Quarterly"
-                        ? expensesByQuarter !== null &&
-                          expensesByQuarter.length > 0
-                          ? expensesByQuarter
-                          : []
-                        : selectedFrequency === "Yearly"
-                        ? expensesByYear !== null && expensesByYear.length > 0
-                          ? expensesByYear
-                          : []
-                        : []
-                      ).map((x, i) => {
-                        const doesntMatch =
-                          selectedFrequency === "Monthly"
-                            ? getEndOfMonth(
-                                new Date(
-                                  new Date(x.Date).getTime() + 86400000 * 5
-                                )
-                              ) !== selectedDate
-                            : selectedFrequency === "Quarterly"
-                            ? x.Quarter !== selectedDate
-                            : selectedFrequency === "Yearly"
-                            ? x.Year !== selectedDate
-                            : true;
-                        if (selectedDate === null || doesntMatch) return null;
-                        return (
-                          <tr key={i + x.Date}>
-                            <td>
-                              <div>{x.Category}</div>
-                            </td>
-                            <td>
-                              <div>
-                                ${addCommas(String(x.Amount.toFixed(2)))}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
