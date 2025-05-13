@@ -3308,8 +3308,13 @@ function MyComponent() {
                             setGeneralLedger(
                               upOrder === "upCategory"
                                 ? generalLedger.reverse()
-                                : generalLedger.sort((a, b) =>
-                                    a.Category < b.Category ? 1 : -1
+                                : generalLedger.sort(
+                                    (a, b) =>
+                                      a.Category === null
+                                        ? 1
+                                        : b.Category === null
+                                        ? -1
+                                        : a.Category.localeCompare(b.Category) //a.Category < b.Category ? 1 : -1
                                   )
                             );
                             setUpOrder(upOrder ? false : "upCategory");
