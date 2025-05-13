@@ -2252,7 +2252,7 @@ function MyComponent() {
                         ? windowWidth - (mobileView ? 0 : 360) < 300
                           ? "200px"
                           : windowWidth - (mobileView ? 0 : 360)
-                        : (windowWidth - (mobileView ? 0 : 420)) / 2,
+                        : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                   }}
                 >
@@ -2414,7 +2414,7 @@ function MyComponent() {
                         ? windowWidth - (mobileView ? 0 : 360) < 300
                           ? "200px"
                           : windowWidth - (mobileView ? 0 : 360)
-                        : (windowWidth - (mobileView ? 0 : 420)) / 2,
+                        : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                     display: "block",
                   }}
