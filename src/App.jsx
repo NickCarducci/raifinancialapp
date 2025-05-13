@@ -101,7 +101,7 @@ function MyComponent() {
   }, [instance, accounts]);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [mobileView, setMobileView] = useState(true);
+  const [mobileView, setMobileView] = useState(false);
   const [tds, setTds] = useState([]);
   const tableRef = useRef(null);
   const [tableWidth, setTableWidth] = useState(0);
@@ -155,7 +155,9 @@ function MyComponent() {
       setSelectionHeight(selectionMenuRef.current.offsetHeight);
       if (!(window.innerWidth < 500))
         if (window.scrollY > window.innerHeight) {
-          if (!mobileView) setMobileView(true);
+          if (!mobileView) {
+            setMobileView(true);
+          }
           //
         }
 
