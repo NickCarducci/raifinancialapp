@@ -968,7 +968,11 @@ function MyComponent() {
       });
   };
   useEffect(() => {
-    getIOStatement();
+    if (
+      authenticatedUser &&
+      authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
+    )
+      getIOStatement();
   }, []);
   const [allowUpdate, setAllowUpdate] = useState(true);
   return (
