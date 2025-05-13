@@ -4039,7 +4039,7 @@ function MyComponent() {
                   ) : (
                     invoices.map((x, i) => {
                       return (
-                        <tr key={i + x.InvoiceID}>
+                        <tr key={i + String(x.InvoiceID)}>
                           <td>
                             <div>
                               {new Date(x.Date).toLocaleDateString("en-US", {
