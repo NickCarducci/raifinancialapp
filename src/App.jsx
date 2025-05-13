@@ -908,6 +908,68 @@ function MyComponent() {
   const [showBankAccounts, setShowBankAccounts] = useState(false);
   const [hoverMobileView, setHoverMobileView] = useState(false);
   const [invoices, setInvoices] = useState([]);
+  const getIOStatement = () => {
+    setSelectedFrequency("Monthly");
+    setSelectedIO("");
+    setSelectedDate(null);
+    setRevenue(null);
+    setRevenueAmounts([]);
+    setExpenses(null);
+    setExpensesAmounts([]);
+    setRevenueMonths([]);
+    setExpensesMonths([]);
+    if (mobileView) setSelectionMenu(false);
+    setSelection("I/S");
+    setIOMonths(["Connecting to database..."]);
+    setIOStatement(null);
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        fetch("https://raifinancial.azurewebsites.net/api/iostatement", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + response.idToken,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then(async (result) => {
+            console.log(result);
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
+              return setIOStatement([{ Revenue: "please log in again..." }]);
+            }
+            setIOMonths(
+              result.ioStatement
+                .sort((a, b) => new Date(b.Month) - new Date(a.Month))
+                .map((x, i) => {
+                  const date = getEndOfMonth(
+                    new Date(new Date(x.Month).getTime() + 86400000 * 6)
+                  );
+                  if (i === 0) setSelectedDate(date);
+                  return date;
+                })
+            );
+            console.log(result.ioStatement);
+            result.ioStatement && setIOStatement(result.ioStatement);
+            getExpenses();
+            getRevenue();
+          })
+          .catch(() => {
+            setIOStatement([{ Revenue: "please log in again..." }]);
+          });
+      });
+  };
+  useState(() => {
+    getIOStatement();
+  }, []);
   return (
     <div
       style={{
@@ -942,7 +1004,7 @@ function MyComponent() {
               top: "46px",
               left: "10%",
               position: "absolute",
-              borderBottom: "2px solid papayawhip",
+              borderBottom: mobileView ? "" : "2px solid papayawhip",
               width: "80%",
             }}
           ></div>
@@ -1150,77 +1212,7 @@ function MyComponent() {
                   //textDecoration: selector === "I/S" ? "underline" : "none",
                   listStyleType: selector === "I/S" ? "initial" : "none",
                 }}
-                onClick={() => {
-                  setSelectedFrequency("Monthly");
-                  setSelectedIO("");
-                  setSelectedDate(null);
-                  setRevenue(null);
-                  setRevenueAmounts([]);
-                  setExpenses(null);
-                  setExpensesAmounts([]);
-                  setRevenueMonths([]);
-                  setExpensesMonths([]);
-                  if (mobileView) setSelectionMenu(false);
-                  setSelection("I/S");
-                  setIOMonths(["Connecting to database..."]);
-                  setIOStatement(null);
-                  instance
-                    .acquireTokenSilent({
-                      ...loginRequest,
-                      account: accounts[0],
-                    })
-                    .then((response) => {
-                      fetch(
-                        "https://raifinancial.azurewebsites.net/api/iostatement",
-                        {
-                          method: "GET",
-                          headers: {
-                            Authorization: "Bearer " + response.idToken,
-                            "Content-Type": "application/JSON",
-                          },
-                        }
-                      )
-                        .then(async (res) => await res.json())
-                        .then(async (result) => {
-                          console.log(result);
-                          if (result.code === 401) {
-                            await instance.acquireTokenRedirect({
-                              account: accounts[0],
-                              forceRefresh: true,
-                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                            });
-                            return setIOStatement([
-                              { Revenue: "please log in again..." },
-                            ]);
-                          }
-                          setIOMonths(
-                            result.ioStatement
-                              .sort(
-                                (a, b) => new Date(b.Month) - new Date(a.Month)
-                              )
-                              .map((x, i) => {
-                                const date = getEndOfMonth(
-                                  new Date(
-                                    new Date(x.Month).getTime() + 86400000 * 6
-                                  )
-                                );
-                                if (i === 0) setSelectedDate(date);
-                                return date;
-                              })
-                          );
-                          console.log(result.ioStatement);
-                          result.ioStatement &&
-                            setIOStatement(result.ioStatement);
-                          getExpenses();
-                          getRevenue();
-                        })
-                        .catch(() => {
-                          setIOStatement([
-                            { Revenue: "please log in again..." },
-                          ]);
-                        });
-                    });
-                }}
+                onClick={getIOStatement}
               >
                 <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
               </div>
