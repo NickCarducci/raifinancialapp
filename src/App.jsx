@@ -967,7 +967,7 @@ function MyComponent() {
           });
       });
   };
-  useState(() => {
+  useEffect(() => {
     getIOStatement();
   }, []);
   return (
@@ -2126,8 +2126,8 @@ function MyComponent() {
                             changeInTotalExpenses === 0
                               ? "grey"
                               : changeInTotalExpenses > 0
-                              ? "mediumseagreen"
-                              : "crimson",
+                              ? "crimson"
+                              : "mediumseagreen",
                         }}
                       >
                         {Number(changeInTotalExpenses) >= 0 ? (
