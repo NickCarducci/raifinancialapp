@@ -937,6 +937,15 @@ function MyComponent() {
             padding: "5px",
           }}
         >
+          <div
+            style={{
+              top: "46px",
+              left: "10%",
+              position: "absolute",
+              borderBottom: "2px solid papayawhip",
+              width: "80%",
+            }}
+          ></div>
           {!(windowWidth < 500) && (
             <div
               onMouseEnter={() => {
@@ -3539,7 +3548,9 @@ function MyComponent() {
                                       />
                                     </form>
                                   ) : (
-                                    x.Category
+                                    <div onClick={() => setNewCategory("")}>
+                                      {x.Category}
+                                    </div>
                                   )}
                                 </div>
                               </td>
