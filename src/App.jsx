@@ -970,6 +970,7 @@ function MyComponent() {
   useEffect(() => {
     getIOStatement();
   }, []);
+  const [allowUpdate, setAllowUpdate] = useState(true);
   return (
     <div
       style={{
@@ -3482,6 +3483,7 @@ function MyComponent() {
                                       }}
                                       onSubmit={(e) => {
                                         e.preventDefault();
+                                        setAllowUpdate(true);
                                         const answer = window.confirm(
                                           "Are you sure you'd like to change the Category from " +
                                             x.Category +
@@ -3518,7 +3520,8 @@ function MyComponent() {
                                                 .then((response) => {
                                                   console.log(response);
                                                   setNewCategory("");
-                                                  getGeneralLedger();
+                                                  if (allowUpdate)
+                                                    getGeneralLedger();
                                                   setSelection(
                                                     "General Ledger"
                                                   );
@@ -3545,7 +3548,12 @@ function MyComponent() {
                                       />
                                     </form>
                                   ) : (
-                                    <div onClick={() => setNewCategory("")}>
+                                    <div
+                                      onClick={() => {
+                                        setNewCategory("");
+                                        setAllowUpdate(false);
+                                      }}
+                                    >
                                       {x.Category}
                                     </div>
                                   )}
