@@ -1001,7 +1001,10 @@ function MyComponent() {
           style={{
             top: "46px",
             position: "absolute",
-            borderBottom: mobileView ? "" : "2px solid papayawhip",
+            borderBottom:
+              mobileView && !selectionMenu
+                ? ""
+                : `2px solid ${!mobileView ? "papayawhip" : "orange"}`,
             width: "100%",
           }}
         ></div>
