@@ -1207,7 +1207,6 @@ function MyComponent() {
                   padding: "6px 10px",
                   margin: "0px 10px",
                   borderRadius: "3px",
-
                   borderLeft: selection === "I/S" ? "2px solid white" : "",
                   transition: ".3s ease-out",
                   backgroundColor:
@@ -2214,9 +2213,9 @@ function MyComponent() {
                         style={{
                           width: !(windowWidth < 500) ? "150px" : "",
                           color:
-                            changeInNetProfit === 0
+                            thisMonthsIOStatement.NetProfit === 0
                               ? "grey"
-                              : changeInNetProfit > 0
+                              : thisMonthsIOStatement.NetProfit > 0
                               ? "mediumseagreen"
                               : "crimson",
                         }}
@@ -4154,3 +4153,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
