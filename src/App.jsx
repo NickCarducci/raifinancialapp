@@ -55,7 +55,7 @@ function MyComponent() {
   const [users, setUsers] = useState([]);
   const [editAdmins, openAdministrators] = useState(false);
   const [selectionMenu, setSelectionMenu] = useState(true);
-  const [selection, setSelection] = useState("");
+  const [selection, setSelection] = useState("I/S");
   const [selector, setSelector] = useState("");
   const [generalLedger, setGeneralLedger] = useState(null);
   const [payoutLog, setPayoutLog] = useState(null);
@@ -156,7 +156,7 @@ function MyComponent() {
       if (!(window.innerWidth < 500))
         if (window.scrollY > window.innerHeight) {
           if (!mobileView) {
-            setMobileView(true);
+            if (selection !== "I/S") setMobileView(true);
           }
           //
         }
@@ -2804,11 +2804,31 @@ function MyComponent() {
               )}
               <div
                 style={{
-                  display: "flex",
+                  display:
+                    windowWidth - (mobileView ? 0 : 360) < 500 //|| (windowWidth < 900 && !mobileView)
+                      ? "block"
+                      : "flex",
                   alignItems: "flex-start",
                 }}
               >
-                <table>
+                <table
+                  style={{
+                    position: "relative",
+                    cursor: "pointer",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    margin: "20px",
+                    marginRight: "0px",
+                    textAlign: "left",
+                    width:
+                      windowWidth - (mobileView ? 0 : 360) < 500
+                        ? windowWidth - (mobileView ? 0 : 360) < 300
+                          ? "200px"
+                          : windowWidth - (mobileView ? 60 : 360)
+                        : (windowWidth - (mobileView ? 120 : 420)) / 2,
+                    padding: "10px",
+                  }}
+                >
                   <caption
                     style={{
                       display: "flex",
@@ -2890,7 +2910,24 @@ function MyComponent() {
                     })}
                   </tbody>
                 </table>
-                <table>
+                <table
+                  style={{
+                    position: "relative",
+                    cursor: "pointer",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    margin: "20px",
+                    marginRight: "0px",
+                    textAlign: "left",
+                    width:
+                      windowWidth - (mobileView ? 0 : 360) < 500
+                        ? windowWidth - (mobileView ? 0 : 360) < 300
+                          ? "200px"
+                          : windowWidth - (mobileView ? 60 : 360)
+                        : (windowWidth - (mobileView ? 120 : 420)) / 2,
+                    padding: "10px",
+                  }}
+                >
                   <caption
                     style={{
                       display: "flex",
