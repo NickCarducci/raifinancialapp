@@ -153,13 +153,14 @@ function MyComponent() {
   useEffect(() => {
     const handleScroll = () => {
       setSelectionHeight(selectionMenuRef.current.offsetHeight);
-      if (!(window.innerWidth < 500))
-        if (window.scrollY > window.innerHeight) {
-          if (!mobileView) {
-            if (selection !== "I/S") setMobileView(true);
+      //if (!(window.innerWidth < 500))
+      if (window.scrollY > window.innerHeight)
+        if (!mobileView) {
+          if (selection !== "I/S") {
+            setMobileView(true);
           }
-          //
         }
+      //
 
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
 
@@ -171,7 +172,7 @@ function MyComponent() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [selection]);
   useEffect(() => {
     //if (mobileView) window.scrollTo(0, selectionHeight - 100);
     //window.scrollTo(0, 0); //selectionHeight
@@ -1717,7 +1718,7 @@ function MyComponent() {
             fontWeight: mobileView ? "" : "bolder",
             textIndent: "20px",
             padding: "20px 0px",
-            width: mobileView ? "100%" : "calc(100vw - 300px)",
+            width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
             color: "black",
             backgroundColor: "white",
           }}
@@ -1894,7 +1895,6 @@ function MyComponent() {
                                 });
                             }
                           }}
-                          key={user.id}
                         >
                           <span
                             onMouseEnter={() => {
@@ -1955,6 +1955,7 @@ function MyComponent() {
         )*/}
         <div
           style={{
+            width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
             backgroundColor: "whitesmoke",
           }}
         >
@@ -2012,7 +2013,7 @@ function MyComponent() {
               </select>
               <div
                 style={{
-                  width: mobileView ? "100vw" : "calc(100vw - 300px)",
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                   //overflowX: windowWidth < 500 ? "" : "auto",
                   //overflowY: "hidden",
                   //height: windowWidth < 500 ? "" : "170px",
@@ -2286,7 +2287,7 @@ function MyComponent() {
               </div>
               <div
                 style={{
-                  width: "100vw",
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                   height:
                     ioStatement &&
                     ioStatement.length > 0 &&
@@ -2863,7 +2864,7 @@ function MyComponent() {
               )}
               <div
                 style={{
-                  width: "100vw",
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                   height:
                     windowWidth - (mobileView ? 0 : 360) < 500
                       ? revenueExpensesHeight + 80
@@ -3204,11 +3205,10 @@ function MyComponent() {
               <div
                 style={{
                   display: selection !== "I/S" ? "flex" : "none",
-
                   overflowX: "auto",
                   overflowY: "hidden",
                   height: "56px",
-                  width: "100vw",
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                 }}
               >
                 {clickedDiv !== "" || clickedPie !== null ? (
@@ -3286,7 +3286,7 @@ function MyComponent() {
                     overflowX: "auto",
                     overflowY: "hidden",
                     height: generalLedgerHeight + 40,
-                    width: "100vw",
+                    width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                   }}
                 >
                   <table ref={generalLedgerRef}>
@@ -3720,94 +3720,86 @@ function MyComponent() {
               style={{
                 overflowX: "auto",
                 overflowY: "hidden",
-                width: mobileView ? "100%" : "calc(100vw - 300px)",
+                height: accountBalancesHeight + 40,
+                width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
               }}
             >
-              <div
-                style={{
-                  overflowX: "auto",
-                  overflowY: "hidden",
-                  height: accountBalancesHeight + 40,
-                  width: "100vw",
-                }}
-              >
-                <table ref={accountBalancesRef}>
-                  <caption
-                    style={{
-                      display: "flex",
-                      width: "max-content",
-                      position: "relative",
-                      fontSize: "20px",
-                      fontWeight: "bolder",
-                      paddingBottom: "14px",
-                      colspan: "2",
-                    }}
-                  >
-                    Account Balances
-                  </caption>
-                  <tbody>
-                    {accountBalances !== null && accountBalances.length > 0 && (
-                      <tr>
-                        <td
-                          style={{
-                            textAlign: "left",
-                            backgroundColor: "whitesmoke",
-                            color: "grey",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <div>Account</div>
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "left",
-                            backgroundColor: "whitesmoke",
-                            color: "grey",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <div>Balance</div>
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "left",
-                            backgroundColor: "whitesmoke",
-                            color: "grey",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <div>Last Updated</div>
-                        </td>
-                      </tr>
-                    )}
-                    {accountBalances === null ? (
-                      ""
-                    ) : accountBalances.length === 0 ? (
-                      <tr>
-                        <td>No results</td>
-                      </tr>
-                    ) : (
-                      accountBalances.map((x, i) => {
-                        return (
-                          <tr key={i + x.LastUpdated}>
-                            <td>
-                              <div>{x.AccountName}</div>
-                            </td>
-                            <td>
-                              <div>${addCommas(String(x.CurrentBalance))}</div>
-                            </td>
-                            <td>
-                              <div>
-                                {new Date(x.LastUpdated).toLocaleDateString()}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <table ref={accountBalancesRef}>
+                <caption
+                  style={{
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    paddingBottom: "14px",
+                    colspan: "2",
+                  }}
+                >
+                  Account Balances
+                </caption>
+                <tbody>
+                  {accountBalances !== null && accountBalances.length > 0 && (
+                    <tr>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div>Account</div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div>Balance</div>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "left",
+                          backgroundColor: "whitesmoke",
+                          color: "grey",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div>Last Updated</div>
+                      </td>
+                    </tr>
+                  )}
+                  {accountBalances === null ? (
+                    ""
+                  ) : accountBalances.length === 0 ? (
+                    <tr>
+                      <td>No results</td>
+                    </tr>
+                  ) : (
+                    accountBalances.map((x, i) => {
+                      return (
+                        <tr key={i + x.LastUpdated}>
+                          <td>
+                            <div>{x.AccountName}</div>
+                          </td>
+                          <td>
+                            <div>${addCommas(String(x.CurrentBalance))}</div>
+                          </td>
+                          <td>
+                            <div>
+                              {new Date(x.LastUpdated).toLocaleDateString()}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
           {selection === "Payroll" && (
@@ -3827,7 +3819,7 @@ function MyComponent() {
                     : "flex",
                 overflowX: "auto",
                 overflowY: "hidden",
-                width: mobileView ? "100%" : "calc(100vw - 300px)",
+                width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
               }}
             >
               {(true ||
@@ -3848,7 +3840,7 @@ function MyComponent() {
                   overflowX: "auto",
                   overflowY: "hidden",
                   height: payrollHeight + 40,
-                  width: "100vw",
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                 }}
               >
                 <table ref={payrollRef}>
@@ -4054,13 +4046,12 @@ function MyComponent() {
                 }
               }}*/
               style={{
-                width: "100vw",
                 height: invoicesHeight + 40,
                 alignItems: "flex-start",
                 display: "block",
                 overflowX: "auto",
                 overflowY: "hidden",
-                width: mobileView ? "100%" : "calc(100vw - 300px)",
+                width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
               }}
             >
               <table ref={invoicesRef}>
