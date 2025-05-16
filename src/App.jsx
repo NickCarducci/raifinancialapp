@@ -998,6 +998,8 @@ function MyComponent() {
       setAccountBalancesHeight(accountBalancesRef.current.offsetHeight);
     payrollRef.current && setPayrollHeight(payrollRef.current.offsetHeight);
     ioStatement &&
+      barChartRef.current &&
+      pieChartRef.current &&
       setChartsHeight(
         barChartRef.current.offsetHeight + pieChartRef.current.offsetHeight
       );
