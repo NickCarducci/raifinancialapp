@@ -988,12 +988,19 @@ function MyComponent() {
   const revenueRef = useRef(null);
   const expenseRef = useRef(null);
   const [revenueExpensesHeight, setRevenueExpensesHeight] = useState(0);
+  const barChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const [chartsHeight, setChartsHeight] = useState(0);
   useEffect(() => {
     generalLedgerRef.current &&
       setGeneralLedgerHeight(generalLedgerRef.current.offsetHeight);
     accountBalancesRef.current &&
       setAccountBalancesHeight(accountBalancesRef.current.offsetHeight);
     payrollRef.current && setPayrollHeight(payrollRef.current.offsetHeight);
+    ioStatement &&
+      setChartsHeight(
+        barChartRef.current.offsetHeight + pieChartRef.current.offsetHeight
+      );
     revenueRef.current &&
       expenseRef.current &&
       setRevenueExpensesHeight(
@@ -1003,6 +1010,7 @@ function MyComponent() {
     generalLedger,
     accountBalances,
     payoutLog,
+    ioStatement,
     revenue,
     expenses,
     selectedDate,
@@ -2271,6 +2279,15 @@ function MyComponent() {
               </div>
               <div
                 style={{
+                  width: "100vw",
+                  height:
+                    windowWidth - (mobileView ? 0 : 360) < 500
+                      ? chartsHeight + 40
+                      : "",
+                  overflowX:
+                    windowWidth - (mobileView ? 0 : 360) < 500 ? "auto" : "",
+                  overflowY:
+                    windowWidth - (mobileView ? 0 : 360) < 500 ? "hidden" : "",
                   //justifyContent: "space-evenly",
                   display:
                     windowWidth - (mobileView ? 0 : 360) < 500 //|| (windowWidth < 900 && !mobileView)
@@ -2279,6 +2296,7 @@ function MyComponent() {
                 }}
               >
                 <div
+                  ref={barChartRef}
                   onMouseLeave={() => setIOHover("")}
                   style={{
                     position: "relative",
@@ -2442,6 +2460,7 @@ function MyComponent() {
                   </div>
                 </div>
                 <div
+                  ref={pieChartRef}
                   onMouseLeave={() => setIOHover("")}
                   style={{
                     cursor: "pointer",
@@ -2477,8 +2496,7 @@ function MyComponent() {
                   >
                     <div
                       style={{
-                        height:
-                          windowWidth < 500 ? (windowWidth - 60) / 2 : "200px",
+                        //height:windowWidth < 500 ? (windowWidth - 60) / 2 : "200px",
                         width:
                           windowWidth < 500 ? (windowWidth - 60) / 2 : "200px",
                         marginRight: "30px",
