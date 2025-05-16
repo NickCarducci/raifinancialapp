@@ -3816,6 +3816,8 @@ function MyComponent() {
                 (windowWidth < 900 && !mobileView)) && (
                 <div
                   style={{
+                    transition: ".3s ease-out",
+                    height: payoutLog && payoutLog.length > 0 ? "" : "0px",
                     margin: "20px 60px",
                     width:
                       windowWidth < 500 ? windowWidth - windowWidth / 3 : 300,
