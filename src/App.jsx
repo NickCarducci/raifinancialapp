@@ -1019,6 +1019,7 @@ function MyComponent() {
     revenue,
     expenses,
     selectedDate,
+    invoices,
   ]);
   return (
     <div
@@ -1724,6 +1725,7 @@ function MyComponent() {
           <div
             onClick={() => setLoginMenu(true)}
             style={{
+              cursor: "pointer",
               transform: "translateY(-25%)",
               display: "flex",
               height: "40px",
