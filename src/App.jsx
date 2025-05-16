@@ -1803,6 +1803,7 @@ function MyComponent() {
                     <ul>
                       {users.map((user) => (
                         <li
+                          key={user.id}
                           style={{ wordWrap: "normal" }}
                           onClick={() => {
                             console.log(authenticatedUser, user);
@@ -4207,4 +4208,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
