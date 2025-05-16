@@ -182,6 +182,8 @@ function MyComponent() {
   const [newCategory, setNewCategory] = useState("");
   const [maxHeightDivs, setMaxHeightsDivs] = useState(0);
   const [generalLedgerTicks, setGeneralLedgerTicks] = useState([]);
+  const [lastStartingDate, setLastStartingDate] = useState("");
+  const [lastEndingDate, setLastEndingDate] = useState("");
   const getGeneralLedger = () => {
     if (mobileView) setSelectionMenu(false);
     setGeneralLedger([{ Amount: "Connecting to database..." }]);
@@ -191,6 +193,8 @@ function MyComponent() {
         account: accounts[0],
       })
       .then((response) => {
+        setLastStartingDate(startingDate);
+        setLastEndingDate(endingDate);
         const newStartingDate = new Date(
           new Date(startingDate).getTime() + 86400000 * 2
         );
@@ -3167,20 +3171,23 @@ function MyComponent() {
                     See all.
                   </button>
                 ) : (
-                  <span
-                    class="fa fa-refresh"
-                    style={{
-                      marginLeft: "20px",
-                      marginRight: "10px",
-                      padding: "6px",
-                      borderRadius: "10px",
-                      border: "1px solid black",
-                    }}
-                    onClick={() => {
-                      getGeneralLedger();
-                      setSelection("General Ledger");
-                    }}
-                  ></span>
+                  (startingDate !== lastStartingDate ||
+                    endingDate !== lastEndingDate) && (
+                    <span
+                      class="fa fa-refresh"
+                      style={{
+                        marginLeft: "20px",
+                        marginRight: "10px",
+                        padding: "6px",
+                        borderRadius: "10px",
+                        border: "1px solid black",
+                      }}
+                      onClick={() => {
+                        getGeneralLedger();
+                        setSelection("General Ledger");
+                      }}
+                    ></span>
+                  )
                 )}
                 {space}starting date:
                 <input
@@ -4200,3 +4207,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
