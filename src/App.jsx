@@ -1064,6 +1064,7 @@ function MyComponent() {
           });
       });
   };
+  const [hoverRow, setHoverRow] = useState(null);
   return (
     <div
       style={{
@@ -2958,7 +2959,21 @@ function MyComponent() {
                           : true;
                       if (selectedDate === null || doesntMatch) return null;
                       return (
-                        <tr key={i + x.Date}>
+                        <tr
+                          onMouseEnter={() => {
+                            setHoverRow(x.Category);
+                          }}
+                          onMouseLeave={() => {
+                            setHoverRow(null);
+                          }}
+                          key={i + x.Date}
+                          style={{
+                            backgroundColor:
+                              x.Category === hoverRow
+                                ? "rgb(240,240,240,.3)"
+                                : "",
+                          }}
+                        >
                           <td>
                             <div>{x.Category}</div>
                           </td>
@@ -3023,7 +3038,6 @@ function MyComponent() {
                         </td>
                       </tr>
                     )}
-
                     {(!showExpenses
                       ? []
                       : selectedFrequency === "Monthly"
@@ -3055,7 +3069,21 @@ function MyComponent() {
                           : true;
                       if (selectedDate === null || doesntMatch) return null;
                       return (
-                        <tr key={i + x.Date}>
+                        <tr
+                          onMouseEnter={() => {
+                            setHoverRow(x.Category);
+                          }}
+                          onMouseLeave={() => {
+                            setHoverRow(null);
+                          }}
+                          key={i + x.Date}
+                          style={{
+                            backgroundColor:
+                              x.Category === hoverRow
+                                ? "rgb(240,240,240,.3)"
+                                : "",
+                          }}
+                        >
                           <td>
                             <div>{x.Category}</div>
                           </td>
@@ -3547,10 +3575,18 @@ function MyComponent() {
                           .map((x, i) => {
                             return (
                               <tr
-                                key={i + x.Date}
+                                onMouseEnter={() => {
+                                  setHoverRow(x.TransactionID);
+                                }}
+                                onMouseLeave={() => {
+                                  setHoverRow(null);
+                                }}
+                                key={x.TransactionID}
                                 style={{
                                   backgroundColor:
-                                    x.Date === hoverDiv
+                                    x.TransactionID === hoverRow
+                                      ? "rgb(240,240,240,.3)"
+                                      : x.Date === hoverDiv
                                       ? x.Amount >= 0
                                         ? "rgb(100,200,100,.3)"
                                         : "rgb(200,100,100,.3)"
@@ -3771,7 +3807,21 @@ function MyComponent() {
                   ) : (
                     accountBalances.map((x, i) => {
                       return (
-                        <tr key={i + x.LastUpdated}>
+                        <tr
+                          onMouseEnter={() => {
+                            setHoverRow(x.AccountName);
+                          }}
+                          onMouseLeave={() => {
+                            setHoverRow(null);
+                          }}
+                          key={i + x.LastUpdated}
+                          style={{
+                            backgroundColor:
+                              x.AccountName === hoverRow
+                                ? "rgb(240,240,240,.3)"
+                                : "",
+                          }}
+                        >
                           <td>
                             <div>{x.AccountName}</div>
                           </td>
@@ -3989,7 +4039,21 @@ function MyComponent() {
                         return (
                           (clickedPie === null ||
                             x.EmployeeName === clickedPie) && (
-                            <tr key={i + String(x.PayoutID)}>
+                            <tr
+                              onMouseEnter={() => {
+                                setHoverRow(x.PayoutID);
+                              }}
+                              onMouseLeave={() => {
+                                setHoverRow(null);
+                              }}
+                              key={i + String(x.PayoutID)}
+                              style={{
+                                backgroundColor:
+                                  x.PayoutID === hoverRow
+                                    ? "rgb(240,240,240,.3)"
+                                    : "",
+                              }}
+                            >
                               <td>
                                 <div>
                                   {new Date(x.PaymentDate).toLocaleDateString(
@@ -4194,7 +4258,21 @@ function MyComponent() {
                   ) : (
                     invoices.map((x, i) => {
                       return (
-                        <tr key={String(x.InvoiceID)}>
+                        <tr
+                          onMouseEnter={() => {
+                            setHoverRow(x.InvoiceID);
+                          }}
+                          onMouseLeave={() => {
+                            setHoverRow(null);
+                          }}
+                          key={String(x.InvoiceID)}
+                          style={{
+                            backgroundColor:
+                              x.InvoiceID === hoverRow
+                                ? "rgb(240,240,240,.3)"
+                                : "",
+                          }}
+                        >
                           <td>
                             <div>
                               {new Date(x.Date).toLocaleDateString("en-US", {
@@ -4321,3 +4399,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
