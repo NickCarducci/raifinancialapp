@@ -173,7 +173,7 @@ function MyComponent() {
     };
   }, []);
   useEffect(() => {
-    if (mobileView) window.scrollTo(0, selectionHeight - 100);
+    //if (mobileView) window.scrollTo(0, selectionHeight - 100);
     //window.scrollTo(0, 0); //selectionHeight
     return () => {};
   }, [selectionHeight]);
@@ -991,6 +991,8 @@ function MyComponent() {
   const barChartRef = useRef(null);
   const pieChartRef = useRef(null);
   const [chartsHeight, setChartsHeight] = useState(0);
+  const invoicesRef = useRef(null);
+  const [invoicesHeight, setInvoicesHeight] = useState(0);
   useEffect(() => {
     generalLedgerRef.current &&
       setGeneralLedgerHeight(generalLedgerRef.current.offsetHeight);
@@ -1008,6 +1010,7 @@ function MyComponent() {
       setRevenueExpensesHeight(
         revenueRef.current.offsetHeight + expenseRef.current.offsetHeight
       );
+    invoicesRef.current && setInvoicesHeight(invoicesRef.current.offsetHeight);
   }, [
     generalLedger,
     accountBalances,
@@ -2283,6 +2286,8 @@ function MyComponent() {
                 style={{
                   width: "100vw",
                   height:
+                    ioStatement &&
+                    ioStatement.length > 0 &&
                     windowWidth - (mobileView ? 0 : 360) < 500
                       ? chartsHeight + 40
                       : "",
@@ -4047,6 +4052,8 @@ function MyComponent() {
                 }
               }}*/
               style={{
+                width: "100vw",
+                height: invoicesHeight + 40,
                 alignItems: "flex-start",
                 display: "block",
                 overflowX: "auto",
@@ -4054,7 +4061,7 @@ function MyComponent() {
                 width: mobileView ? "100%" : "calc(100vw - 300px)",
               }}
             >
-              <table>
+              <table ref={invoicesRef}>
                 <caption
                   style={{
                     display: "flex",
@@ -4250,4 +4257,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
