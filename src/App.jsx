@@ -4083,7 +4083,7 @@ function MyComponent() {
                         onClick={() => {
                           setInvoices(
                             upOrder === "upDate"
-                              ? invoices.reverse()
+                              ? invoices.slice().reverse()
                               : invoices.sort(
                                   (a, b) => new Date(a.Date) - new Date(b.Date)
                                 )
@@ -4205,7 +4205,7 @@ function MyComponent() {
                   ) : (
                     invoices.map((x, i) => {
                       return (
-                        <tr key={i + String(x.InvoiceID)}>
+                        <tr key={String(x.InvoiceID)}>
                           <td>
                             <div>
                               {new Date(x.Date).toLocaleDateString("en-US", {
