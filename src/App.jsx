@@ -1024,6 +1024,46 @@ function MyComponent() {
     selectedDate,
     invoices,
   ]);
+  const getInvoices = () => {
+    if (mobileView) setSelectionMenu(false);
+    setSelection("Invoices");
+    setInvoices([{ Description: "Connecting to database..." }]);
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        fetch("https://raifinancial.azurewebsites.net/api/invoices", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + response.idToken,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then(async (result) => {
+            console.log(result);
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
+              return setInvoices([{ Description: "please log in again..." }]);
+            }
+
+            setInvoices(
+              result.invoices.sort(
+                (a, b) => new Date(b.Date) - new Date(a.Date)
+              )
+            );
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      });
+  };
   return (
     <div
       style={{
@@ -1522,51 +1562,7 @@ function MyComponent() {
                   //textDecoration:selector === "Invoices" ? "underline" : "none",
                   listStyleType: selector === "Invoices" ? "initial" : "none",
                 }}
-                onClick={() => {
-                  if (mobileView) setSelectionMenu(false);
-                  setSelection("Invoices");
-                  setInvoices([{ Description: "Connecting to database..." }]);
-                  instance
-                    .acquireTokenSilent({
-                      ...loginRequest,
-                      account: accounts[0],
-                    })
-                    .then((response) => {
-                      fetch(
-                        "https://raifinancial.azurewebsites.net/api/invoices",
-                        {
-                          method: "GET",
-                          headers: {
-                            Authorization: "Bearer " + response.idToken,
-                            "Content-Type": "application/JSON",
-                          },
-                        }
-                      )
-                        .then(async (res) => await res.json())
-                        .then(async (result) => {
-                          console.log(result);
-                          if (result.code === 401) {
-                            await instance.acquireTokenRedirect({
-                              account: accounts[0],
-                              forceRefresh: true,
-                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                            });
-                            return setInvoices([
-                              { Description: "please log in again..." },
-                            ]);
-                          }
-
-                          setInvoices(
-                            result.invoices.sort(
-                              (a, b) => new Date(b.Date) - new Date(a.Date)
-                            )
-                          );
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                        });
-                    });
-                }}
+                onClick={getInvoices}
               >
                 <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
               </div>
@@ -3599,94 +3595,95 @@ function MyComponent() {
                                 </td>
                                 <td
                                   onClick={() => {
-                                    if (editCategory === i) return null;
-                                    setEditCategory(i);
+                                    if (editCategory === x.TransactionID)
+                                      return null;
+                                    setEditCategory(x.TransactionID);
                                   }}
                                   style={{ cursor: "pointer" }}
                                 >
-                                  <div>
-                                    {editCategory === i ? (
-                                      <form
-                                        style={{
-                                          display: "flex",
-                                        }}
-                                        onSubmit={(e) => {
-                                          e.preventDefault();
-                                          setAllowUpdate(true);
-                                          const answer = window.confirm(
-                                            "Are you sure you'd like to change the Category from " +
-                                              x.Category +
-                                              " to " +
-                                              newCategory +
-                                              "?"
-                                          );
-                                          if (answer) {
-                                            instance
-                                              .acquireTokenSilent({
-                                                ...loginRequest,
-                                                account: accounts[0],
-                                              })
-                                              .then((response) => {
-                                                fetch(
-                                                  "https://raifinancial.azurewebsites.net/api/updatecategory",
-                                                  {
-                                                    method: "POST",
-                                                    headers: {
-                                                      Authorization: `Bearer ${response.idToken}`,
-                                                      "Content-Type":
-                                                        "application/JSON",
-                                                    },
-                                                    body: JSON.stringify({
-                                                      ...x,
-                                                      Category: newCategory,
-                                                    }),
-                                                  }
+                                  {editCategory === x.TransactionID ? (
+                                    <form
+                                      style={{
+                                        display: "flex",
+                                      }}
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        setAllowUpdate(true);
+                                        const answer = window.confirm(
+                                          "Are you sure you'd like to change the Category from " +
+                                            x.Category +
+                                            " to " +
+                                            newCategory +
+                                            "?"
+                                        );
+                                        if (answer) {
+                                          instance
+                                            .acquireTokenSilent({
+                                              ...loginRequest,
+                                              account: accounts[0],
+                                            })
+                                            .then((response) => {
+                                              fetch(
+                                                "https://raifinancial.azurewebsites.net/api/updatecategory",
+                                                {
+                                                  method: "POST",
+                                                  headers: {
+                                                    Authorization: `Bearer ${response.idToken}`,
+                                                    "Content-Type":
+                                                      "application/JSON",
+                                                  },
+                                                  body: JSON.stringify({
+                                                    ...x,
+                                                    Category: newCategory,
+                                                  }),
+                                                }
+                                              )
+                                                .then(
+                                                  async (res) =>
+                                                    await res.json()
                                                 )
-                                                  .then(
-                                                    async (res) =>
-                                                      await res.json()
-                                                  )
-                                                  .then((response) => {
-                                                    console.log(response);
-                                                    setNewCategory("");
-                                                    if (allowUpdate)
-                                                      getGeneralLedger();
-                                                    setSelection(
-                                                      "General Ledger"
-                                                    );
-                                                    setEditCategory(false);
-                                                  })
-                                                  .catch((error) => {
-                                                    console.error(error);
-                                                  });
-                                              });
-                                          }
-                                        }}
-                                      >
-                                        <div
-                                          onClick={() => setEditCategory(false)}
-                                        >
-                                          &times;
-                                        </div>
-                                        <input
-                                          placeholder={x.Category}
-                                          value={newCategory}
-                                          onChange={(e) => {
-                                            setNewCategory(e.target.value);
-                                          }}
-                                        />
-                                      </form>
-                                    ) : (
+                                                .then((response) => {
+                                                  console.log(response);
+                                                  setNewCategory("");
+                                                  if (allowUpdate)
+                                                    getGeneralLedger();
+                                                  setSelection(
+                                                    "General Ledger"
+                                                  );
+                                                  setEditCategory(false);
+                                                })
+                                                .catch((error) => {
+                                                  console.error(error);
+                                                });
+                                            });
+                                        }
+                                      }}
+                                    >
                                       <div
-                                        onClick={() => {
-                                          setNewCategory("");
-                                          setAllowUpdate(false);
-                                        }}
+                                        onClick={() => setEditCategory(false)}
                                       >
-                                        {x.Category}
+                                        &times;
                                       </div>
-                                    )}
-                                  </div>
+                                      <input
+                                        placeholder={
+                                          x.Category ? x.Category : "(empty)"
+                                        }
+                                        value={newCategory}
+                                        onChange={(e) => {
+                                          setNewCategory(e.target.value);
+                                        }}
+                                      />
+                                    </form>
+                                  ) : (
+                                    <div
+                                      onClick={() => {
+                                        setNewCategory("");
+                                        setAllowUpdate(false);
+                                      }}
+                                    >
+                                      {x.Category}
+                                    </div>
+                                  )}
                                 </td>
                                 <td>
                                   <div>{x.Platform}</div>
@@ -4215,8 +4212,88 @@ function MyComponent() {
                               })}
                             </div>
                           </td>
-                          <td>
-                            <div>{x.Category}</div>
+                          <td
+                            onClick={() => {
+                              if (editCategory === x.InvoiceID) return null;
+                              setEditCategory(x.InvoiceID);
+                            }}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {editCategory === x.InvoiceID ? (
+                              <form
+                                style={{
+                                  display: "flex",
+                                }}
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  setAllowUpdate(true);
+                                  const answer = window.confirm(
+                                    "Are you sure you'd like to change the Category from " +
+                                      x.Category +
+                                      " to " +
+                                      newCategory +
+                                      "?"
+                                  );
+                                  if (answer) {
+                                    instance
+                                      .acquireTokenSilent({
+                                        ...loginRequest,
+                                        account: accounts[0],
+                                      })
+                                      .then((response) => {
+                                        fetch(
+                                          "https://raifinancial.azurewebsites.net/api/updatecategoryinvoices",
+                                          {
+                                            method: "POST",
+                                            headers: {
+                                              Authorization: `Bearer ${response.idToken}`,
+                                              "Content-Type":
+                                                "application/JSON",
+                                            },
+                                            body: JSON.stringify({
+                                              ...x,
+                                              Category: newCategory,
+                                            }),
+                                          }
+                                        )
+                                          .then(async (res) => await res.json())
+                                          .then((response) => {
+                                            console.log(response);
+                                            setNewCategory("");
+                                            if (allowUpdate) getInvoices();
+                                            setSelection("Invoices");
+                                            setEditCategory(false);
+                                          })
+                                          .catch((error) => {
+                                            console.error(error);
+                                          });
+                                      });
+                                  }
+                                }}
+                              >
+                                <div onClick={() => setEditCategory(false)}>
+                                  &times;
+                                </div>
+                                <input
+                                  placeholder={
+                                    x.Category ? x.Category : "(empty)"
+                                  }
+                                  value={newCategory}
+                                  onChange={(e) => {
+                                    setNewCategory(e.target.value);
+                                  }}
+                                />
+                              </form>
+                            ) : (
+                              <div
+                                onClick={() => {
+                                  setNewCategory("");
+                                  setAllowUpdate(false);
+                                }}
+                              >
+                                {x.Category}
+                              </div>
+                            )}
                           </td>
                           <td>
                             <div>${addCommas(String(x.Amount))}</div>
