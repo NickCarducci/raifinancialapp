@@ -982,16 +982,31 @@ function MyComponent() {
   const generalLedgerRef = useRef(null);
   const accountBalancesRef = useRef(null);
   const payrollRef = useRef(null);
-  const [generalLedgerHeight, setGeneralLedgerHeight] = useState(true);
-  const [accountBalancesHeight, setAccountBalancesHeight] = useState(true);
-  const [payrollHeight, setPayrollHeight] = useState(true);
+  const [generalLedgerHeight, setGeneralLedgerHeight] = useState(0);
+  const [accountBalancesHeight, setAccountBalancesHeight] = useState(0);
+  const [payrollHeight, setPayrollHeight] = useState(0);
+  const revenueRef = useRef(null);
+  const expenseRef = useRef(null);
+  const [revenueExpensesHeight, setRevenueExpensesHeight] = useState(0);
   useEffect(() => {
     generalLedgerRef.current &&
       setGeneralLedgerHeight(generalLedgerRef.current.offsetHeight);
     accountBalancesRef.current &&
       setAccountBalancesHeight(accountBalancesRef.current.offsetHeight);
     payrollRef.current && setPayrollHeight(payrollRef.current.offsetHeight);
-  }, [generalLedger, accountBalances, payoutLog]);
+    revenueRef.current &&
+      expenseRef.current &&
+      setRevenueExpensesHeight(
+        revenueRef.current.offsetHeight + expenseRef.current.offsetHeight
+      );
+  }, [
+    generalLedger,
+    accountBalances,
+    payoutLog,
+    revenue,
+    expenses,
+    selectedDate,
+  ]);
   return (
     <div
       style={{
@@ -2821,6 +2836,15 @@ function MyComponent() {
               )}
               <div
                 style={{
+                  width: "100vw",
+                  height:
+                    windowWidth - (mobileView ? 0 : 360) < 500
+                      ? revenueExpensesHeight + 80
+                      : "",
+                  overflowX:
+                    windowWidth - (mobileView ? 0 : 360) < 500 ? "auto" : "",
+                  overflowY:
+                    windowWidth - (mobileView ? 0 : 360) < 500 ? "hidden" : "",
                   display:
                     windowWidth - (mobileView ? 0 : 360) < 500 //|| (windowWidth < 900 && !mobileView)
                       ? "block"
@@ -2829,6 +2853,7 @@ function MyComponent() {
                 }}
               >
                 <table
+                  ref={revenueRef}
                   style={{
                     position: "relative",
                     cursor: "pointer",
@@ -2839,9 +2864,7 @@ function MyComponent() {
                     textAlign: "left",
                     width:
                       windowWidth - (mobileView ? 0 : 360) < 500
-                        ? windowWidth - (mobileView ? 0 : 360) < 300
-                          ? "200px"
-                          : windowWidth - (mobileView ? 60 : 360)
+                        ? ""
                         : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                   }}
@@ -2928,6 +2951,7 @@ function MyComponent() {
                   </tbody>
                 </table>
                 <table
+                  ref={expenseRef}
                   style={{
                     position: "relative",
                     cursor: "pointer",
@@ -2938,9 +2962,7 @@ function MyComponent() {
                     textAlign: "left",
                     width:
                       windowWidth - (mobileView ? 0 : 360) < 500
-                        ? windowWidth - (mobileView ? 0 : 360) < 300
-                          ? "200px"
-                          : windowWidth - (mobileView ? 60 : 360)
+                        ? ""
                         : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                   }}
@@ -4208,3 +4230,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
