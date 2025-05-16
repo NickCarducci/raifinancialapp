@@ -994,7 +994,9 @@ function MyComponent() {
   const [chartsHeight, setChartsHeight] = useState(0);
   const invoicesRef = useRef(null);
   const [invoicesHeight, setInvoicesHeight] = useState(0);
+  //const [pageHeight, setPageHeight] = useState(0);
   useEffect(() => {
+    //setPageHeight(document.documentElement.scrollHeight);
     generalLedgerRef.current &&
       setGeneralLedgerHeight(generalLedgerRef.current.offsetHeight);
     accountBalancesRef.current &&
@@ -4119,22 +4121,22 @@ function MyComponent() {
                         }}
                         onClick={() => {
                           setInvoices(
-                            upOrder === "upDescription"
+                            upOrder === "upCategory"
                               ? invoices.reverse()
                               : invoices.sort((a, b) =>
-                                  a.Description === null
+                                  a.Category === null
                                     ? -1
-                                    : b.Description === null
+                                    : b.Category === null
                                     ? 1
-                                    : b.Description.localeCompare(a.Description)
+                                    : b.Category.localeCompare(a.Category)
                                 )
                           );
-                          setUpOrder(upOrder ? false : "upDescription");
+                          setUpOrder(upOrder ? false : "upCategory");
                         }}
                       >
                         <div>
-                          DESCRIPTION{" "}
-                          {upOrder === "upDescription" && (
+                          CATEGORY{" "}
+                          {upOrder === "upCategory" && (
                             <div
                               style={{
                                 display: "inline-block",
@@ -4214,7 +4216,7 @@ function MyComponent() {
                             </div>
                           </td>
                           <td>
-                            <div>{x.Description}</div>
+                            <div>{x.Category}</div>
                           </td>
                           <td>
                             <div>${addCommas(String(x.Amount))}</div>
