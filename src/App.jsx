@@ -2867,10 +2867,8 @@ function MyComponent() {
                     windowWidth - (mobileView ? 0 : 360) < 500
                       ? revenueExpensesHeight + 80
                       : "",
-                  overflowX:
-                    windowWidth - (mobileView ? 0 : 360) < 500 ? "auto" : "",
-                  overflowY:
-                    windowWidth - (mobileView ? 0 : 360) < 500 ? "hidden" : "",
+                  overflowX: "auto",
+                  overflowY: "hidden",
                   display:
                     windowWidth - (mobileView ? 0 : 360) < 500 //|| (windowWidth < 900 && !mobileView)
                       ? "block"
@@ -2888,10 +2886,6 @@ function MyComponent() {
                     margin: "20px",
                     marginRight: "0px",
                     textAlign: "left",
-                    width:
-                      windowWidth - (mobileView ? 0 : 360) < 500
-                        ? ""
-                        : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                   }}
                 >
@@ -2986,10 +2980,6 @@ function MyComponent() {
                     margin: "20px",
                     marginRight: "0px",
                     textAlign: "left",
-                    width:
-                      windowWidth - (mobileView ? 0 : 360) < 500
-                        ? ""
-                        : (windowWidth - (mobileView ? 120 : 420)) / 2,
                     padding: "10px",
                   }}
                 >
