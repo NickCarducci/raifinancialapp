@@ -489,54 +489,30 @@ function MyComponent() {
   //console.log(thisMonthsIOStatement, selectedDate);
   const changeInTotalRevenue =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.Revenue) === 0 ||
-        Math.sign(lastMonthsIOStatement.Revenue) === 0 ||
-        Math.sign(thisMonthsIOStatement.Revenue) ===
-          Math.sign(lastMonthsIOStatement.Revenue)
-        ? (
-            ((thisMonthsIOStatement.Revenue - lastMonthsIOStatement.Revenue) /
-              lastMonthsIOStatement.Revenue) *
-            100
-          ).toFixed(1)
-        : (
-            ((thisMonthsIOStatement.Revenue + lastMonthsIOStatement.Revenue) /
-              lastMonthsIOStatement.Revenue) *
-            100
-          ).toFixed(1)
+      ? (
+          ((Math.abs(thisMonthsIOStatement.Revenue) -
+            Math.abs(lastMonthsIOStatement.Revenue)) /
+            lastMonthsIOStatement.Revenue) *
+          100
+        ).toFixed(1)
       : 0;
   const changeInTotalExpenses =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.Expenses) === 0 ||
-        Math.sign(lastMonthsIOStatement.Expenses) === 0 ||
-        Math.sign(thisMonthsIOStatement.Expenses) ===
-          Math.sign(lastMonthsIOStatement.Expenses)
-        ? (
-            ((thisMonthsIOStatement.Expenses - lastMonthsIOStatement.Expenses) /
-              lastMonthsIOStatement.Expenses) *
-            100
-          ).toFixed(1)
-        : (
-            ((thisMonthsIOStatement.Expenses + lastMonthsIOStatement.Expenses) /
-              lastMonthsIOStatement.Expenses) *
-            100
-          ).toFixed(1)
+      ? (
+          ((Math.abs(thisMonthsIOStatement.Expenses) -
+            Math.abs(lastMonthsIOStatement.Expenses)) /
+            lastMonthsIOStatement.Expenses) *
+          100
+        ).toFixed(1)
       : 0;
   const changeInNetProfit =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.NetProfit) >= 0 &&
-        Math.sign(lastMonthsIOStatement.NetProfit) >= 0
-        ? (
-            ((thisMonthsIOStatement.NetProfit -
-              lastMonthsIOStatement.NetProfit) /
-              lastMonthsIOStatement.NetProfit) *
-            100
-          ).toFixed(1)
-        : (
-            ((Math.abs(thisMonthsIOStatement.NetProfit) -
-              Math.abs(lastMonthsIOStatement.NetProfit)) /
-              lastMonthsIOStatement.NetProfit) *
-            100
-          ).toFixed(1)
+      ? (
+          ((Math.abs(thisMonthsIOStatement.NetProfit) -
+            Math.abs(lastMonthsIOStatement.NetProfit)) /
+            lastMonthsIOStatement.NetProfit) *
+          100
+        ).toFixed(1)
       : 0;
   const getRevenue = () => {
     setSelectedIO("revenue");
@@ -2024,6 +2000,7 @@ function MyComponent() {
                 <span
                   class="fa fa-refresh"
                   style={{
+                    cursor: "pointer",
                     height: "min-content",
                     padding: "6px",
                     borderRadius: "10px",
@@ -3361,16 +3338,21 @@ function MyComponent() {
                           <span
                             class="fa fa-refresh"
                             style={{
+                              cursor: "pointer",
                               height: "min-content",
                               padding: "6px",
                               borderRadius: "10px",
                               color:
-                                startingDate !== lastStartingDate ||
-                                endingDate !== lastEndingDate
+                                startingDate &&
+                                endingDate &&
+                                (startingDate !== lastStartingDate ||
+                                  endingDate !== lastEndingDate)
                                   ? "black"
                                   : "grey",
                             }}
                             onClick={() => {
+                              if (!startingDate || !endingDate)
+                                return window.alert("Invalid queried date.");
                               getGeneralLedger();
                               setSelection("General Ledger");
                             }}
@@ -3809,6 +3791,7 @@ function MyComponent() {
                   <span
                     class="fa fa-refresh"
                     style={{
+                      cursor: "pointer",
                       height: "min-content",
                       padding: "6px",
                       borderRadius: "10px",
@@ -3956,6 +3939,7 @@ function MyComponent() {
                     <span
                       class="fa fa-refresh"
                       style={{
+                        cursor: "pointer",
                         height: "min-content",
                         padding: "6px",
                         borderRadius: "10px",
@@ -4193,6 +4177,7 @@ function MyComponent() {
                   <span
                     class="fa fa-refresh"
                     style={{
+                      cursor: "pointer",
                       height: "min-content",
                       padding: "6px",
                       borderRadius: "10px",
