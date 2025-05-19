@@ -127,6 +127,7 @@ function MyComponent() {
     if (tableRef.current) setTableWidth(tableRef.current.offsetWidth);
     return () => {};
   }, [selection]);
+  const [scrolling, setScrolling] = useState(false);
   useEffect(() => {
     const handleResize = () => {
       setSelectionMenu(window.innerWidth < 500 ? false : true);
@@ -150,8 +151,8 @@ function MyComponent() {
   const [upOrder, setUpOrder] = useState(false);
   const [selectionHeight, setSelectionHeight] = useState(0);
   const [payoutTotals, setPayoutTotals] = useState({});
-  const [scrolling, setScrolling] = useState(false);
 
+  const timerId = useRef(null);
   useEffect(() => {
     const handleScroll = () => {
       setSelectionHeight(selectionMenuRef.current.offsetHeight);
@@ -162,10 +163,9 @@ function MyComponent() {
             //setMobileView(true);
           }
         }
-      var cancel;
       setScrolling(true);
-      clearTimeout(cancel);
-      cancel = setTimeout(() => {
+      clearTimeout(timerId.current);
+      timerId.current = setTimeout(() => {
         setScrolling(false);
       }, 5000);
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
@@ -175,6 +175,7 @@ function MyComponent() {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
+      clearTimeout(timerId.current);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [selection]);
