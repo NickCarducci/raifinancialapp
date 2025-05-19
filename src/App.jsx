@@ -167,7 +167,7 @@ function MyComponent() {
       clearTimeout(cancel);
       cancel = setTimeout(() => {
         setScrolling(false);
-      }, 1000);
+      }, 5000);
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
       setScrollPosition(window.scrollY);
     };
@@ -3261,6 +3261,7 @@ function MyComponent() {
                   style={{
                     textAlign: "center",
                     marginLeft: "10px",
+                    width: "max-content",
                   }}
                 >
                   START
@@ -3280,6 +3281,7 @@ function MyComponent() {
                   style={{
                     textAlign: "center",
                     marginLeft: "10px",
+                    width: "max-content",
                   }}
                 >
                   END
