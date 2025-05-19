@@ -1156,6 +1156,8 @@ function MyComponent() {
           });
       });
   };
+  const [expenseFilter, setExpenseFilter] = useState(false);
+  const [expenseFilterHover, setExpenseFilterHover] = useState(false);
   return (
     <div
       style={{
@@ -1419,7 +1421,6 @@ function MyComponent() {
                     padding: "6px 10px",
                     margin: "0px 10px",
                     borderRadius: "3px",
-
                     borderLeft:
                       selection === "General Ledger" ? "2px solid white" : "",
                     transition: ".3s ease-out",
@@ -1446,7 +1447,6 @@ function MyComponent() {
                     padding: "6px 10px",
                     margin: "0px 10px",
                     borderRadius: "3px",
-
                     borderLeft: selection === "Charts" ? "2px solid white" : "",
                     transition: ".3s ease-out",
                     backgroundColor:
@@ -1515,7 +1515,6 @@ function MyComponent() {
                     padding: "6px 10px",
                     margin: "0px 10px",
                     borderRadius: "3px",
-
                     borderLeft:
                       selection === "Invoices" ? "2px solid white" : "",
                     transition: ".3s ease-out",
@@ -3086,7 +3085,32 @@ function MyComponent() {
                           }}
                         >
                           <td>
-                            <div>{x.Category}</div>
+                            <div
+                              onClick={() => {
+                                setExpenseFilter(x.Category);
+                                setSelection("General Ledger");
+                                getGeneralLedger();
+                              }}
+                            >
+                              <span
+                                style={{
+                                  width:
+                                    hoverRow === x.Category
+                                      ? "min-content"
+                                      : "0px",
+                                  transition:
+                                    hoverRow === x.Category
+                                      ? ".3s ease-in"
+                                      : ".05s ease-out",
+                                  transform: `translateX(${
+                                    hoverRow === x.Category ? "-50%" : "-100%"
+                                  })`,
+                                  opacity: hoverRow === x.Category ? 1 : 0,
+                                }}
+                                class="fa-solid fa-arrow-right"
+                              ></span>
+                              {x.Category}
+                            </div>
                           </td>
                           <td>
                             <div>${addCommas(String(x.Amount.toFixed(2)))}</div>
@@ -3345,7 +3369,7 @@ function MyComponent() {
                         style={{
                           cursor: "pointer",
                           height: "min-content",
-                          padding: "6px",
+                          padding: "6px 10px",
                           borderRadius: "10px",
                           color:
                             startingDate &&
@@ -3363,6 +3387,46 @@ function MyComponent() {
                         }}
                       ></span>
                     )}
+                    <span
+                      style={{
+                        color: expenseFilterHover ? "grey" : "black",
+                        transition: ".3s ease-in",
+                        opacity: expenseFilter ? 1 : 0,
+                        width: expenseFilter ? "" : 0,
+                        position: "relative",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={() => {
+                        setExpenseFilterHover(true);
+                      }}
+                      onMouseLeave={() => {
+                        setExpenseFilterHover(false);
+                      }}
+                      onClick={() => {
+                        setExpenseFilter(false);
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "25px",
+                          WebkitTextStroke: "1.5px white",
+                          position: "absolute",
+                          fontWeight: "bolder",
+                          transform: `translate(150%,-20%) rotate(30deg)`,
+                        }}
+                      >
+                        /
+                      </span>
+                      <span
+                        style={{
+                          height: "min-content",
+                          padding: "6px",
+                          paddingRight: "0px",
+                          borderRadius: "10px",
+                        }}
+                        class="fa-solid fa-filter"
+                      ></span>
+                    </span>
                   </caption>
                 )}
                 <div
@@ -3603,6 +3667,8 @@ function MyComponent() {
                           )
                           .filter((x) => {
                             if (x === null) return false;
+                            if (expenseFilter && expenseFilter !== x.Category)
+                              return false;
                             if (
                               clickedDiv !== "" &&
                               x.Date &&
@@ -3806,7 +3872,7 @@ function MyComponent() {
                   style={{
                     cursor: "pointer",
                     height: "min-content",
-                    padding: "6px",
+                    padding: "6px 10px",
                     borderRadius: "10px",
                   }}
                   onClick={() => {
@@ -3959,7 +4025,7 @@ function MyComponent() {
                   style={{
                     cursor: "pointer",
                     height: "min-content",
-                    padding: "6px",
+                    padding: "6px 10px",
                     borderRadius: "10px",
                   }}
                   onClick={() => {
@@ -4198,7 +4264,7 @@ function MyComponent() {
                   style={{
                     cursor: "pointer",
                     height: "min-content",
-                    padding: "6px",
+                    padding: "6px 10px",
                     borderRadius: "10px",
                   }}
                   onClick={() => {
