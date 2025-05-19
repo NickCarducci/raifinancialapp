@@ -1295,7 +1295,9 @@ function MyComponent() {
                 fontSize: windowWidth < 500 ? "" : "20px",
               }}
             >
-              RAI Finance
+              {scrollPosition > 0 && mobileView && !selectionMenu
+                ? selection
+                : "RAI Finance"}
             </div>
           </div>
           <div
@@ -4460,3 +4462,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
