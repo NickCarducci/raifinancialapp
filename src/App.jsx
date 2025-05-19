@@ -969,6 +969,8 @@ function MyComponent() {
   const invoicesRef = useRef(null);
   const [invoicesHeight, setInvoicesHeight] = useState(0);
   //const [pageHeight, setPageHeight] = useState(0);
+  const [expenseFilter, setExpenseFilter] = useState(false);
+  const [expenseFilterHover, setExpenseFilterHover] = useState(false);
   useEffect(() => {
     //setPageHeight(document.documentElement.scrollHeight);
     generalLedgerRef.current &&
@@ -997,6 +999,7 @@ function MyComponent() {
     expenses,
     selectedDate,
     invoices,
+    expenseFilter,
   ]);
   const getInvoices = () => {
     if (mobileView) setSelectionMenu(false);
@@ -1156,8 +1159,6 @@ function MyComponent() {
           });
       });
   };
-  const [expenseFilter, setExpenseFilter] = useState(false);
-  const [expenseFilterHover, setExpenseFilterHover] = useState(false);
   return (
     <div
       style={{
@@ -3315,7 +3316,7 @@ function MyComponent() {
                 </span>
                 <br />
                 {selection === "I/S" && false ? (
-                  <caption
+                  <div
                     style={{
                       padding: "10px 20px",
                       borderTopLeftRadius: "5px",
@@ -3334,9 +3335,9 @@ function MyComponent() {
                     }}
                   >
                     Recent Transactions
-                  </caption>
+                  </div>
                 ) : (
-                  <caption
+                  <div
                     style={{
                       padding: "10px 20px",
                       borderTopLeftRadius: "5px",
@@ -3427,7 +3428,7 @@ function MyComponent() {
                         class="fa-solid fa-filter"
                       ></span>
                     </span>
-                  </caption>
+                  </div>
                 )}
                 <div
                   style={{
@@ -3849,7 +3850,7 @@ function MyComponent() {
           {selection === "Balances" && (
             <div>
               <br />
-              <caption
+              <div
                 style={{
                   padding: "10px 20px",
                   borderTopLeftRadius: "5px",
@@ -3880,7 +3881,7 @@ function MyComponent() {
                     setSelection("Balances");
                   }}
                 ></span>
-              </caption>
+              </div>
               <div
                 style={{
                   overflowX: "auto",
@@ -4002,7 +4003,7 @@ function MyComponent() {
                 </div>
               )}
               <br />
-              <caption
+              <div
                 style={{
                   padding: "10px 20px",
                   borderTopLeftRadius: "5px",
@@ -4033,7 +4034,7 @@ function MyComponent() {
                     setSelection("Payroll");
                   }}
                 ></span>
-              </caption>
+              </div>
               <div
                 style={{
                   overflowX: "auto",
@@ -4241,7 +4242,7 @@ function MyComponent() {
           {selection === "Invoices" && (
             <div>
               <br />
-              <caption
+              <div
                 style={{
                   padding: "10px 20px",
                   borderTopLeftRadius: "5px",
@@ -4272,7 +4273,7 @@ function MyComponent() {
                     setSelection("Invoices");
                   }}
                 ></span>
-              </caption>
+              </div>
               <div
                 /*onScroll={(e) => {
                 if (!mobileView) {
