@@ -130,7 +130,7 @@ function MyComponent() {
   useEffect(() => {
     const handleResize = () => {
       setSelectionMenu(window.innerWidth < 500 ? false : true);
-      setMobileView(window.innerWidth < 500 ? true : false);
+      if (mobileView) setMobileView(window.innerWidth < 500 ? true : false);
       setWindowWidth(window.innerWidth);
       //clearTimeout(timeout);
       displayTds();
@@ -3249,7 +3249,12 @@ function MyComponent() {
                   width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                 }}
               >
-                <div style={{ textAlign: "center", marginLeft: "10px" }}>
+                <label
+                  style={{
+                    textAlign: "center",
+                    marginLeft: "10px",
+                  }}
+                >
                   START
                   <br />
                   <input
@@ -3262,8 +3267,8 @@ function MyComponent() {
                     }}
                     style={{ borderRadius: "6px" }}
                   />
-                </div>
-                <div
+                </label>
+                <label
                   style={{
                     textAlign: "center",
                     marginLeft: "10px",
@@ -3281,7 +3286,7 @@ function MyComponent() {
                     }}
                     style={{ borderRadius: "6px" }}
                   />
-                </div>
+                </label>
               </div>
               <div ref={tableRef}>
                 <span
