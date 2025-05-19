@@ -130,12 +130,13 @@ function MyComponent() {
   useEffect(() => {
     const handleResize = () => {
       setSelectionMenu(window.innerWidth < 500 ? false : true);
-      if (mobileView) setMobileView(window.innerWidth < 500 ? true : false);
+      if (!scrolling) setMobileView(window.innerWidth < 500 ? true : false);
       setWindowWidth(window.innerWidth);
       //clearTimeout(timeout);
       displayTds();
     };
     handleResize();
+
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -149,6 +150,7 @@ function MyComponent() {
   const [upOrder, setUpOrder] = useState(false);
   const [selectionHeight, setSelectionHeight] = useState(0);
   const [payoutTotals, setPayoutTotals] = useState({});
+  const [scrolling, setScrolling] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -160,6 +162,12 @@ function MyComponent() {
             //setMobileView(true);
           }
         }
+      var cancel;
+      setScrolling(true);
+      clearTimeout(cancel);
+      cancel = setTimeout(() => {
+        setScrolling(false);
+      }, 1000);
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
       setScrollPosition(window.scrollY);
     };
@@ -1281,7 +1289,7 @@ function MyComponent() {
                   setHoverMobileView(false);
                 }}
                 onClick={() => {
-                  setSelectionMenu(mobileView ? true : false);
+                  setSelectionMenu(true);
                   setMobileView(!mobileView);
                 }}
                 style={{
