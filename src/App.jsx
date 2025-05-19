@@ -1188,7 +1188,7 @@ function MyComponent() {
         //onMouseEnter={() => setClickDiv("")}
         style={{
           zIndex: "1",
-          display: mobileView ? "float" : "block",
+          //display: mobileView ? "flex" : "block",
           position: "fixed",
           overflowX: "hidden",
           overflowY: "auto",
@@ -1221,37 +1221,6 @@ function MyComponent() {
               padding: "5px",
             }}
           >
-            {!(windowWidth < 500) && (
-              <div
-                onMouseEnter={() => {
-                  setHoverMobileView(true);
-                }}
-                onMouseLeave={() => {
-                  setHoverMobileView(false);
-                }}
-                onClick={() => {
-                  setSelectionMenu(mobileView ? true : false);
-                  setMobileView(!mobileView);
-                }}
-                style={{
-                  transition: ".3s ease-out",
-                  right: "0px",
-                  position: "absolute",
-                  margin: "6px 0px",
-                  borderLeft: hoverMobileView
-                    ? "4px solid white"
-                    : "4px solid antiquewhite",
-                  borderBottom: hoverMobileView
-                    ? "4px solid white"
-                    : "4px solid antiquewhite",
-                  height: "20px",
-                  width: "20px",
-                  borderRadius: "5px",
-                  backgroundColor: "transparent",
-                  transform: "rotate(45deg)",
-                }}
-              ></div>
-            )}
             {windowWidth < 500 && (
               <div
                 onClick={() => {
@@ -1289,6 +1258,7 @@ function MyComponent() {
               </div>
             )}
             <div
+              onClick={() => setMobileView(!mobileView)}
               style={{
                 padding: "0px 10px",
                 paddingTop: "5px",
@@ -1299,6 +1269,37 @@ function MyComponent() {
                 ? selection
                 : "RAI Finance"}
             </div>
+            {!(windowWidth < 500) && (
+              <div
+                onMouseEnter={() => {
+                  setHoverMobileView(true);
+                }}
+                onMouseLeave={() => {
+                  setHoverMobileView(false);
+                }}
+                onClick={() => {
+                  setSelectionMenu(mobileView ? true : false);
+                  setMobileView(!mobileView);
+                }}
+                style={{
+                  transform: `rotate(${mobileView ? 225 : 45}deg)`,
+                  transition: ".3s ease-out",
+                  right: "0px",
+                  position: mobileView ? "relative" : "absolute",
+                  margin: "6px 0px",
+                  borderLeft: hoverMobileView
+                    ? "4px solid white"
+                    : "4px solid antiquewhite",
+                  borderBottom: hoverMobileView
+                    ? "4px solid white"
+                    : "4px solid antiquewhite",
+                  height: "20px",
+                  width: "20px",
+                  borderRadius: "5px",
+                  backgroundColor: "transparent",
+                }}
+              ></div>
+            )}
           </div>
           <div
             style={{
@@ -1693,7 +1694,7 @@ function MyComponent() {
       <div
         //onMouseEnter={() => setClickDiv("")}
         style={{
-          display: mobileView ? "float" : "block",
+          //display: mobileView ? "float" : "block",
           position: "relative",
           fontWeight: "bolder",
           color: "white",
@@ -4462,4 +4463,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
