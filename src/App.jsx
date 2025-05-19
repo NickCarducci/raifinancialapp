@@ -974,25 +974,37 @@ function MyComponent() {
   //const [pageHeight, setPageHeight] = useState(0);
   const [expenseFilter, setExpenseFilter] = useState(false);
   const [expenseFilterHover, setExpenseFilterHover] = useState(false);
+  const stop = useRef(null);
   useEffect(() => {
-    //setPageHeight(document.documentElement.scrollHeight);
-    generalLedgerRef.current &&
-      setGeneralLedgerHeight(generalLedgerRef.current.offsetHeight);
-    accountBalancesRef.current &&
-      setAccountBalancesHeight(accountBalancesRef.current.offsetHeight);
-    payrollRef.current && setPayrollHeight(payrollRef.current.offsetHeight);
-    ioStatement &&
-      barChartRef.current &&
-      pieChartRef.current &&
-      setChartsHeight(
-        barChartRef.current.offsetHeight + pieChartRef.current.offsetHeight
-      );
-    revenueRef.current &&
-      expenseRef.current &&
-      setRevenueExpensesHeight(
-        revenueRef.current.offsetHeight + expenseRef.current.offsetHeight
-      );
-    invoicesRef.current && setInvoicesHeight(invoicesRef.current.offsetHeight);
+    clearTimeout(stop.current);
+    stop.current = setTimeout(() => {
+      //setPageHeight(document.documentElement.scrollHeight);
+      generalLedgerRef.current &&
+        setGeneralLedgerHeight(generalLedgerRef.current.offsetHeight);
+      accountBalancesRef.current &&
+        setAccountBalancesHeight(accountBalancesRef.current.offsetHeight);
+      payrollRef.current && setPayrollHeight(payrollRef.current.offsetHeight);
+      ioStatement &&
+        barChartRef.current &&
+        pieChartRef.current &&
+        setChartsHeight(
+          window.innerWidth - (mobileView ? 0 : 300) < 500
+            ? barChartRef.current.offsetHeight +
+                pieChartRef.current.offsetHeight
+            : Math.max(
+                barChartRef.current.offsetHeight,
+                pieChartRef.current.offsetHeight
+              )
+        );
+      revenueRef.current &&
+        expenseRef.current &&
+        setRevenueExpensesHeight(
+          revenueRef.current.offsetHeight + expenseRef.current.offsetHeight
+        );
+      invoicesRef.current &&
+        setInvoicesHeight(invoicesRef.current.offsetHeight);
+      return () => clearTimeout(stop.current);
+    }, 200);
   }, [
     generalLedger,
     accountBalances,
@@ -1003,6 +1015,7 @@ function MyComponent() {
     selectedDate,
     invoices,
     expenseFilter,
+    windowWidth,
   ]);
   const getInvoices = () => {
     if (mobileView) setSelectionMenu(false);
@@ -2308,6 +2321,7 @@ function MyComponent() {
                   onMouseLeave={() => setIOHover("")}
                   style={{
                     position: "relative",
+                    height: "min-content",
                     cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
@@ -2471,6 +2485,8 @@ function MyComponent() {
                   ref={pieChartRef}
                   onMouseLeave={() => setIOHover("")}
                   style={{
+                    height: "min-content",
+                    position: "relative",
                     cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
@@ -2863,10 +2879,7 @@ function MyComponent() {
               <div
                 style={{
                   width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
-                  height:
-                    windowWidth - (mobileView ? 0 : 360) < 500
-                      ? revenueExpensesHeight + 80
-                      : "",
+                  height: revenueExpensesHeight + 80,
                   overflowX: "auto",
                   overflowY: "hidden",
                   display:
