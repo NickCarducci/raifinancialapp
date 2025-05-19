@@ -175,7 +175,6 @@ function MyComponent() {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      clearTimeout(timerId);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [selection]);
@@ -4482,4 +4481,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
