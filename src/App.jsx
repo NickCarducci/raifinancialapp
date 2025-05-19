@@ -3289,6 +3289,82 @@ function MyComponent() {
                 >
                   see all
                 </span>
+                <br />
+                {selection === "I/S" && false ? (
+                  <caption
+                    style={{
+                      padding: "10px 20px",
+                      borderTopLeftRadius: "5px",
+                      borderTopRightRadius: "5px",
+                      margin: "0px 16px",
+                      marginTop: "10px",
+                      backgroundColor: "white",
+                      borderSpacing: 0,
+                      tableLayout: "fixed",
+                      display: "flex",
+                      width: "max-content",
+                      position: "relative",
+                      fontSize: "20px",
+                      fontWeight: "bolder",
+                      colSpan: "2",
+                    }}
+                  >
+                    Recent Transactions
+                  </caption>
+                ) : (
+                  <caption
+                    style={{
+                      padding: "10px 20px",
+                      borderTopLeftRadius: "5px",
+                      borderTopRightRadius: "5px",
+                      margin: "0px 16px",
+                      backgroundColor: "white",
+                      borderSpacing: 0,
+                      tableLayout: "fixed",
+                      display: "flex",
+                      width: "max-content",
+                      position: "relative",
+                      fontSize: "20px",
+                      fontWeight: "bolder",
+                      colSpan: "2",
+                    }}
+                  >
+                    General Ledger{space}
+                    {clickedDiv !== "" || clickedPie !== null ? (
+                      <button
+                        onClick={() => {
+                          setClickDiv("");
+                          setClickPie(null);
+                        }}
+                      >
+                        See all.
+                      </button>
+                    ) : (
+                      <span
+                        class="fa fa-refresh"
+                        style={{
+                          cursor: "pointer",
+                          height: "min-content",
+                          padding: "6px",
+                          borderRadius: "10px",
+                          color:
+                            startingDate &&
+                            endingDate &&
+                            (startingDate !== lastStartingDate ||
+                              endingDate !== lastEndingDate)
+                              ? "black"
+                              : "grey",
+                        }}
+                        onClick={() => {
+                          if (!startingDate || !endingDate)
+                            return window.alert("Invalid queried date.");
+                          getGeneralLedger();
+                          setSelection("General Ledger");
+                        }}
+                      ></span>
+                    )}
+                  </caption>
+                )}
                 <div
                   style={{
                     overflowX: "auto",
@@ -3298,68 +3374,6 @@ function MyComponent() {
                   }}
                 >
                   <table ref={generalLedgerRef}>
-                    {selection === "I/S" && false ? (
-                      <caption
-                        style={{
-                          display: "flex",
-                          width: "max-content",
-                          position: "relative",
-                          fontSize: "20px",
-                          fontWeight: "bolder",
-                          paddingBottom: "14px",
-                          colspan: "2",
-                        }}
-                      >
-                        Recent Transactions
-                      </caption>
-                    ) : (
-                      <caption
-                        style={{
-                          display: "flex",
-                          width: "max-content",
-                          position: "relative",
-                          fontSize: "20px",
-                          fontWeight: "bolder",
-                          paddingBottom: "14px",
-                          colSpan: "2",
-                        }}
-                      >
-                        General Ledger{space}
-                        {clickedDiv !== "" || clickedPie !== null ? (
-                          <button
-                            onClick={() => {
-                              setClickDiv("");
-                              setClickPie(null);
-                            }}
-                          >
-                            See all.
-                          </button>
-                        ) : (
-                          <span
-                            class="fa fa-refresh"
-                            style={{
-                              cursor: "pointer",
-                              height: "min-content",
-                              padding: "6px",
-                              borderRadius: "10px",
-                              color:
-                                startingDate &&
-                                endingDate &&
-                                (startingDate !== lastStartingDate ||
-                                  endingDate !== lastEndingDate)
-                                  ? "black"
-                                  : "grey",
-                            }}
-                            onClick={() => {
-                              if (!startingDate || !endingDate)
-                                return window.alert("Invalid queried date.");
-                              getGeneralLedger();
-                              setSelection("General Ledger");
-                            }}
-                          ></span>
-                        )}
-                      </caption>
-                    )}
                     <tbody>
                       {generalLedger !== null && generalLedger.length > 0 && (
                         <tr>
@@ -3767,117 +3781,126 @@ function MyComponent() {
             </div>
           )}
           {selection === "Balances" && (
-            <div
-              style={{
-                overflowX: "auto",
-                overflowY: "hidden",
-                height: accountBalancesHeight + 40,
-                width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
-              }}
-            >
-              <table ref={accountBalancesRef}>
-                <caption
+            <div>
+              <br />
+              <caption
+                style={{
+                  padding: "10px 20px",
+                  borderTopLeftRadius: "5px",
+                  borderTopRightRadius: "5px",
+                  margin: "0px 16px",
+                  backgroundColor: "white",
+                  borderSpacing: 0,
+                  tableLayout: "fixed",
+                  display: "flex",
+                  width: "max-content",
+                  position: "relative",
+                  fontSize: "20px",
+                  fontWeight: "bolder",
+                  colSpan: "2",
+                }}
+              >
+                Account Balances{space}
+                <span
+                  class="fa fa-refresh"
                   style={{
-                    display: "flex",
-                    width: "max-content",
-                    position: "relative",
-                    fontSize: "20px",
-                    fontWeight: "bolder",
-                    paddingBottom: "14px",
-                    colspan: "2",
+                    cursor: "pointer",
+                    height: "min-content",
+                    padding: "6px",
+                    borderRadius: "10px",
                   }}
-                >
-                  Account Balances{space}
-                  <span
-                    class="fa fa-refresh"
-                    style={{
-                      cursor: "pointer",
-                      height: "min-content",
-                      padding: "6px",
-                      borderRadius: "10px",
-                    }}
-                    onClick={() => {
-                      getAccountBalances();
-                      setSelection("Balances");
-                    }}
-                  ></span>
-                </caption>
-                <tbody>
-                  {accountBalances !== null && accountBalances.length > 0 && (
-                    <tr>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div>Account</div>
-                      </td>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div>Balance</div>
-                      </td>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div>Last Updated</div>
-                      </td>
-                    </tr>
-                  )}
-                  {accountBalances === null ? (
-                    ""
-                  ) : accountBalances.length === 0 ? (
-                    <tr>
-                      <td>No results</td>
-                    </tr>
-                  ) : (
-                    accountBalances.map((x, i) => {
-                      return (
-                        <tr
-                          onMouseEnter={() => {
-                            setHoverRow(x.AccountName);
-                          }}
-                          onMouseLeave={() => {
-                            setHoverRow(null);
-                          }}
-                          key={i + x.LastUpdated}
+                  onClick={() => {
+                    getAccountBalances();
+                    setSelection("Balances");
+                  }}
+                ></span>
+              </caption>
+              <div
+                style={{
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  height: accountBalancesHeight + 40,
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
+                }}
+              >
+                <table ref={accountBalancesRef}>
+                  <tbody>
+                    {accountBalances !== null && accountBalances.length > 0 && (
+                      <tr>
+                        <td
                           style={{
-                            backgroundColor:
-                              x.AccountName === hoverRow
-                                ? "rgb(240,240,240,.3)"
-                                : "",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
                           }}
                         >
-                          <td>
-                            <div>{x.AccountName}</div>
-                          </td>
-                          <td>
-                            <div>${addCommas(String(x.CurrentBalance))}</div>
-                          </td>
-                          <td>
-                            <div>
-                              {new Date(x.LastUpdated).toLocaleDateString()}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                          <div>Account</div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>Balance</div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>Last Updated</div>
+                        </td>
+                      </tr>
+                    )}
+                    {accountBalances === null ? (
+                      ""
+                    ) : accountBalances.length === 0 ? (
+                      <tr>
+                        <td>No results</td>
+                      </tr>
+                    ) : (
+                      accountBalances.map((x, i) => {
+                        return (
+                          <tr
+                            onMouseEnter={() => {
+                              setHoverRow(x.AccountName);
+                            }}
+                            onMouseLeave={() => {
+                              setHoverRow(null);
+                            }}
+                            key={i + x.LastUpdated}
+                            style={{
+                              backgroundColor:
+                                x.AccountName === hoverRow
+                                  ? "rgb(240,240,240,.3)"
+                                  : "",
+                            }}
+                          >
+                            <td>
+                              <div>{x.AccountName}</div>
+                            </td>
+                            <td>
+                              <div>${addCommas(String(x.CurrentBalance))}</div>
+                            </td>
+                            <td>
+                              <div>
+                                {new Date(x.LastUpdated).toLocaleDateString()}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
           {selection === "Payroll" && (
@@ -3895,9 +3918,6 @@ function MyComponent() {
                   (windowWidth < 900 && !mobileView)
                     ? "block"
                     : "flex",
-                overflowX: "auto",
-                overflowY: "hidden",
-                width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
               }}
             >
               {(true ||
@@ -3915,6 +3935,39 @@ function MyComponent() {
                   {pieChart()}
                 </div>
               )}
+              <br />
+              <caption
+                style={{
+                  padding: "10px 20px",
+                  borderTopLeftRadius: "5px",
+                  borderTopRightRadius: "5px",
+                  margin: "0px 16px",
+                  backgroundColor: "white",
+                  borderSpacing: 0,
+                  tableLayout: "fixed",
+                  display: "flex",
+                  width: "max-content",
+                  position: "relative",
+                  fontSize: "20px",
+                  fontWeight: "bolder",
+                  colSpan: "2",
+                }}
+              >
+                Payroll{space}
+                <span
+                  class="fa fa-refresh"
+                  style={{
+                    cursor: "pointer",
+                    height: "min-content",
+                    padding: "6px",
+                    borderRadius: "10px",
+                  }}
+                  onClick={() => {
+                    getPayouLog();
+                    setSelection("Payroll");
+                  }}
+                ></span>
+              </caption>
               <div
                 style={{
                   overflowX: "auto",
@@ -3924,32 +3977,6 @@ function MyComponent() {
                 }}
               >
                 <table ref={payrollRef}>
-                  <caption
-                    style={{
-                      display: "flex",
-                      width: "max-content",
-                      position: "relative",
-                      fontSize: "20px",
-                      fontWeight: "bolder",
-                      paddingBottom: "14px",
-                      colspan: "2",
-                    }}
-                  >
-                    Payroll{space}
-                    <span
-                      class="fa fa-refresh"
-                      style={{
-                        cursor: "pointer",
-                        height: "min-content",
-                        padding: "6px",
-                        borderRadius: "10px",
-                      }}
-                      onClick={() => {
-                        getPayouLog();
-                        setSelection("Payroll");
-                      }}
-                    ></span>
-                  </caption>
                   <tbody>
                     {payoutLog !== null && payoutLog.length > 0 && (
                       <tr>
@@ -4146,296 +4173,308 @@ function MyComponent() {
             </div>
           )}
           {selection === "Invoices" && (
-            <div
-              /*onScroll={(e) => {
+            <div>
+              <br />
+              <caption
+                style={{
+                  padding: "10px 20px",
+                  borderTopLeftRadius: "5px",
+                  borderTopRightRadius: "5px",
+                  margin: "0px 16px",
+                  backgroundColor: "white",
+                  borderSpacing: 0,
+                  tableLayout: "fixed",
+                  display: "flex",
+                  width: "max-content",
+                  position: "relative",
+                  fontSize: "20px",
+                  fontWeight: "bolder",
+                  colSpan: "2",
+                }}
+              >
+                Invoices{space}
+                <span
+                  class="fa fa-refresh"
+                  style={{
+                    cursor: "pointer",
+                    height: "min-content",
+                    padding: "6px",
+                    borderRadius: "10px",
+                  }}
+                  onClick={() => {
+                    getInvoices();
+                    setSelection("Invoices");
+                  }}
+                ></span>
+              </caption>
+              <div
+                /*onScroll={(e) => {
                 if (!mobileView) {
                   setMobileView(e.target.scrollLeft > 300);
                 }
               }}*/
-              style={{
-                height: invoicesHeight + 40,
-                alignItems: "flex-start",
-                display: "block",
-                overflowX: "auto",
-                overflowY: "hidden",
-                width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
-              }}
-            >
-              <table ref={invoicesRef}>
-                <caption
-                  style={{
-                    display: "flex",
-                    width: "max-content",
-                    position: "relative",
-                    fontSize: "20px",
-                    fontWeight: "bolder",
-                    paddingBottom: "14px",
-                    colspan: "2",
-                  }}
-                >
-                  Invoices{space}
-                  <span
-                    class="fa fa-refresh"
-                    style={{
-                      cursor: "pointer",
-                      height: "min-content",
-                      padding: "6px",
-                      borderRadius: "10px",
-                    }}
-                    onClick={() => {
-                      getInvoices();
-                      setSelection("Invoices");
-                    }}
-                  ></span>
-                </caption>
-                <tbody>
-                  {invoices !== null && invoices.length > 0 && (
-                    <tr>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setInvoices(
-                            upOrder === "upDate"
-                              ? invoices.slice().reverse()
-                              : invoices.sort(
-                                  (a, b) => new Date(a.Date) - new Date(b.Date)
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upDate");
-                        }}
-                      >
-                        <div>
-                          DATE{" "}
-                          {upOrder === "upDate" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
-                        </div>
-                      </td>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setInvoices(
-                            upOrder === "upCategory"
-                              ? invoices.reverse()
-                              : invoices.sort((a, b) =>
-                                  a.Category === null
-                                    ? -1
-                                    : b.Category === null
-                                    ? 1
-                                    : b.Category.localeCompare(a.Category)
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upCategory");
-                        }}
-                      >
-                        <div>
-                          CATEGORY{" "}
-                          {upOrder === "upCategory" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
-                        </div>
-                      </td>
-                      <td
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "whitesmoke",
-                          color: "grey",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setInvoices(
-                            upOrder === "upAmount"
-                              ? invoices.reverse()
-                              : invoices.sort((a, b) =>
-                                  a.Amount < b.Amount ? 1 : -1
-                                )
-                          );
-                          setUpOrder(upOrder ? false : "upAmount");
-                        }}
-                      >
-                        <div>
-                          AMOUNT{" "}
-                          {upOrder === "upAmount" && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                margin: "6px 0px",
-                                borderLeft: "4px solid black",
-                                borderBottom: "4px solid black",
-                                height: "6px",
-                                width: "6px",
-                                borderRadius: "3px",
-                                backgroundColor: "transparent",
-                                transform: `rotate(${
-                                  upOrder ? "315" : "135"
-                                }deg)`,
-                              }}
-                            ></div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  {invoices === null ? (
-                    ""
-                  ) : invoices.length === 0 ? (
-                    <tr>
-                      <td>No results</td>
-                    </tr>
-                  ) : (
-                    invoices.map((x, i) => {
-                      return (
-                        <tr
-                          onMouseEnter={() => {
-                            setHoverRow(x.InvoiceID);
-                          }}
-                          onMouseLeave={() => {
-                            setHoverRow(null);
-                          }}
-                          key={String(x.InvoiceID)}
+                style={{
+                  height: invoicesHeight + 40,
+                  alignItems: "flex-start",
+                  display: "block",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
+                }}
+              >
+                <table ref={invoicesRef}>
+                  <tbody>
+                    {invoices !== null && invoices.length > 0 && (
+                      <tr>
+                        <td
                           style={{
-                            backgroundColor:
-                              x.InvoiceID === hoverRow
-                                ? "rgb(240,240,240,.3)"
-                                : "",
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setInvoices(
+                              upOrder === "upDate"
+                                ? invoices.slice().reverse()
+                                : invoices.sort(
+                                    (a, b) =>
+                                      new Date(a.Date) - new Date(b.Date)
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upDate");
                           }}
                         >
-                          <td>
-                            <div>
-                              {new Date(x.Date).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                            </div>
-                          </td>
-                          <td style={{ cursor: "pointer" }}>
-                            {editCategory === x.InvoiceID ? (
-                              <form
-                                style={{
-                                  display: "flex",
-                                }}
-                                onSubmit={(e) => {
-                                  e.preventDefault();
-                                  setAllowUpdate(true);
-                                  const answer = window.confirm(
-                                    "Are you sure you'd like to change the Category from " +
-                                      x.Category +
-                                      " to " +
-                                      newCategory +
-                                      "?"
-                                  );
-                                  if (answer) {
-                                    instance
-                                      .acquireTokenSilent({
-                                        ...loginRequest,
-                                        account: accounts[0],
-                                      })
-                                      .then((response) => {
-                                        fetch(
-                                          "https://raifinancial.azurewebsites.net/api/updatecategoryinvoices",
-                                          {
-                                            method: "POST",
-                                            headers: {
-                                              Authorization: `Bearer ${response.idToken}`,
-                                              "Content-Type":
-                                                "application/JSON",
-                                            },
-                                            body: JSON.stringify({
-                                              ...x,
-                                              Category: newCategory,
-                                            }),
-                                          }
-                                        )
-                                          .then(async (res) => await res.json())
-                                          .then((response) => {
-                                            console.log(response);
-                                            if (allowUpdate) {
-                                              setNewCategory("");
-                                              getInvoices();
-                                              setSelection("Invoices");
-                                              setEditCategory(false);
-                                            }
-                                          })
-                                          .catch((error) => {
-                                            console.error(error);
-                                          });
-                                      });
-                                  }
-                                }}
-                              >
-                                <div onClick={() => setEditCategory(false)}>
-                                  &times;
-                                </div>
-                                <input
-                                  placeholder={
-                                    x.Category ? x.Category : "(empty)"
-                                  }
-                                  value={newCategory}
-                                  onChange={(e) => {
-                                    setNewCategory(e.target.value);
-                                  }}
-                                />
-                              </form>
-                            ) : (
+                          <div>
+                            DATE{" "}
+                            {upOrder === "upDate" && (
                               <div
-                                onClick={() => {
-                                  setEditCategory(x.InvoiceID);
-                                  setNewCategory("");
-                                  setAllowUpdate(false);
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
                                 }}
-                              >
-                                {x.Category}
-                              </div>
+                              ></div>
                             )}
-                          </td>
-                          <td>
-                            <div>${addCommas(String(x.Amount))}</div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setInvoices(
+                              upOrder === "upCategory"
+                                ? invoices.reverse()
+                                : invoices.sort((a, b) =>
+                                    a.Category === null
+                                      ? -1
+                                      : b.Category === null
+                                      ? 1
+                                      : b.Category.localeCompare(a.Category)
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upCategory");
+                          }}
+                        >
+                          <div>
+                            CATEGORY{" "}
+                            {upOrder === "upCategory" && (
+                              <div
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
+                                }}
+                              ></div>
+                            )}
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "left",
+                            backgroundColor: "whitesmoke",
+                            color: "grey",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setInvoices(
+                              upOrder === "upAmount"
+                                ? invoices.reverse()
+                                : invoices.sort((a, b) =>
+                                    a.Amount < b.Amount ? 1 : -1
+                                  )
+                            );
+                            setUpOrder(upOrder ? false : "upAmount");
+                          }}
+                        >
+                          <div>
+                            AMOUNT{" "}
+                            {upOrder === "upAmount" && (
+                              <div
+                                style={{
+                                  display: "inline-block",
+                                  margin: "6px 0px",
+                                  borderLeft: "4px solid black",
+                                  borderBottom: "4px solid black",
+                                  height: "6px",
+                                  width: "6px",
+                                  borderRadius: "3px",
+                                  backgroundColor: "transparent",
+                                  transform: `rotate(${
+                                    upOrder ? "315" : "135"
+                                  }deg)`,
+                                }}
+                              ></div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {invoices === null ? (
+                      ""
+                    ) : invoices.length === 0 ? (
+                      <tr>
+                        <td>No results</td>
+                      </tr>
+                    ) : (
+                      invoices.map((x, i) => {
+                        return (
+                          <tr
+                            onMouseEnter={() => {
+                              setHoverRow(x.InvoiceID);
+                            }}
+                            onMouseLeave={() => {
+                              setHoverRow(null);
+                            }}
+                            key={String(x.InvoiceID)}
+                            style={{
+                              backgroundColor:
+                                x.InvoiceID === hoverRow
+                                  ? "rgb(240,240,240,.3)"
+                                  : "",
+                            }}
+                          >
+                            <td>
+                              <div>
+                                {new Date(x.Date).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
+                              </div>
+                            </td>
+                            <td style={{ cursor: "pointer" }}>
+                              {editCategory === x.InvoiceID ? (
+                                <form
+                                  style={{
+                                    display: "flex",
+                                  }}
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    setAllowUpdate(true);
+                                    const answer = window.confirm(
+                                      "Are you sure you'd like to change the Category from " +
+                                        x.Category +
+                                        " to " +
+                                        newCategory +
+                                        "?"
+                                    );
+                                    if (answer) {
+                                      instance
+                                        .acquireTokenSilent({
+                                          ...loginRequest,
+                                          account: accounts[0],
+                                        })
+                                        .then((response) => {
+                                          fetch(
+                                            "https://raifinancial.azurewebsites.net/api/updatecategoryinvoices",
+                                            {
+                                              method: "POST",
+                                              headers: {
+                                                Authorization: `Bearer ${response.idToken}`,
+                                                "Content-Type":
+                                                  "application/JSON",
+                                              },
+                                              body: JSON.stringify({
+                                                ...x,
+                                                Category: newCategory,
+                                              }),
+                                            }
+                                          )
+                                            .then(
+                                              async (res) => await res.json()
+                                            )
+                                            .then((response) => {
+                                              console.log(response);
+                                              if (allowUpdate) {
+                                                setNewCategory("");
+                                                getInvoices();
+                                                setSelection("Invoices");
+                                                setEditCategory(false);
+                                              }
+                                            })
+                                            .catch((error) => {
+                                              console.error(error);
+                                            });
+                                        });
+                                    }
+                                  }}
+                                >
+                                  <div onClick={() => setEditCategory(false)}>
+                                    &times;
+                                  </div>
+                                  <input
+                                    placeholder={
+                                      x.Category ? x.Category : "(empty)"
+                                    }
+                                    value={newCategory}
+                                    onChange={(e) => {
+                                      setNewCategory(e.target.value);
+                                    }}
+                                  />
+                                </form>
+                              ) : (
+                                <div
+                                  onClick={() => {
+                                    setEditCategory(x.InvoiceID);
+                                    setNewCategory("");
+                                    setAllowUpdate(false);
+                                  }}
+                                >
+                                  {x.Category}
+                                </div>
+                              )}
+                            </td>
+                            <td>
+                              <div>${addCommas(String(x.Amount))}</div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
