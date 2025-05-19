@@ -1267,7 +1267,7 @@ function MyComponent() {
             )}
             <div
               onClick={() => {
-                setSelectionMenu(true);
+                setSelectionMenu(!selectionMenu);
                 if (!(windowWidth < 500)) setMobileView(!mobileView);
               }}
               style={{
@@ -1289,7 +1289,7 @@ function MyComponent() {
                   setHoverMobileView(false);
                 }}
                 onClick={() => {
-                  setSelectionMenu(true);
+                  setSelectionMenu(!selectionMenu);
                   setMobileView(!mobileView);
                 }}
                 style={{
