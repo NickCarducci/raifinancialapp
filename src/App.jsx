@@ -520,10 +520,8 @@ function MyComponent() {
       : 0;
   const changeInNetProfit =
     thisMonthsIOStatement && lastMonthsIOStatement
-      ? Math.sign(thisMonthsIOStatement.NetProfit) === 0 ||
-        Math.sign(lastMonthsIOStatement.NetProfit) === 0 ||
-        Math.sign(thisMonthsIOStatement.NetProfit) ===
-          Math.sign(lastMonthsIOStatement.NetProfit)
+      ? Math.sign(thisMonthsIOStatement.NetProfit) >= 0 &&
+        Math.sign(lastMonthsIOStatement.NetProfit) >= 0
         ? (
             ((thisMonthsIOStatement.NetProfit -
               lastMonthsIOStatement.NetProfit) /
@@ -531,9 +529,9 @@ function MyComponent() {
             100
           ).toFixed(1)
         : (
-            ((Math.abs(thisMonthsIOStatement.NetProfit) +
+            ((Math.abs(thisMonthsIOStatement.NetProfit) -
               Math.abs(lastMonthsIOStatement.NetProfit)) /
-              thisMonthsIOStatement.NetProfit) *
+              lastMonthsIOStatement.NetProfit) *
             100
           ).toFixed(1)
       : 0;
