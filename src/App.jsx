@@ -949,7 +949,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setIOStatement([{ Revenue: "please log in again..." }]);
