@@ -1267,8 +1267,8 @@ function MyComponent() {
             )}
             <div
               onClick={() => {
-                setSelectionMenu(!selectionMenu);
-                setMobileView(!mobileView);
+                setSelectionMenu(true);
+                if (!(windowWidth < 500)) setMobileView(!mobileView);
               }}
               style={{
                 padding: "0px 10px",
