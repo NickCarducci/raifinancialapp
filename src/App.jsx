@@ -2291,12 +2291,7 @@ function MyComponent() {
               <div
                 style={{
                   width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
-                  height:
-                    ioStatement &&
-                    ioStatement.length > 0 &&
-                    windowWidth - (mobileView ? 0 : 360) < 500
-                      ? chartsHeight + 40
-                      : "",
+                  height: chartsHeight + 40,
                   overflowX:
                     windowWidth - (mobileView ? 0 : 360) < 500 ? "auto" : "",
                   overflowY:
