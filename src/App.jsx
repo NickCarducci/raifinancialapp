@@ -3248,7 +3248,7 @@ function MyComponent() {
                   alignItems: "center",
                   overflowX: "auto",
                   overflowY: "hidden",
-                  height: "56px",
+                  height: "70px",
                   width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                 }}
               >
