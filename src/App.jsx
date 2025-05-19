@@ -129,23 +129,18 @@ function MyComponent() {
   }, [selection]);
   const [scrolling, setScrolling] = useState(false);
   useEffect(() => {
-    let timerId;
     const handleResize = () => {
-      clearTimeout(timerId);
-      timerId = setTimeout(() => {
-        setSelectionMenu(window.innerWidth < 500 ? false : true);
-        if (!scrolling) setMobileView(window.innerWidth < 500 ? true : false);
-        setWindowWidth(window.innerWidth);
-        //clearTimeout(timeout);
-        displayTds();
-      }, 2000);
+      setSelectionMenu(window.innerWidth < 500 ? false : true);
+      if (!scrolling) setMobileView(window.innerWidth < 500 ? true : false);
+      setWindowWidth(window.innerWidth);
+      //clearTimeout(timeout);
+      displayTds();
     };
     handleResize();
 
     window.addEventListener("resize", handleResize);
 
     return () => {
-      clearTimeout(timerId);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
