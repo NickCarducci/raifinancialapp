@@ -132,6 +132,9 @@ function MyComponent() {
       if (window.innerWidth < 500) {
         setSelectionMenu(false);
         setMobileView(true);
+      } else {
+        setSelectionMenu(true);
+        setMobileView(false);
       }
       setWindowWidth(window.innerWidth);
       //clearTimeout(timeout);
