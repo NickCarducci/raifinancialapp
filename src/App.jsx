@@ -3265,7 +3265,7 @@ function MyComponent() {
                     onChange={(e) => {
                       setStartingDate(e.target.value);
                     }}
-                    style={{ borderRadius: "6px" }}
+                    style={{ borderRadius: "6px", width: "max-content" }}
                   />
                 </label>
                 <label
@@ -3284,7 +3284,7 @@ function MyComponent() {
                     onChange={(e) => {
                       setEndingDate(e.target.value);
                     }}
-                    style={{ borderRadius: "6px" }}
+                    style={{ borderRadius: "6px", width: "max-content" }}
                   />
                 </label>
               </div>
