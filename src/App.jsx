@@ -129,18 +129,23 @@ function MyComponent() {
   }, [selection]);
   const [scrolling, setScrolling] = useState(false);
   useEffect(() => {
+    let timerId;
     const handleResize = () => {
-      setSelectionMenu(window.innerWidth < 500 ? false : true);
-      if (!scrolling) setMobileView(window.innerWidth < 500 ? true : false);
-      setWindowWidth(window.innerWidth);
-      //clearTimeout(timeout);
-      displayTds();
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        setSelectionMenu(window.innerWidth < 500 ? false : true);
+        if (!scrolling) setMobileView(window.innerWidth < 500 ? true : false);
+        setWindowWidth(window.innerWidth);
+        //clearTimeout(timeout);
+        displayTds();
+      }, 2000);
     };
     handleResize();
 
     window.addEventListener("resize", handleResize);
 
     return () => {
+      clearTimeout(timerId);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
@@ -152,8 +157,8 @@ function MyComponent() {
   const [selectionHeight, setSelectionHeight] = useState(0);
   const [payoutTotals, setPayoutTotals] = useState({});
 
-  const timerId = useRef(null);
   useEffect(() => {
+    let timerId;
     const handleScroll = () => {
       setSelectionHeight(selectionMenuRef.current.offsetHeight);
       //if (!(window.innerWidth < 500))
@@ -164,8 +169,8 @@ function MyComponent() {
           }
         }
       setScrolling(true);
-      clearTimeout(timerId.current);
-      timerId.current = setTimeout(() => {
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
         setScrolling(false);
       }, 5000);
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
@@ -175,7 +180,7 @@ function MyComponent() {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      clearTimeout(timerId.current);
+      clearTimeout(timerId);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [selection]);
