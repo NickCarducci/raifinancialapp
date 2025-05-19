@@ -157,7 +157,7 @@ function MyComponent() {
       if (window.scrollY > window.innerHeight)
         if (!mobileView) {
           if (selection !== "I/S") {
-            setMobileView(true);
+            //setMobileView(true);
           }
         }
       //
@@ -1065,6 +1065,123 @@ function MyComponent() {
       });
   };
   const [hoverRow, setHoverRow] = useState(null);
+  const getAccountBalances = () => {
+    if (mobileView) setSelectionMenu(false);
+    setSelection("Balances");
+    setAccountBalances([{ CurrentBalance: "Connecting to database..." }]);
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        fetch("https://raifinancial.azurewebsites.net/api/accountbalances", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + response.idToken,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then(async (result) => {
+            console.log(result);
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
+              return setAccountBalances([
+                { CurrentBalance: "please log in again..." },
+              ]);
+            }
+            setAccountBalances(result.accountBalances);
+          })
+          .catch(() => {
+            setAccountBalances([{ CurrentBalance: "please log in again..." }]);
+          });
+      });
+  };
+  const getPayoutLog = () => {
+    if (mobileView) setSelectionMenu(false);
+    setSelection("Payroll");
+    setPayoutLog([{ EmployeeName: "Connecting to database..." }]);
+    instance
+      .acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+      })
+      .then((response) => {
+        fetch("https://raifinancial.azurewebsites.net/api/payoutlog", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + response.idToken,
+            "Content-Type": "application/JSON",
+          },
+        })
+          .then(async (res) => await res.json())
+          .then(async (result) => {
+            console.log(result);
+            if (result.code === 401) {
+              await instance.acquireTokenRedirect({
+                account: accounts[0],
+                forceRefresh: true,
+                refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+              });
+              return setPayoutLog([{ EmployeeName: "please log in again..." }]);
+            }
+
+            var payoutLog = result.payoutLog.map((x) => {
+              const employeeName = x.EmployeeName.split("RTP Sent ")[1];
+              return {
+                ...x,
+                EmployeeName: employeeName
+                  ? employeeName.slice(0, employeeName.search(/\d/))
+                  : x.EmployeeName,
+              };
+            });
+            var payoutTotals = [];
+            var totals = {};
+            payoutLog.forEach((x) => {
+              if (!totals[x.EmployeeName]) totals[x.EmployeeName] = 0;
+              //console.log(x.AmountPaid);
+              totals[x.EmployeeName] = totals[x.EmployeeName] + x.AmountPaid;
+            });
+            setPayoutTotals(totals);
+            let triedColors = [];
+            let i = 0;
+            function getRandomInt(max) {
+              const value = Math.floor(Math.random() * max);
+              if (triedColors.includes(value)) {
+                if (i > 20) return value;
+                i++;
+                return getRandomInt(max);
+              }
+              return value;
+            }
+            setPayoutChart(
+              Object.keys(totals).map((employeeName, i) => {
+                return {
+                  title: employeeName,
+                  value: Object.values(totals)[i],
+                  //(i / Object.keys(totals).length)
+                  color: `rgb(${getRandomInt(250)},${getRandomInt(250)},${
+                    getRandomInt(250) //(i / result.payoutLog.length) * 250
+                  })`,
+                };
+              })
+            );
+            setPayoutLog(
+              payoutLog.sort(
+                (a, b) => new Date(b.PaymentDate) - new Date(a.PaymentDate)
+              )
+            );
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      });
+  };
   return (
     <div
       style={{
@@ -1073,6 +1190,510 @@ function MyComponent() {
     >
       <div
         ref={selectionMenuRef}
+        //onMouseEnter={() => setClickDiv("")}
+        style={{
+          zIndex: "1",
+          display: mobileView ? "float" : "block",
+          position: "fixed",
+          overflowX: "hidden",
+          overflowY: "auto",
+          fontWeight: "bolder",
+          color: "white",
+          background: `linear-gradient(to bottom, darkorange, orange 70.71%)`,
+          borderBottom: mobileView ? "5px solid rgba(0,0,0,.3)" : "",
+          borderRight: !mobileView ? "5px solid rgba(0,0,0,.3)" : "",
+          width: mobileView ? "100vw" : "300px",
+          height: selectionMenu ? "100vh" : "min-content", // mobileView ? "min-content" : "100vh",
+          transition: ".3s ease-in",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              top: "46px",
+              position: "absolute",
+              borderBottom:
+                mobileView && !selectionMenu
+                  ? ""
+                  : `2px solid ${!mobileView ? "papayawhip" : "orange"}`,
+              width: "100%",
+            }}
+          ></div>
+          <div
+            style={{
+              display: "flex",
+              cursor: "pointer",
+              padding: "5px",
+            }}
+          >
+            {!(windowWidth < 500) && (
+              <div
+                onMouseEnter={() => {
+                  setHoverMobileView(true);
+                }}
+                onMouseLeave={() => {
+                  setHoverMobileView(false);
+                }}
+                onClick={() => {
+                  setSelectionMenu(mobileView ? true : false);
+                  setMobileView(!mobileView);
+                }}
+                style={{
+                  transition: ".3s ease-out",
+                  right: "0px",
+                  position: "absolute",
+                  margin: "6px 0px",
+                  borderLeft: hoverMobileView
+                    ? "4px solid white"
+                    : "4px solid antiquewhite",
+                  borderBottom: hoverMobileView
+                    ? "4px solid white"
+                    : "4px solid antiquewhite",
+                  height: "20px",
+                  width: "20px",
+                  borderRadius: "5px",
+                  backgroundColor: "transparent",
+                  transform: "rotate(45deg)",
+                }}
+              ></div>
+            )}
+            {windowWidth < 500 && (
+              <div
+                onClick={() => {
+                  if (!mobileView) return null;
+                  setSelectionMenu(!selectionMenu);
+                }}
+              >
+                <div
+                  style={{
+                    borderRadius: "5px",
+                    margin: "5px",
+                    width: "30px",
+                    height: "5px",
+                    backgroundColor: "white",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    borderRadius: "5px",
+                    margin: "5px",
+                    width: "30px",
+                    height: "5px",
+                    backgroundColor: "white",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    borderRadius: "5px",
+                    margin: "5px",
+                    width: "30px",
+                    height: "5px",
+                    backgroundColor: "white",
+                  }}
+                ></div>
+              </div>
+            )}
+            <div
+              style={{
+                padding: "0px 10px",
+                paddingTop: "5px",
+                fontSize: windowWidth < 500 ? "" : "20px",
+              }}
+            >
+              RAI Finance
+            </div>
+          </div>
+          <div
+            style={{
+              display: selectionMenu ? "block" : "none",
+              textAlign: "center",
+              margin: "20px",
+              marginBottom: "20px",
+              borderRadius: "8px",
+              padding: "10px",
+              backgroundColor: "rgba(250,250,250,0.15)",
+            }}
+          >
+            {accounts[0] ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    display: "block",
+                    textAlign: "center",
+                    borderRadius: "10px",
+                    backgroundColor: "white",
+                    padding: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      margin: "auto",
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "10px",
+                      backgroundColor: "darkorange",
+                    }}
+                  ></div>
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "12px",
+                      borderTopLeftRadius: "8px",
+                      borderTopRightRadius: "8px",
+                      backgroundColor: "darkorange",
+                    }}
+                  ></div>
+                </div>
+                &nbsp;&nbsp;
+                <div style={{ textAlign: "left" }}>
+                  {!accounts[0]
+                    ? ""
+                    : authenticatedUser &&
+                      authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
+                    ? "Finance Admin"
+                    : "User"}
+                  <br />
+                  <div
+                    style={{
+                      fontSize: "12px",
+                    }}
+                  >
+                    {accounts[0].username}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "block" }}>
+                <button
+                  onClick={() =>
+                    instance.loginPopup({ prompt: "select_account" })
+                  }
+                >
+                  login
+                </button>
+                <br />
+                <span
+                  style={{ cursor: "pointer", color: "dodgerblue" }}
+                  onClick={() => instance.loginPopup({ prompt: "create" })}
+                >
+                  Sign up
+                </span>
+                {space}or make a{space}
+                <a
+                  style={{ fontWeight: "bolder" }}
+                  href="https://signup.live.com"
+                >
+                  microsoft account
+                </a>
+                {space}first.
+              </div>
+            )}
+          </div>
+          {!selectionMenu ? null : !authenticatedUser ? (
+            <div style={{ padding: "0px 10px" }}>
+              Must be logged in to view this page.
+            </div>
+          ) : !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin ? (
+            <div style={{ padding: "0px 10px" }}>
+              Must be an admin to view this page.
+            </div>
+          ) : (
+            <div style={{ paddingBottom: "10px" }}>
+              <div
+                style={{
+                  cursor: "pointer",
+                  color: "white",
+                }}
+              >
+                <div
+                  onMouseLeave={(e) => setSelector("")}
+                  onMouseEnter={(e) => setSelector("I/S")}
+                  style={{
+                    padding: "6px 10px",
+                    margin: "0px 10px",
+                    borderRadius: "3px",
+                    borderLeft: selection === "I/S" ? "2px solid white" : "",
+                    transition: ".3s ease-out",
+                    backgroundColor:
+                      selector === "I/S"
+                        ? "rgba(250,250,250,.15)"
+                        : selection === "I/S"
+                        ? "rgba(250,250,250,.3)"
+                        : "",
+                    //textDecoration: selector === "I/S" ? "underline" : "none",
+                    listStyleType: selector === "I/S" ? "initial" : "none",
+                  }}
+                  onClick={getIOStatement}
+                >
+                  <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
+                </div>
+                <div
+                  onMouseEnter={(e) => setSelector("General Ledger")}
+                  style={{
+                    padding: "6px 10px",
+                    margin: "0px 10px",
+                    borderRadius: "3px",
+
+                    borderLeft:
+                      selection === "General Ledger" ? "2px solid white" : "",
+                    transition: ".3s ease-out",
+                    backgroundColor:
+                      selector === "General Ledger"
+                        ? "rgba(250,250,250,.15)"
+                        : selection === "General Ledger"
+                        ? "rgba(250,250,250,.3)"
+                        : "",
+                    //textDecoration:selector === "General Ledger" ? "underline" : "none",
+                    listStyleType:
+                      selector === "General Ledger" ? "initial" : "none",
+                  }}
+                  onClick={() => {
+                    getGeneralLedger();
+                    setSelection("General Ledger");
+                  }}
+                >
+                  <div class="fas fa-book w-6"></div>&nbsp;&nbsp;General Ledger
+                </div>
+                <div
+                  onMouseEnter={(e) => setSelector("Charts")}
+                  style={{
+                    padding: "6px 10px",
+                    margin: "0px 10px",
+                    borderRadius: "3px",
+
+                    borderLeft: selection === "Charts" ? "2px solid white" : "",
+                    transition: ".3s ease-out",
+                    backgroundColor:
+                      selector === "Charts"
+                        ? "rgba(250,250,250,.15)"
+                        : selection === "Charts"
+                        ? "rgba(250,250,250,.3)"
+                        : "",
+                    //textDecoration: selector === "Charts" ? "underline" : "none",
+                    listStyleType: selector === "Charts" ? "initial" : "none",
+                  }}
+                  onClick={() => {
+                    if (mobileView) setSelectionMenu(false);
+                    setSelection("Charts");
+                  }}
+                >
+                  <div class="fas fa-chart-line w-6"></div>&nbsp;&nbsp;Charts
+                </div>
+                <div
+                  onMouseEnter={(e) => setSelector("Balances")}
+                  style={{
+                    padding: "6px 10px",
+                    margin: "0px 10px",
+                    borderRadius: "3px",
+                    borderLeft:
+                      selection === "Balances" ? "2px solid white" : "",
+                    transition: ".3s ease-out",
+                    backgroundColor:
+                      selector === "Balances"
+                        ? "rgba(250,250,250,.15)"
+                        : selection === "Balances"
+                        ? "rgba(250,250,250,.3)"
+                        : "",
+                    //textDecoration:selector === "Balances" ? "underline" : "none",
+                    listStyleType: selector === "Balances" ? "initial" : "none",
+                  }}
+                  onClick={getAccountBalances}
+                >
+                  <div class="fas fa-wallet w-6"></div>&nbsp;&nbsp;Balances
+                </div>
+                <div
+                  onMouseEnter={(e) => setSelector("Payroll")}
+                  style={{
+                    padding: "6px 10px",
+                    margin: "0px 10px",
+                    borderRadius: "3px",
+                    borderLeft:
+                      selection === "Payroll" ? "2px solid white" : "",
+                    transition: ".3s ease-out",
+                    backgroundColor:
+                      selector === "Payroll"
+                        ? "rgba(250,250,250,.15)"
+                        : selection === "Payroll"
+                        ? "rgba(250,250,250,.3)"
+                        : "",
+                    //textDecoration: selector === "Payroll" ? "underline" : "none",
+                    listStyleType: selector === "Payroll" ? "initial" : "none",
+                  }}
+                  onClick={getPayoutLog}
+                >
+                  <div class="fas fa-exchange-alt w-6"></div>&nbsp;&nbsp;Payroll
+                </div>
+                <div
+                  onMouseEnter={(e) => setSelector("Invoices")}
+                  style={{
+                    padding: "6px 10px",
+                    margin: "0px 10px",
+                    borderRadius: "3px",
+
+                    borderLeft:
+                      selection === "Invoices" ? "2px solid white" : "",
+                    transition: ".3s ease-out",
+                    backgroundColor:
+                      selector === "Invoices"
+                        ? "rgba(250,250,250,.15)"
+                        : selection === "Invoices"
+                        ? "rgba(250,250,250,.3)"
+                        : "",
+                    //textDecoration:selector === "Invoices" ? "underline" : "none",
+                    listStyleType: selector === "Invoices" ? "initial" : "none",
+                  }}
+                  onClick={getInvoices}
+                >
+                  <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
+                </div>
+
+                <div
+                  style={{
+                    padding: "1em",
+                    marginBottom: "1em",
+                  }}
+                >
+                  {showBankAccounts ? (
+                    bankAccounts.length > 0 ? (
+                      <div style={{ display: "block" }}>
+                        <div
+                          onClick={() => {
+                            setShowBankAccounts(false);
+                            setBankAccounts([]);
+                            setNeedsRelink(false);
+                          }}
+                          style={{
+                            width: "min-content",
+                            margin: "10px",
+                            padding: "10px",
+                            borderRadius: "6px",
+                            border: "2px solid",
+                          }}
+                        >
+                          &times;
+                        </div>
+                        {bankAccounts.map((x) => {
+                          return (
+                            <div>
+                              {x.NeedsRelink && (
+                                <button
+                                  disabled={!readyPlaid || !linkTokenPlaid}
+                                  onClick={() => {
+                                    setNeedsRelink(x);
+                                    openPlaid();
+                                  }}
+                                >
+                                  <span role="img" aria-label="hazard-sign">
+                                    ⚠️
+                                  </span>
+                                  {space}Reconnect
+                                </button>
+                              )}
+                              {space}
+                              {x.BankName}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      "No bank account is connected yet."
+                    )
+                  ) : (
+                    authenticatedUser && (
+                      <button
+                        onClick={() => {
+                          setShowBankAccounts(true);
+                          ///api/needs_relink?userId=1
+                          instance
+                            .acquireTokenSilent({
+                              ...loginRequest,
+                              account: accounts[0],
+                            })
+                            .then((response) => {
+                              fetch(
+                                "https://raifinancial.azurewebsites.net/api/userbanktokens",
+                                {
+                                  method: "GET",
+                                  headers: {
+                                    Authorization: "Bearer " + response.idToken,
+                                    "Content-Type": "application/JSON",
+                                  },
+                                }
+                              )
+                                .then(async (res) => await res.json())
+                                .then(async (result) => {
+                                  if (result.code === 401) {
+                                    return await instance.acquireTokenRedirect({
+                                      account: accounts[0],
+                                      forceRefresh: true,
+                                      refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                    });
+                                  }
+                                  if (result.userBankTokens.length > 0) {
+                                    setBankAccounts(result.userBankTokens);
+                                  }
+                                })
+                                .catch((e) => console.log(e.message));
+                              ///api/create_link_token
+                              fetch(
+                                "https://raifinancial.azurewebsites.net/api/get_link_token",
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    Authorization: "Bearer " + response.idToken,
+                                    "Content-Type": "application/JSON",
+                                  },
+                                  body: JSON.stringify({
+                                    referer: window.location.href,
+                                  }),
+                                }
+                              )
+                                .then(async (res) => await res.json())
+                                .then(async (result) => {
+                                  if (result.code === 401) {
+                                    return await instance.acquireTokenRedirect({
+                                      account: accounts[0],
+                                      forceRefresh: true,
+                                      refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                    });
+                                  }
+                                  setLinkToken(result.link_token);
+                                })
+                                .catch((e) => console.log(e.message));
+                            });
+                        }}
+                      >
+                        Bank Accounts
+                      </button>
+                    )
+                  )}
+                  {readyPlaid && linkTokenPlaid ? (
+                    <button
+                      onClick={() => {
+                        setNeedsRelink(false);
+                        openPlaid();
+                      }}
+                      disabled={!readyPlaid || !linkTokenPlaid}
+                    >
+                      Connect New Bank Account
+                    </button>
+                  ) : (
+                    showBankAccounts && "Connecting to plaid..."
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div
         //onMouseEnter={() => setClickDiv("")}
         style={{
           display: mobileView ? "float" : "block",
@@ -1086,628 +1707,10 @@ function MyComponent() {
           height: mobileView ? "min-content" : "100vh",
           transition: ".3s ease-in",
         }}
-      >
-        <div
-          style={{
-            top: "46px",
-            position: "absolute",
-            borderBottom:
-              mobileView && !selectionMenu
-                ? ""
-                : `2px solid ${!mobileView ? "papayawhip" : "orange"}`,
-            width: "100%",
-          }}
-        ></div>
-        <div
-          style={{
-            display: "flex",
-            cursor: "pointer",
-            padding: "5px",
-          }}
-        >
-          {!(windowWidth < 500) && (
-            <div
-              onMouseEnter={() => {
-                setHoverMobileView(true);
-              }}
-              onMouseLeave={() => {
-                setHoverMobileView(false);
-              }}
-              onClick={() => {
-                setSelectionMenu(mobileView ? true : false);
-                setMobileView(!mobileView);
-              }}
-              style={{
-                transition: ".3s ease-out",
-                right: "0px",
-                position: "absolute",
-                margin: "6px 0px",
-                borderLeft: hoverMobileView
-                  ? "4px solid white"
-                  : "4px solid antiquewhite",
-                borderBottom: hoverMobileView
-                  ? "4px solid white"
-                  : "4px solid antiquewhite",
-                height: "20px",
-                width: "20px",
-                borderRadius: "5px",
-                backgroundColor: "transparent",
-                transform: "rotate(45deg)",
-              }}
-            ></div>
-          )}
-          {windowWidth < 500 && (
-            <div
-              onClick={() => {
-                if (!mobileView) return null;
-                setSelectionMenu(!selectionMenu);
-              }}
-            >
-              <div
-                style={{
-                  borderRadius: "5px",
-                  margin: "5px",
-                  width: "30px",
-                  height: "5px",
-                  backgroundColor: "white",
-                }}
-              ></div>
-              <div
-                style={{
-                  borderRadius: "5px",
-                  margin: "5px",
-                  width: "30px",
-                  height: "5px",
-                  backgroundColor: "white",
-                }}
-              ></div>
-              <div
-                style={{
-                  borderRadius: "5px",
-                  margin: "5px",
-                  width: "30px",
-                  height: "5px",
-                  backgroundColor: "white",
-                }}
-              ></div>
-            </div>
-          )}
-          <div
-            style={{
-              padding: "0px 10px",
-              paddingTop: "5px",
-              fontSize: windowWidth < 500 ? "" : "20px",
-            }}
-          >
-            RAI Finance
-          </div>
-        </div>
-        <div
-          style={{
-            display: selectionMenu ? "block" : "none",
-            textAlign: "center",
-            margin: "20px",
-            marginBottom: "20px",
-            borderRadius: "8px",
-            padding: "10px",
-            backgroundColor: "rgba(250,250,250,0.15)",
-          }}
-        >
-          {accounts[0] ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                position: "relative",
-              }}
-            >
-              <div
-                style={{
-                  display: "block",
-                  textAlign: "center",
-                  borderRadius: "10px",
-                  backgroundColor: "white",
-                  padding: "10px",
-                }}
-              >
-                <div
-                  style={{
-                    margin: "auto",
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "10px",
-                    backgroundColor: "darkorange",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    width: "20px",
-                    height: "12px",
-                    borderTopLeftRadius: "8px",
-                    borderTopRightRadius: "8px",
-                    backgroundColor: "darkorange",
-                  }}
-                ></div>
-              </div>
-              &nbsp;&nbsp;
-              <div style={{ textAlign: "left" }}>
-                {!accounts[0]
-                  ? ""
-                  : authenticatedUser &&
-                    authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin
-                  ? "Finance Admin"
-                  : "User"}
-                <br />
-                <div
-                  style={{
-                    fontSize: "12px",
-                  }}
-                >
-                  {accounts[0].username}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: "block" }}>
-              <button
-                onClick={() =>
-                  instance.loginPopup({ prompt: "select_account" })
-                }
-              >
-                login
-              </button>
-              <br />
-              <span
-                style={{ cursor: "pointer", color: "dodgerblue" }}
-                onClick={() => instance.loginPopup({ prompt: "create" })}
-              >
-                Sign up
-              </span>
-              {space}or make a{space}
-              <a
-                style={{ fontWeight: "bolder" }}
-                href="https://signup.live.com"
-              >
-                microsoft account
-              </a>
-              {space}first.
-            </div>
-          )}
-        </div>
-        {!selectionMenu ? null : !authenticatedUser ? (
-          <div style={{ padding: "0px 10px" }}>
-            Must be logged in to view this page.
-          </div>
-        ) : !authenticatedUser.extension_24a8955a629c4869b36185a566f48b4a_Admin ? (
-          <div style={{ padding: "0px 10px" }}>
-            Must be an admin to view this page.
-          </div>
-        ) : (
-          <div style={{ paddingBottom: "10px" }}>
-            <div
-              style={{
-                cursor: "pointer",
-                color: "white",
-              }}
-            >
-              <div
-                onMouseLeave={(e) => setSelector("")}
-                onMouseEnter={(e) => setSelector("I/S")}
-                style={{
-                  padding: "6px 10px",
-                  margin: "0px 10px",
-                  borderRadius: "3px",
-                  borderLeft: selection === "I/S" ? "2px solid white" : "",
-                  transition: ".3s ease-out",
-                  backgroundColor:
-                    selector === "I/S"
-                      ? "rgba(250,250,250,.15)"
-                      : selection === "I/S"
-                      ? "rgba(250,250,250,.3)"
-                      : "",
-                  //textDecoration: selector === "I/S" ? "underline" : "none",
-                  listStyleType: selector === "I/S" ? "initial" : "none",
-                }}
-                onClick={getIOStatement}
-              >
-                <div class="fas fa-home w-6"></div>&nbsp;&nbsp;I/S
-              </div>
-              <div
-                onMouseEnter={(e) => setSelector("General Ledger")}
-                style={{
-                  padding: "6px 10px",
-                  margin: "0px 10px",
-                  borderRadius: "3px",
-
-                  borderLeft:
-                    selection === "General Ledger" ? "2px solid white" : "",
-                  transition: ".3s ease-out",
-                  backgroundColor:
-                    selector === "General Ledger"
-                      ? "rgba(250,250,250,.15)"
-                      : selection === "General Ledger"
-                      ? "rgba(250,250,250,.3)"
-                      : "",
-                  //textDecoration:selector === "General Ledger" ? "underline" : "none",
-                  listStyleType:
-                    selector === "General Ledger" ? "initial" : "none",
-                }}
-                onClick={() => {
-                  getGeneralLedger();
-                  setSelection("General Ledger");
-                }}
-              >
-                <div class="fas fa-book w-6"></div>&nbsp;&nbsp;General Ledger
-              </div>
-              <div
-                onMouseEnter={(e) => setSelector("Charts")}
-                style={{
-                  padding: "6px 10px",
-                  margin: "0px 10px",
-                  borderRadius: "3px",
-
-                  borderLeft: selection === "Charts" ? "2px solid white" : "",
-                  transition: ".3s ease-out",
-                  backgroundColor:
-                    selector === "Charts"
-                      ? "rgba(250,250,250,.15)"
-                      : selection === "Charts"
-                      ? "rgba(250,250,250,.3)"
-                      : "",
-                  //textDecoration: selector === "Charts" ? "underline" : "none",
-                  listStyleType: selector === "Charts" ? "initial" : "none",
-                }}
-                onClick={() => {
-                  if (mobileView) setSelectionMenu(false);
-                  setSelection("Charts");
-                }}
-              >
-                <div class="fas fa-chart-line w-6"></div>&nbsp;&nbsp;Charts
-              </div>
-              <div
-                onMouseEnter={(e) => setSelector("Balances")}
-                style={{
-                  padding: "6px 10px",
-                  margin: "0px 10px",
-                  borderRadius: "3px",
-
-                  borderLeft: selection === "Balances" ? "2px solid white" : "",
-                  transition: ".3s ease-out",
-                  backgroundColor:
-                    selector === "Balances"
-                      ? "rgba(250,250,250,.15)"
-                      : selection === "Balances"
-                      ? "rgba(250,250,250,.3)"
-                      : "",
-                  //textDecoration:selector === "Balances" ? "underline" : "none",
-                  listStyleType: selector === "Balances" ? "initial" : "none",
-                }}
-                onClick={() => {
-                  if (mobileView) setSelectionMenu(false);
-                  setSelection("Balances");
-                  setAccountBalances([
-                    { CurrentBalance: "Connecting to database..." },
-                  ]);
-                  instance
-                    .acquireTokenSilent({
-                      ...loginRequest,
-                      account: accounts[0],
-                    })
-                    .then((response) => {
-                      fetch(
-                        "https://raifinancial.azurewebsites.net/api/accountbalances",
-                        {
-                          method: "GET",
-                          headers: {
-                            Authorization: "Bearer " + response.idToken,
-                            "Content-Type": "application/JSON",
-                          },
-                        }
-                      )
-                        .then(async (res) => await res.json())
-                        .then(async (result) => {
-                          console.log(result);
-                          if (result.code === 401) {
-                            await instance.acquireTokenRedirect({
-                              account: accounts[0],
-                              forceRefresh: true,
-                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                            });
-                            return setAccountBalances([
-                              { CurrentBalance: "please log in again..." },
-                            ]);
-                          }
-                          setAccountBalances(result.accountBalances);
-                        })
-                        .catch(() => {
-                          setAccountBalances([
-                            { CurrentBalance: "please log in again..." },
-                          ]);
-                        });
-                    });
-                }}
-              >
-                <div class="fas fa-wallet w-6"></div>&nbsp;&nbsp;Balances
-              </div>
-              <div
-                onMouseEnter={(e) => setSelector("Payroll")}
-                style={{
-                  padding: "6px 10px",
-                  margin: "0px 10px",
-                  borderRadius: "3px",
-
-                  borderLeft: selection === "Payroll" ? "2px solid white" : "",
-                  transition: ".3s ease-out",
-                  backgroundColor:
-                    selector === "Payroll"
-                      ? "rgba(250,250,250,.15)"
-                      : selection === "Payroll"
-                      ? "rgba(250,250,250,.3)"
-                      : "",
-                  //textDecoration: selector === "Payroll" ? "underline" : "none",
-                  listStyleType: selector === "Payroll" ? "initial" : "none",
-                }}
-                onClick={() => {
-                  if (mobileView) setSelectionMenu(false);
-                  setSelection("Payroll");
-                  setPayoutLog([{ EmployeeName: "Connecting to database..." }]);
-                  instance
-                    .acquireTokenSilent({
-                      ...loginRequest,
-                      account: accounts[0],
-                    })
-                    .then((response) => {
-                      fetch(
-                        "https://raifinancial.azurewebsites.net/api/payoutlog",
-                        {
-                          method: "GET",
-                          headers: {
-                            Authorization: "Bearer " + response.idToken,
-                            "Content-Type": "application/JSON",
-                          },
-                        }
-                      )
-                        .then(async (res) => await res.json())
-                        .then(async (result) => {
-                          console.log(result);
-                          if (result.code === 401) {
-                            await instance.acquireTokenRedirect({
-                              account: accounts[0],
-                              forceRefresh: true,
-                              refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                            });
-                            return setPayoutLog([
-                              { EmployeeName: "please log in again..." },
-                            ]);
-                          }
-
-                          var payoutLog = result.payoutLog.map((x) => {
-                            const employeeName =
-                              x.EmployeeName.split("RTP Sent ")[1];
-                            return {
-                              ...x,
-                              EmployeeName: employeeName
-                                ? employeeName.slice(
-                                    0,
-                                    employeeName.search(/\d/)
-                                  )
-                                : x.EmployeeName,
-                            };
-                          });
-                          var payoutTotals = [];
-                          var totals = {};
-                          payoutLog.forEach((x) => {
-                            if (!totals[x.EmployeeName])
-                              totals[x.EmployeeName] = 0;
-                            //console.log(x.AmountPaid);
-                            totals[x.EmployeeName] =
-                              totals[x.EmployeeName] + x.AmountPaid;
-                          });
-                          setPayoutTotals(totals);
-                          let triedColors = [];
-                          let i = 0;
-                          function getRandomInt(max) {
-                            const value = Math.floor(Math.random() * max);
-                            if (triedColors.includes(value)) {
-                              if (i > 20) return value;
-                              i++;
-                              return getRandomInt(max);
-                            }
-                            return value;
-                          }
-                          setPayoutChart(
-                            Object.keys(totals).map((employeeName, i) => {
-                              return {
-                                title: employeeName,
-                                value: Object.values(totals)[i],
-                                //(i / Object.keys(totals).length)
-                                color: `rgb(${getRandomInt(250)},${getRandomInt(
-                                  250
-                                )},${
-                                  getRandomInt(250) //(i / result.payoutLog.length) * 250
-                                })`,
-                              };
-                            })
-                          );
-                          setPayoutLog(
-                            payoutLog.sort(
-                              (a, b) =>
-                                new Date(b.PaymentDate) -
-                                new Date(a.PaymentDate)
-                            )
-                          );
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                        });
-                    });
-                }}
-              >
-                <div class="fas fa-exchange-alt w-6"></div>&nbsp;&nbsp;Payroll
-              </div>
-              <div
-                onMouseEnter={(e) => setSelector("Invoices")}
-                style={{
-                  padding: "6px 10px",
-                  margin: "0px 10px",
-                  borderRadius: "3px",
-
-                  borderLeft: selection === "Invoices" ? "2px solid white" : "",
-                  transition: ".3s ease-out",
-                  backgroundColor:
-                    selector === "Invoices"
-                      ? "rgba(250,250,250,.15)"
-                      : selection === "Invoices"
-                      ? "rgba(250,250,250,.3)"
-                      : "",
-                  //textDecoration:selector === "Invoices" ? "underline" : "none",
-                  listStyleType: selector === "Invoices" ? "initial" : "none",
-                }}
-                onClick={getInvoices}
-              >
-                <div class="fas fa-file-alt w-6"></div>&nbsp;&nbsp;Invoices
-              </div>
-
-              <div
-                style={{
-                  padding: "1em",
-                  marginBottom: "1em",
-                }}
-              >
-                {showBankAccounts ? (
-                  bankAccounts.length > 0 ? (
-                    <div style={{ display: "block" }}>
-                      <div
-                        onClick={() => {
-                          setShowBankAccounts(false);
-                          setBankAccounts([]);
-                          setNeedsRelink(false);
-                        }}
-                        style={{
-                          width: "min-content",
-                          margin: "10px",
-                          padding: "10px",
-                          borderRadius: "6px",
-                          border: "2px solid",
-                        }}
-                      >
-                        &times;
-                      </div>
-                      {bankAccounts.map((x) => {
-                        return (
-                          <div>
-                            {x.NeedsRelink && (
-                              <button
-                                disabled={!readyPlaid || !linkTokenPlaid}
-                                onClick={() => {
-                                  setNeedsRelink(x);
-                                  openPlaid();
-                                }}
-                              >
-                                <span role="img" aria-label="hazard-sign">
-                                  ⚠️
-                                </span>
-                                {space}Reconnect
-                              </button>
-                            )}
-                            {space}
-                            {x.BankName}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    "No bank account is connected yet."
-                  )
-                ) : (
-                  authenticatedUser && (
-                    <button
-                      onClick={() => {
-                        setShowBankAccounts(true);
-                        ///api/needs_relink?userId=1
-                        instance
-                          .acquireTokenSilent({
-                            ...loginRequest,
-                            account: accounts[0],
-                          })
-                          .then((response) => {
-                            fetch(
-                              "https://raifinancial.azurewebsites.net/api/userbanktokens",
-                              {
-                                method: "GET",
-                                headers: {
-                                  Authorization: "Bearer " + response.idToken,
-                                  "Content-Type": "application/JSON",
-                                },
-                              }
-                            )
-                              .then(async (res) => await res.json())
-                              .then(async (result) => {
-                                if (result.code === 401) {
-                                  return await instance.acquireTokenRedirect({
-                                    account: accounts[0],
-                                    forceRefresh: true,
-                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                                  });
-                                }
-                                if (result.userBankTokens.length > 0) {
-                                  setBankAccounts(result.userBankTokens);
-                                }
-                              })
-                              .catch((e) => console.log(e.message));
-                            ///api/create_link_token
-                            fetch(
-                              "https://raifinancial.azurewebsites.net/api/get_link_token",
-                              {
-                                method: "POST",
-                                headers: {
-                                  Authorization: "Bearer " + response.idToken,
-                                  "Content-Type": "application/JSON",
-                                },
-                                body: JSON.stringify({
-                                  referer: window.location.href,
-                                }),
-                              }
-                            )
-                              .then(async (res) => await res.json())
-                              .then(async (result) => {
-                                if (result.code === 401) {
-                                  return await instance.acquireTokenRedirect({
-                                    account: accounts[0],
-                                    forceRefresh: true,
-                                    refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
-                                  });
-                                }
-                                setLinkToken(result.link_token);
-                              })
-                              .catch((e) => console.log(e.message));
-                          });
-                      }}
-                    >
-                      Bank Accounts
-                    </button>
-                  )
-                )}
-                {readyPlaid && linkTokenPlaid ? (
-                  <button
-                    onClick={() => {
-                      setNeedsRelink(false);
-                      openPlaid();
-                    }}
-                    disabled={!readyPlaid || !linkTokenPlaid}
-                  >
-                    Connect New Bank Account
-                  </button>
-                ) : (
-                  showBankAccounts && "Connecting to plaid..."
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      ></div>
       <div
         style={{
+          marginTop: mobileView ? "61px" : "0px",
           backgroundColor: "snow",
           display: "block",
         }}
@@ -1960,56 +1963,73 @@ function MyComponent() {
         >
           {selection === "I/S" && (
             <div>
-              <select
-                value={selectedDate ? selectedDate : ""}
-                style={{
-                  margin: "10px",
-                }}
-                onChange={(e) => {
-                  //setSelectedIO("");
-                  setSelectedDate(e.target.value);
-                }}
-              >
-                {ioMonths.map((month) => {
-                  const zeroPad = (x) => {
-                    return x < 10 ? "0" + x : x;
-                  };
-                  return (
-                    <option value={month} key={month}>
-                      {selectedFrequency === "Monthly"
-                        ? month === getEndOfMonth(new Date())
-                          ? "Current Month"
-                          : month
-                        : selectedFrequency === "Quarterly"
-                        ? month ===
-                          new Date().getFullYear() +
-                            {
-                              "01": "-Q1",
-                              "02": "-Q1",
-                              "03": "-Q1",
-                              "04": "-Q2",
-                              "05": "-Q2",
-                              "06": "-Q2",
-                              "07": "-Q3",
-                              "08": "-Q3",
-                              "09": "-Q3",
-                              10: "-Q4",
-                              11: "-Q4",
-                              12: "-Q4",
-                            }[
-                              String(new Date().getMonth() + 1).padStart(2, "0")
-                            ]
-                          ? "Current Quarter"
-                          : month
-                        : selectedFrequency === "Yearly"
-                        ? month === new Date().getFullYear()
-                          ? "Current Year"
-                          : month
-                        : month}
-                    </option>
-                  );
-                })}
-              </select>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <select
+                  value={selectedDate ? selectedDate : ""}
+                  style={{
+                    margin: "10px",
+                  }}
+                  onChange={(e) => {
+                    //setSelectedIO("");
+                    setSelectedDate(e.target.value);
+                  }}
+                >
+                  {ioMonths.map((month) => {
+                    const zeroPad = (x) => {
+                      return x < 10 ? "0" + x : x;
+                    };
+                    return (
+                      <option value={month} key={month}>
+                        {selectedFrequency === "Monthly"
+                          ? month === getEndOfMonth(new Date())
+                            ? "Current Month"
+                            : month
+                          : selectedFrequency === "Quarterly"
+                          ? month ===
+                            new Date().getFullYear() +
+                              {
+                                "01": "-Q1",
+                                "02": "-Q1",
+                                "03": "-Q1",
+                                "04": "-Q2",
+                                "05": "-Q2",
+                                "06": "-Q2",
+                                "07": "-Q3",
+                                "08": "-Q3",
+                                "09": "-Q3",
+                                10: "-Q4",
+                                11: "-Q4",
+                                12: "-Q4",
+                              }[
+                                String(new Date().getMonth() + 1).padStart(
+                                  2,
+                                  "0"
+                                )
+                              ]
+                            ? "Current Quarter"
+                            : month
+                          : selectedFrequency === "Yearly"
+                          ? month === new Date().getFullYear()
+                            ? "Current Year"
+                            : month
+                          : month}
+                      </option>
+                    );
+                  })}
+                </select>
+                <span
+                  class="fa fa-refresh"
+                  style={{
+                    height: "min-content",
+                    padding: "6px",
+                    borderRadius: "10px",
+                  }}
+                  onClick={() => {
+                    getIOStatement();
+                    setSelection("I/S");
+                  }}
+                ></span>
+              </div>
               <div
                 style={{
                   width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
@@ -3332,7 +3352,19 @@ function MyComponent() {
                           colSpan: "2",
                         }}
                       >
-                        General Ledger
+                        General Ledger{space}
+                        <span
+                          class="fa fa-refresh"
+                          style={{
+                            height: "min-content",
+                            padding: "6px",
+                            borderRadius: "10px",
+                          }}
+                          onClick={() => {
+                            getGeneralLedger();
+                            setSelection("General Ledger");
+                          }}
+                        ></span>
                       </caption>
                     )}
                     <tbody>
@@ -3670,13 +3702,14 @@ function MyComponent() {
                                                 )
                                                 .then((response) => {
                                                   console.log(response);
-                                                  setNewCategory("");
-                                                  if (allowUpdate)
+                                                  if (allowUpdate) {
+                                                    setNewCategory("");
                                                     getGeneralLedger();
-                                                  setSelection(
-                                                    "General Ledger"
-                                                  );
-                                                  setEditCategory(false);
+                                                    setSelection(
+                                                      "General Ledger"
+                                                    );
+                                                    setEditCategory(false);
+                                                  }
                                                 })
                                                 .catch((error) => {
                                                   console.error(error);
@@ -3761,7 +3794,19 @@ function MyComponent() {
                     colspan: "2",
                   }}
                 >
-                  Account Balances
+                  Account Balances{space}
+                  <span
+                    class="fa fa-refresh"
+                    style={{
+                      height: "min-content",
+                      padding: "6px",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => {
+                      getAccountBalances();
+                      setSelection("Balances");
+                    }}
+                  ></span>
                 </caption>
                 <tbody>
                   {accountBalances !== null && accountBalances.length > 0 && (
@@ -3896,7 +3941,19 @@ function MyComponent() {
                       colspan: "2",
                     }}
                   >
-                    Payroll
+                    Payroll{space}
+                    <span
+                      class="fa fa-refresh"
+                      style={{
+                        height: "min-content",
+                        padding: "6px",
+                        borderRadius: "10px",
+                      }}
+                      onClick={() => {
+                        getPayouLog();
+                        setSelection("Payroll");
+                      }}
+                    ></span>
                   </caption>
                   <tbody>
                     {payoutLog !== null && payoutLog.length > 0 && (
@@ -4121,7 +4178,19 @@ function MyComponent() {
                     colspan: "2",
                   }}
                 >
-                  Invoices
+                  Invoices{space}
+                  <span
+                    class="fa fa-refresh"
+                    style={{
+                      height: "min-content",
+                      padding: "6px",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => {
+                      getInvoices();
+                      setSelection("Invoices");
+                    }}
+                  ></span>
                 </caption>
                 <tbody>
                   {invoices !== null && invoices.length > 0 && (
@@ -4282,13 +4351,7 @@ function MyComponent() {
                               })}
                             </div>
                           </td>
-                          <td
-                            onClick={() => {
-                              if (editCategory === x.InvoiceID) return null;
-                              setEditCategory(x.InvoiceID);
-                            }}
-                            style={{ cursor: "pointer" }}
-                          >
+                          <td style={{ cursor: "pointer" }}>
                             {editCategory === x.InvoiceID ? (
                               <form
                                 style={{
@@ -4329,10 +4392,12 @@ function MyComponent() {
                                           .then(async (res) => await res.json())
                                           .then((response) => {
                                             console.log(response);
-                                            setNewCategory("");
-                                            if (allowUpdate) getInvoices();
-                                            setSelection("Invoices");
-                                            setEditCategory(false);
+                                            if (allowUpdate) {
+                                              setNewCategory("");
+                                              getInvoices();
+                                              setSelection("Invoices");
+                                              setEditCategory(false);
+                                            }
                                           })
                                           .catch((error) => {
                                             console.error(error);
@@ -4357,6 +4422,7 @@ function MyComponent() {
                             ) : (
                               <div
                                 onClick={() => {
+                                  setEditCategory(x.InvoiceID);
                                   setNewCategory("");
                                   setAllowUpdate(false);
                                 }}
