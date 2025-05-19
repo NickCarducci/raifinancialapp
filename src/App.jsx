@@ -984,8 +984,7 @@ function MyComponent() {
       accountBalancesRef.current &&
         setAccountBalancesHeight(accountBalancesRef.current.offsetHeight);
       payrollRef.current && setPayrollHeight(payrollRef.current.offsetHeight);
-      ioStatement &&
-        barChartRef.current &&
+      barChartRef.current &&
         pieChartRef.current &&
         setChartsHeight(
           window.innerWidth - (mobileView ? 0 : 300) < 500
