@@ -168,11 +168,11 @@ function MyComponent() {
             //setMobileView(true);
           }
         }
-      setScrolling(true);
+      /*setScrolling(true);
       clearTimeout(timerId);
       timerId = setTimeout(() => {
         setScrolling(false);
-      }, 5000);
+      }, 5000);*/
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
       setScrollPosition(window.scrollY);
     };
@@ -4487,3 +4487,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
