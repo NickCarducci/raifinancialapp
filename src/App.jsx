@@ -234,7 +234,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setGeneralLedger([{ Amount: "please log in again..." }]);
@@ -567,7 +567,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setRevenue([{ Amount: "Sign in again..." }]);
@@ -691,7 +691,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setExpenses([
@@ -1050,7 +1050,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setInvoices([{ Description: "please log in again..." }]);
@@ -1091,7 +1091,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setAccountBalances([
@@ -1128,7 +1128,7 @@ function MyComponent() {
             if (result.code === 401) {
               await instance.acquireTokenRedirect({
                 account: accounts[0],
-                forceRefresh: true,
+                //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
               return setPayoutLog([{ EmployeeName: "please log in again..." }]);
@@ -1640,7 +1640,7 @@ function MyComponent() {
                                   if (result.code === 401) {
                                     return await instance.acquireTokenRedirect({
                                       account: accounts[0],
-                                      forceRefresh: true,
+                                      //forceRefresh: true,
                                       refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
                                     });
                                   }
@@ -1668,7 +1668,7 @@ function MyComponent() {
                                   if (result.code === 401) {
                                     return await instance.acquireTokenRedirect({
                                       account: accounts[0],
-                                      forceRefresh: true,
+                                      //forceRefresh: true,
                                       refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
                                     });
                                   }
@@ -4481,3 +4481,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
