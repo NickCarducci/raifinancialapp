@@ -160,10 +160,7 @@ function MyComponent() {
             //setMobileView(true);
           }
         }
-      //
-
       //setSelectionMenu(window.scrollY > window.innerHeight ? false : true);
-
       setScrollPosition(window.scrollY);
     };
 
@@ -1710,7 +1707,7 @@ function MyComponent() {
       ></div>
       <div
         style={{
-          marginTop: mobileView ? "61px" : "0px",
+          marginTop: mobileView ? "46px" : "0px",
           backgroundColor: "snow",
           display: "block",
         }}
@@ -3135,7 +3132,7 @@ function MyComponent() {
                 }}
                 style={{
                   width: "min-content",
-                  display: generalLedger.length > 0 ? "block" : "none",
+                  display: generalLedger.length > 0 ? "none" : "none",
                   margin: "10px",
                   border:
                     "2px solid " + (hoverDivs === true ? "black" : "lightgrey"),
@@ -3241,62 +3238,46 @@ function MyComponent() {
               <div
                 style={{
                   display: selection !== "I/S" ? "flex" : "none",
+                  alignItems: "center",
                   overflowX: "auto",
                   overflowY: "hidden",
                   height: "56px",
                   width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
                 }}
               >
-                {clickedDiv !== "" || clickedPie !== null ? (
-                  <button
-                    onClick={() => {
-                      setClickDiv("");
-                      setClickPie(null);
+                <div style={{ textAlign: "center", marginLeft: "10px" }}>
+                  START
+                  <br />
+                  <input
+                    type="date"
+                    id="start"
+                    name="query-start"
+                    value={startingDate}
+                    onChange={(e) => {
+                      setStartingDate(e.target.value);
                     }}
-                  >
-                    See all.
-                  </button>
-                ) : (
-                  (startingDate !== lastStartingDate ||
-                    endingDate !== lastEndingDate) && (
-                    <span
-                      class="fa fa-refresh"
-                      style={{
-                        marginLeft: "20px",
-                        marginRight: "10px",
-                        padding: "6px",
-                        borderRadius: "10px",
-                        border: "1px solid black",
-                      }}
-                      onClick={() => {
-                        getGeneralLedger();
-                        setSelection("General Ledger");
-                      }}
-                    ></span>
-                  )
-                )}
-                {space}starting date:
-                <input
-                  type="date"
-                  id="start"
-                  name="query-start"
-                  value={startingDate}
-                  onChange={(e) => {
-                    setStartingDate(e.target.value);
+                    style={{ borderRadius: "6px" }}
+                  />
+                </div>
+                <div
+                  style={{
+                    textAlign: "center",
+                    marginLeft: "10px",
                   }}
-                  style={{ marginRight: "10px", borderRadius: "6px" }}
-                />
-                {space}ending date:
-                <input
-                  type="date"
-                  id="end"
-                  name="query-end"
-                  value={endingDate}
-                  onChange={(e) => {
-                    setEndingDate(e.target.value);
-                  }}
-                  style={{ borderRadius: "6px" }}
-                />
+                >
+                  END
+                  <br />
+                  <input
+                    type="date"
+                    id="end"
+                    name="query-end"
+                    value={endingDate}
+                    onChange={(e) => {
+                      setEndingDate(e.target.value);
+                    }}
+                    style={{ borderRadius: "6px" }}
+                  />
+                </div>
               </div>
               <div ref={tableRef}>
                 <span
@@ -3353,18 +3334,34 @@ function MyComponent() {
                         }}
                       >
                         General Ledger{space}
-                        <span
-                          class="fa fa-refresh"
-                          style={{
-                            height: "min-content",
-                            padding: "6px",
-                            borderRadius: "10px",
-                          }}
-                          onClick={() => {
-                            getGeneralLedger();
-                            setSelection("General Ledger");
-                          }}
-                        ></span>
+                        {clickedDiv !== "" || clickedPie !== null ? (
+                          <button
+                            onClick={() => {
+                              setClickDiv("");
+                              setClickPie(null);
+                            }}
+                          >
+                            See all.
+                          </button>
+                        ) : (
+                          <span
+                            class="fa fa-refresh"
+                            style={{
+                              height: "min-content",
+                              padding: "6px",
+                              borderRadius: "10px",
+                              color:
+                                startingDate !== lastStartingDate ||
+                                endingDate !== lastEndingDate
+                                  ? "black"
+                                  : "grey",
+                            }}
+                            onClick={() => {
+                              getGeneralLedger();
+                              setSelection("General Ledger");
+                            }}
+                          ></span>
+                        )}
                       </caption>
                     )}
                     <tbody>
@@ -4465,4 +4462,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
