@@ -1503,6 +1503,7 @@ function MyComponent() {
                       selector === "General Ledger" ? "initial" : "none",
                   }}
                   onClick={() => {
+                    setNewSearchQuery(null);
                     getGeneralLedger();
                     setSelection("General Ledger");
                   }}
@@ -1982,22 +1983,24 @@ function MyComponent() {
               margin: "0px 10px",
             }}
           >
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSelection("General Ledger");
-                getGeneralLedger();
-              }}
-            >
-              <input
-                required={true}
-                placeholder="Search financials..."
-                value={newSearchQuery ? newSearchQuery : ""}
-                onChange={(e) => {
-                  setNewSearchQuery(e.target.value.toLocaleUpperCase());
+            {["I/S", "General Ledger"].includes(selection) && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSelection("General Ledger");
+                  getGeneralLedger();
                 }}
-              />
-            </form>
+              >
+                <input
+                  required={true}
+                  placeholder="Search financials..."
+                  value={newSearchQuery ? newSearchQuery : ""}
+                  onChange={(e) => {
+                    setNewSearchQuery(e.target.value.toLocaleUpperCase());
+                  }}
+                />
+              </form>
+            )}
             <div
               style={{
                 cursor: "pointer",
@@ -3498,6 +3501,7 @@ function MyComponent() {
                           onClick={() => {
                             if (!startingDate || !endingDate)
                               return window.alert("Invalid queried date.");
+                            setNewSearchQuery(null);
                             getGeneralLedger();
                             setSelection("General Ledger");
                           }}
@@ -3788,6 +3792,7 @@ function MyComponent() {
                               return false;
                             if (
                               newSearchQuery &&
+                              x.Description &&
                               !x.Description.includes(newSearchQuery)
                             )
                               return false;
@@ -4705,7 +4710,14 @@ function MyComponent() {
           )}
         </div>
         {selection !== "" && (
-          <div>
+          <div
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              width: windowWidth - (mobileView ? 0 : 305),
+              height: "50px",
+            }}
+          >
             {clickedDiv !== "" || clickedPie !== null ? (
               <button
                 onClick={() => {
@@ -4715,6 +4727,135 @@ function MyComponent() {
               >
                 See all.
               </button>
+            ) : newSearchQuery ? (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <button
+                  style={{
+                    margin: "6px",
+                    display: "flex",
+                    width: "max-content",
+                    border: "1px solid black",
+                    padding: "6px",
+                    borderRadius: "6px",
+                  }}
+                  onClick={() => {
+                    setNewSearchQuery(null);
+                    getGeneralLedger();
+                  }}
+                >
+                  &times;&nbsp;
+                  {newSearchQuery}
+                </button>
+                {space}
+                <button
+                  style={{
+                    margin: "6px",
+                    display: "flex",
+                    width: "max-content",
+                    border: "1px solid black",
+                    padding: "6px",
+                    borderRadius: "6px",
+                  }}
+                  onClick={() => {
+                    () => {
+                      setGeneralLedger([
+                        { Amount: `Querying database for${newSearchQuery}...` },
+                      ]);
+                      instance
+                        .acquireTokenSilent({
+                          ...loginRequest,
+                          account: accounts[0],
+                        })
+                        .then((response) => {
+                          setLastStartingDate(startingDate);
+                          setLastEndingDate(endingDate);
+                          const newStartingDate = new Date(
+                            new Date(startingDate).getTime() + 86400000 * 2
+                          );
+                          const newEndingDate = new Date(
+                            new Date(endingDate).getTime() + 86400000 * 2
+                          );
+                          fetch(
+                            "https://raifinancial.azurewebsites.net/api/generalledgersearch/" +
+                              newSearchQuery,
+                            {
+                              method: "GET",
+                              headers: {
+                                Authorization: "Bearer " + response.idToken,
+                                "Content-Type": "application/JSON",
+                              },
+                            }
+                          )
+                            .then(async (res) => await res.json())
+                            .then(async (result) => {
+                              console.log(result);
+                              if (result.code === 401) {
+                                return instance.logoutRedirect({
+                                  account: accounts[0],
+                                  mainWindowRedirectUri: window.location.href,
+                                });
+                                await instance.acquireTokenRedirect({
+                                  account: accounts[0],
+                                  //forceRefresh: true,
+                                  refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
+                                });
+                                return setGeneralLedger([
+                                  { Amount: "please log in again..." },
+                                ]);
+                              }
+                              const generalLedger = result.generalLedger
+                                .filter((x) => {
+                                  if (x.Category === "End of month balance")
+                                    return false;
+                                  return true;
+                                })
+                                .sort(
+                                  (a, b) => new Date(b.Date) - new Date(a.Date)
+                                );
+                              var generalLedgerTicks = [];
+                              generalLedger.forEach((x, i) => {
+                                var found = generalLedgerTicks.find(
+                                  (y) => y[x.Date.split("T")[0]]
+                                );
+                                if (!found)
+                                  generalLedgerTicks.push({
+                                    [x.Date.split("T")[0]]: 0,
+                                  });
+                                generalLedgerTicks = generalLedgerTicks.filter(
+                                  (y) =>
+                                    Object.keys(y)[0] !== x.Date.split("T")[0]
+                                );
+                                generalLedgerTicks.push({
+                                  [x.Date.split("T")[0]]:
+                                    (found ? Object.values(found)[0] : 0) +
+                                    x.Amount,
+                                });
+                                //console.log(generalLedgerTicks);
+                              });
+                              //console.log(generalLedgerTicks);
+                              setGeneralLedgerTicks(generalLedgerTicks);
+                              const heights = generalLedgerTicks.map((x) => {
+                                const amount = Object.values(x)[0];
+                                return typeof amount === "number"
+                                  ? Math.abs(amount)
+                                  : 0;
+                              });
+                              const maxHeightDivs = Math.max(...heights);
+                              setMaxHeightsDivs(maxHeightDivs);
+                              setGeneralLedger(generalLedger);
+                            })
+                            .catch(() => {
+                              setGeneralLedger([
+                                { Amount: "reload or log in again..." },
+                              ]);
+                            });
+                        });
+                    };
+                  }}
+                >
+                  Search&nbsp;within&nbsp;any&nbsp;date&nbsp;range.
+                </button>
+              </div>
             ) : (
               "End of results."
             )}
