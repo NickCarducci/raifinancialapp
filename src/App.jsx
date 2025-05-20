@@ -1211,6 +1211,22 @@ function MyComponent() {
       }}
     >
       <div
+        onClick={() => {
+          setSelectionMenu(!selectionMenu);
+          setMobileView(!mobileView);
+        }}
+        style={{
+          zIndex: "10",
+          //backgroundColor: "red",
+          cursor: "pointer",
+          position: !mobileView ? "fixed" : "absolute",
+          height: !mobileView ? "100vh" : "5px",
+          width: !mobileView ? "5px" : "100vw",
+          top: !mobileView ? "0px" : "46px",
+          left: !mobileView ? "300px" : "0px",
+        }}
+      ></div>
+      <div
         ref={selectionMenuRef}
         //onMouseEnter={() => setClickDiv("")}
         style={{
@@ -4039,7 +4055,7 @@ function MyComponent() {
                     : "flex",
               }}
             >
-              {(true ||
+              {(payrollLog.find((x) => x.PaymentDate) ||
                 windowWidth < 500 ||
                 (windowWidth < 900 && !mobileView)) && (
                 <div
@@ -4619,4 +4635,3 @@ function MyComponent() {
 }
 
 export default MyComponent;
-
