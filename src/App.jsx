@@ -992,6 +992,7 @@ function MyComponent() {
   const [expenseFilter, setExpenseFilter] = useState(false);
   const [expenseFilterHover, setExpenseFilterHover] = useState(false);
   const stop = useRef(null);
+  const [newSearchQuery, setNewSearchQuery] = useState(null);
   useEffect(() => {
     clearTimeout(stop.current);
     stop.current = setTimeout(() => {
@@ -1033,6 +1034,7 @@ function MyComponent() {
     expenseFilter,
     windowWidth,
     selectionMenu,
+    newSearchQuery,
   ]);
   const getInvoices = () => {
     if (mobileView) setSelectionMenu(false);
@@ -1772,45 +1774,25 @@ function MyComponent() {
       >
         <div
           style={{
+            display: "flex",
+            justifyContent: "space-between",
             fontWeight: mobileView ? "" : "bolder",
             textIndent: "20px",
-            padding: "20px 0px",
             width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
             color: "black",
             backgroundColor: "white",
+            overflowX: "auto",
+            overflowY: "hidden",
+            height: "56px",
+            width: windowWidth - (mobileView ? 0 : 305),
           }}
         >
-          <div
-            onClick={() => setLoginMenu(true)}
-            style={{
-              cursor: "pointer",
-              transform: "translateY(-25%)",
-              display: "flex",
-              height: "40px",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "darkorange",
-              borderRadius: "10px",
-              position: "absolute",
-              right: "0px",
-              margin: "0px 10px",
-            }}
-          >
-            <div
-              style={{
-                transform: "translateX(-25%)",
-              }}
-            >
-              {accounts[0] ? accounts[0].username.substring(0, 2) : "UU"}
-            </div>
-          </div>
           <div
             style={{
               zIndex: 1,
               boxShadow: "-2px 5px 5px 1px grey",
               backgroundColor: "white",
               borderRadius: "10px",
-              padding: "10px",
               display: loginMenu ? "block" : "none",
               position: "absolute",
               right: "0px",
@@ -1984,7 +1966,59 @@ function MyComponent() {
               </button>
             )}
           </div>
-          Financial Dashboard
+          <div
+            style={{
+              padding: "16px 0px",
+              width: "max-content",
+            }}
+          >
+            Financial&nbsp;Dashboard
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0px 10px",
+            }}
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSelection("General Ledger");
+                getGeneralLedger();
+              }}
+            >
+              <input
+                required={true}
+                placeholder="Search financials..."
+                value={newSearchQuery ? newSearchQuery : ""}
+                onChange={(e) => {
+                  setNewSearchQuery(e.target.value.toLocaleUpperCase());
+                }}
+              />
+            </form>
+            <div
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                height: "40px",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "darkorange",
+                borderRadius: "10px",
+              }}
+            >
+              <div
+                onClick={() => setLoginMenu(true)}
+                style={{
+                  transform: "translateX(-25%)",
+                }}
+              >
+                {accounts[0] ? accounts[0].username.substring(0, 2) : "UU"}
+              </div>
+            </div>
+          </div>
         </div>
         {/*selection !== "" && (
           <div
@@ -3388,121 +3422,130 @@ function MyComponent() {
                   see all
                 </span>
                 <br />
-                {selection === "I/S" && false ? (
-                  <div
-                    style={{
-                      padding: "10px 20px",
-                      borderTopLeftRadius: "5px",
-                      borderTopRightRadius: "5px",
-                      margin: "0px 16px",
-                      marginTop: "10px",
-                      backgroundColor: "white",
-                      borderSpacing: 0,
-                      tableLayout: "fixed",
-                      display: "flex",
-                      width: "max-content",
-                      position: "relative",
-                      fontSize: "20px",
-                      fontWeight: "bolder",
-                      colSpan: "2",
-                    }}
-                  >
-                    Recent Transactions
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      padding: "10px 20px",
-                      borderTopLeftRadius: "5px",
-                      borderTopRightRadius: "5px",
-                      margin: "0px 16px",
-                      backgroundColor: "white",
-                      borderSpacing: 0,
-                      tableLayout: "fixed",
-                      display: "flex",
-                      width: "max-content",
-                      position: "relative",
-                      fontSize: "20px",
-                      fontWeight: "bolder",
-                      colSpan: "2",
-                    }}
-                  >
-                    General Ledger{space}
-                    {clickedDiv !== "" || clickedPie !== null ? (
-                      <button
-                        onClick={() => {
-                          setClickDiv("");
-                          setClickPie(null);
-                        }}
-                      >
-                        See all.
-                      </button>
-                    ) : (
-                      <span
-                        class="fa fa-refresh"
-                        style={{
-                          cursor: "pointer",
-                          height: "min-content",
-                          padding: "6px 10px",
-                          borderRadius: "10px",
-                          color:
-                            startingDate &&
-                            endingDate &&
-                            (startingDate !== lastStartingDate ||
-                              endingDate !== lastEndingDate)
-                              ? "black"
-                              : "grey",
-                        }}
-                        onClick={() => {
-                          if (!startingDate || !endingDate)
-                            return window.alert("Invalid queried date.");
-                          getGeneralLedger();
-                          setSelection("General Ledger");
-                        }}
-                      ></span>
-                    )}
-                    <span
+                <div
+                  style={{
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    height: "50px",
+                    width: windowWidth - (mobileView ? 0 : 305),
+                  }}
+                >
+                  {selection === "I/S" && false ? (
+                    <div
                       style={{
-                        color: expenseFilterHover ? "grey" : "black",
-                        transition: ".3s ease-in",
-                        opacity: expenseFilter ? 1 : 0,
-                        width: expenseFilter ? "" : 0,
+                        padding: "10px 20px",
+                        borderTopLeftRadius: "5px",
+                        borderTopRightRadius: "5px",
+                        margin: "0px 16px",
+                        marginTop: "10px",
+                        backgroundColor: "white",
+                        borderSpacing: 0,
+                        tableLayout: "fixed",
+                        display: "flex",
+                        width: "max-content",
                         position: "relative",
-                        cursor: "pointer",
-                      }}
-                      onMouseEnter={() => {
-                        setExpenseFilterHover(true);
-                      }}
-                      onMouseLeave={() => {
-                        setExpenseFilterHover(false);
-                      }}
-                      onClick={() => {
-                        setExpenseFilter(false);
+                        fontSize: "20px",
+                        fontWeight: "bolder",
+                        colSpan: "2",
                       }}
                     >
+                      Recent Transactions
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        padding: "10px 20px",
+                        borderTopLeftRadius: "5px",
+                        borderTopRightRadius: "5px",
+                        margin: "0px 16px",
+                        backgroundColor: "white",
+                        borderSpacing: 0,
+                        tableLayout: "fixed",
+                        display: "flex",
+                        width: "max-content",
+                        position: "relative",
+                        fontSize: "20px",
+                        fontWeight: "bolder",
+                        colSpan: "2",
+                      }}
+                    >
+                      General Ledger{space}
+                      {clickedDiv !== "" || clickedPie !== null ? (
+                        <button
+                          onClick={() => {
+                            setClickDiv("");
+                            setClickPie(null);
+                          }}
+                        >
+                          See all.
+                        </button>
+                      ) : (
+                        <span
+                          class="fa fa-refresh"
+                          style={{
+                            cursor: "pointer",
+                            height: "min-content",
+                            padding: "6px 10px",
+                            borderRadius: "10px",
+                            color:
+                              startingDate &&
+                              endingDate &&
+                              (startingDate !== lastStartingDate ||
+                                endingDate !== lastEndingDate)
+                                ? "black"
+                                : "grey",
+                          }}
+                          onClick={() => {
+                            if (!startingDate || !endingDate)
+                              return window.alert("Invalid queried date.");
+                            getGeneralLedger();
+                            setSelection("General Ledger");
+                          }}
+                        ></span>
+                      )}
                       <span
                         style={{
-                          fontSize: "25px",
-                          WebkitTextStroke: "1.5px white",
-                          position: "absolute",
-                          fontWeight: "bolder",
-                          transform: `translate(150%,-20%) rotate(30deg)`,
+                          color: expenseFilterHover ? "grey" : "black",
+                          transition: ".3s ease-in",
+                          opacity: expenseFilter ? 1 : 0,
+                          width: expenseFilter ? "" : 0,
+                          position: "relative",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={() => {
+                          setExpenseFilterHover(true);
+                        }}
+                        onMouseLeave={() => {
+                          setExpenseFilterHover(false);
+                        }}
+                        onClick={() => {
+                          setExpenseFilter(false);
                         }}
                       >
-                        /
+                        <span
+                          style={{
+                            fontSize: "25px",
+                            WebkitTextStroke: "1.5px white",
+                            position: "absolute",
+                            fontWeight: "bolder",
+                            transform: `translate(150%,-20%) rotate(30deg)`,
+                          }}
+                        >
+                          /
+                        </span>
+                        <span
+                          style={{
+                            height: "min-content",
+                            padding: "6px",
+                            paddingRight: "0px",
+                            borderRadius: "10px",
+                          }}
+                          class="fa-solid fa-filter"
+                        ></span>
                       </span>
-                      <span
-                        style={{
-                          height: "min-content",
-                          padding: "6px",
-                          paddingRight: "0px",
-                          borderRadius: "10px",
-                        }}
-                        class="fa-solid fa-filter"
-                      ></span>
-                    </span>
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
                 <div
                   style={{
                     overflowX: "auto",
@@ -3744,6 +3787,11 @@ function MyComponent() {
                             if (expenseFilter && expenseFilter !== x.Category)
                               return false;
                             if (
+                              newSearchQuery &&
+                              !x.Description.includes(newSearchQuery)
+                            )
+                              return false;
+                            if (
                               clickedDiv !== "" &&
                               x.Date &&
                               clickedDiv !== x.Date.split("T")[0]
@@ -3925,35 +3973,44 @@ function MyComponent() {
               <br />
               <div
                 style={{
-                  padding: "10px 20px",
-                  borderTopLeftRadius: "5px",
-                  borderTopRightRadius: "5px",
-                  margin: "0px 16px",
-                  backgroundColor: "white",
-                  borderSpacing: 0,
-                  tableLayout: "fixed",
-                  display: "flex",
-                  width: "max-content",
-                  position: "relative",
-                  fontSize: "20px",
-                  fontWeight: "bolder",
-                  colSpan: "2",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  height: "50px",
+                  width: windowWidth - (mobileView ? 0 : 305),
                 }}
               >
-                Account Balances{space}
-                <span
-                  class="fa fa-refresh"
+                <div
                   style={{
-                    cursor: "pointer",
-                    height: "min-content",
-                    padding: "6px 10px",
-                    borderRadius: "10px",
+                    padding: "10px 20px",
+                    borderTopLeftRadius: "5px",
+                    borderTopRightRadius: "5px",
+                    margin: "0px 16px",
+                    backgroundColor: "white",
+                    borderSpacing: 0,
+                    tableLayout: "fixed",
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    colSpan: "2",
                   }}
-                  onClick={() => {
-                    getAccountBalances();
-                    setSelection("Balances");
-                  }}
-                ></span>
+                >
+                  Account Balances{space}
+                  <span
+                    class="fa fa-refresh"
+                    style={{
+                      cursor: "pointer",
+                      height: "min-content",
+                      padding: "6px 10px",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => {
+                      getAccountBalances();
+                      setSelection("Balances");
+                    }}
+                  ></span>
+                </div>
               </div>
               <div
                 style={{
@@ -4089,35 +4146,44 @@ function MyComponent() {
               <br />
               <div
                 style={{
-                  padding: "10px 20px",
-                  borderTopLeftRadius: "5px",
-                  borderTopRightRadius: "5px",
-                  margin: "0px 16px",
-                  backgroundColor: "white",
-                  borderSpacing: 0,
-                  tableLayout: "fixed",
-                  display: "flex",
-                  width: "max-content",
-                  position: "relative",
-                  fontSize: "20px",
-                  fontWeight: "bolder",
-                  colSpan: "2",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  height: "50px",
+                  width: windowWidth - (mobileView ? 0 : 305),
                 }}
               >
-                Payroll{space}
-                <span
-                  class="fa fa-refresh"
+                <div
                   style={{
-                    cursor: "pointer",
-                    height: "min-content",
-                    padding: "6px 10px",
-                    borderRadius: "10px",
+                    padding: "10px 20px",
+                    borderTopLeftRadius: "5px",
+                    borderTopRightRadius: "5px",
+                    margin: "0px 16px",
+                    backgroundColor: "white",
+                    borderSpacing: 0,
+                    tableLayout: "fixed",
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    colSpan: "2",
                   }}
-                  onClick={() => {
-                    getPayouLog();
-                    setSelection("Payroll");
-                  }}
-                ></span>
+                >
+                  Payroll{space}
+                  <span
+                    class="fa fa-refresh"
+                    style={{
+                      cursor: "pointer",
+                      height: "min-content",
+                      padding: "6px 10px",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => {
+                      getPayouLog();
+                      setSelection("Payroll");
+                    }}
+                  ></span>
+                </div>
               </div>
               <div
                 style={{
@@ -4328,35 +4394,44 @@ function MyComponent() {
               <br />
               <div
                 style={{
-                  padding: "10px 20px",
-                  borderTopLeftRadius: "5px",
-                  borderTopRightRadius: "5px",
-                  margin: "0px 16px",
-                  backgroundColor: "white",
-                  borderSpacing: 0,
-                  tableLayout: "fixed",
-                  display: "flex",
-                  width: "max-content",
-                  position: "relative",
-                  fontSize: "20px",
-                  fontWeight: "bolder",
-                  colSpan: "2",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  height: "50px",
+                  width: windowWidth - (mobileView ? 0 : 305),
                 }}
               >
-                Invoices{space}
-                <span
-                  class="fa fa-refresh"
+                <div
                   style={{
-                    cursor: "pointer",
-                    height: "min-content",
-                    padding: "6px 10px",
-                    borderRadius: "10px",
+                    padding: "10px 20px",
+                    borderTopLeftRadius: "5px",
+                    borderTopRightRadius: "5px",
+                    margin: "0px 16px",
+                    backgroundColor: "white",
+                    borderSpacing: 0,
+                    tableLayout: "fixed",
+                    display: "flex",
+                    width: "max-content",
+                    position: "relative",
+                    fontSize: "20px",
+                    fontWeight: "bolder",
+                    colSpan: "2",
                   }}
-                  onClick={() => {
-                    getInvoices();
-                    setSelection("Invoices");
-                  }}
-                ></span>
+                >
+                  Invoices{space}
+                  <span
+                    class="fa fa-refresh"
+                    style={{
+                      cursor: "pointer",
+                      height: "min-content",
+                      padding: "6px 10px",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => {
+                      getInvoices();
+                      setSelection("Invoices");
+                    }}
+                  ></span>
+                </div>
               </div>
               <div
                 /*onScroll={(e) => {
@@ -4651,3 +4726,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
