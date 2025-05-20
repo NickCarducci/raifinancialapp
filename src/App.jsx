@@ -1260,12 +1260,14 @@ function MyComponent() {
           <div
             style={{
               display: "flex",
-              cursor: "pointer",
               padding: "5px",
             }}
           >
             {windowWidth < 500 && (
               <div
+                style={{
+                  cursor: "pointer",
+                }}
                 onClick={() => {
                   if (!mobileView) return null;
                   setSelectionMenu(!selectionMenu);
@@ -1306,6 +1308,7 @@ function MyComponent() {
                 if (!(windowWidth < 500)) setMobileView(!mobileView);
               }}
               style={{
+                cursor: "pointer",
                 padding: "0px 10px",
                 paddingTop: "5px",
                 fontSize: windowWidth < 500 ? "" : "20px",
@@ -1328,6 +1331,7 @@ function MyComponent() {
                   setMobileView(!mobileView);
                 }}
                 style={{
+                  cursor: "pointer",
                   transform: `rotate(${mobileView ? 225 : 45}deg)`,
                   transition: ".3s ease-out",
                   right: "0px",
@@ -2379,7 +2383,6 @@ function MyComponent() {
                   style={{
                     position: "relative",
                     height: "min-content",
-                    cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
                     margin: "20px",
@@ -2507,6 +2510,12 @@ function MyComponent() {
                     {ioStatement && (
                       <Bar
                         options={{
+                          onHover: (event, chartElement) => {
+                            //console.log(event);
+                            const canvas = event.native.target;
+                            canvas.style.cursor =
+                              chartElement.length > 0 ? "pointer" : "default";
+                          },
                           onClick: (event, elements) => {
                             if (elements.length > 0) {
                               const elementIndex = elements[0].index;
@@ -2544,7 +2553,6 @@ function MyComponent() {
                   style={{
                     height: "min-content",
                     position: "relative",
-                    cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
                     margin: "20px",
@@ -2950,7 +2958,6 @@ function MyComponent() {
                   ref={revenueRef}
                   style={{
                     position: "relative",
-                    cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
                     margin: "20px",
@@ -2980,7 +2987,6 @@ function MyComponent() {
                             textAlign: "left",
                             backgroundColor: "whitesmoke",
                             color: "grey",
-                            cursor: "pointer",
                           }}
                         >
                           <div>CATEGORY</div>
@@ -2990,7 +2996,6 @@ function MyComponent() {
                             textAlign: "left",
                             backgroundColor: "whitesmoke",
                             color: "grey",
-                            cursor: "pointer",
                           }}
                         >
                           <div>AMOUNT</div>
@@ -3058,7 +3063,6 @@ function MyComponent() {
                   ref={expenseRef}
                   style={{
                     position: "relative",
-                    cursor: "pointer",
                     backgroundColor: "white",
                     borderRadius: "10px",
                     margin: "20px",
@@ -3090,7 +3094,6 @@ function MyComponent() {
                             textAlign: "left",
                             backgroundColor: "whitesmoke",
                             color: "grey",
-                            cursor: "pointer",
                           }}
                         >
                           <div>CATEGORY</div>
@@ -3100,7 +3103,6 @@ function MyComponent() {
                             textAlign: "left",
                             backgroundColor: "whitesmoke",
                             color: "grey",
-                            cursor: "pointer",
                           }}
                         >
                           <div>AMOUNT</div>
@@ -3155,6 +3157,9 @@ function MyComponent() {
                         >
                           <td>
                             <div
+                              style={{
+                                cursor: "pointer",
+                              }}
                               onClick={() => {
                                 setExpenseFilter(x.Category);
                                 setSelection("General Ledger");
@@ -4055,7 +4060,7 @@ function MyComponent() {
                     : "flex",
               }}
             >
-              {(payrollLog.find((x) => x.PaymentDate) ||
+              {(payoutLog.find((x) => x.PaymentDate) ||
                 windowWidth < 500 ||
                 (windowWidth < 900 && !mobileView)) && (
                 <div
