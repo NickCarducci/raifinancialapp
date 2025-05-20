@@ -230,6 +230,10 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -539,6 +543,10 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -663,6 +671,10 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -921,6 +933,11 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              //console.log("logout!");
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -1015,6 +1032,7 @@ function MyComponent() {
     invoices,
     expenseFilter,
     windowWidth,
+    selectionMenu,
   ]);
   const getInvoices = () => {
     if (mobileView) setSelectionMenu(false);
@@ -1037,6 +1055,10 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -1078,6 +1100,10 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -1115,6 +1141,10 @@ function MyComponent() {
           .then(async (result) => {
             console.log(result);
             if (result.code === 401) {
+              return instance.logoutRedirect({
+                account: accounts[0],
+                mainWindowRedirectUri: window.location.href,
+              });
               await instance.acquireTokenRedirect({
                 account: accounts[0],
                 //forceRefresh: true,
@@ -1624,6 +1654,11 @@ function MyComponent() {
                                 .then(async (res) => await res.json())
                                 .then(async (result) => {
                                   if (result.code === 401) {
+                                    return instance.logoutRedirect({
+                                      account: accounts[0],
+                                      mainWindowRedirectUri:
+                                        window.location.href,
+                                    });
                                     return await instance.acquireTokenRedirect({
                                       account: accounts[0],
                                       //forceRefresh: true,
@@ -1652,6 +1687,11 @@ function MyComponent() {
                                 .then(async (res) => await res.json())
                                 .then(async (result) => {
                                   if (result.code === 401) {
+                                    return instance.logoutRedirect({
+                                      account: accounts[0],
+                                      mainWindowRedirectUri:
+                                        window.location.href,
+                                    });
                                     return await instance.acquireTokenRedirect({
                                       account: accounts[0],
                                       //forceRefresh: true,
@@ -2273,29 +2313,31 @@ function MyComponent() {
                               )
                           : "-"}
                       </div>
-                      <div
-                        style={{
-                          width: !(windowWidth < 500) ? "150px" : "",
-                          color:
-                            thisMonthsIOStatement.NetProfit === 0
-                              ? "grey"
-                              : thisMonthsIOStatement.NetProfit > 0
-                              ? "mediumseagreen"
-                              : "crimson",
-                        }}
-                      >
-                        {Number(changeInNetProfit) >= 0 ? (
-                          <span class="fa fa-arrow-trend-up"></span>
-                        ) : (
-                          <span class="fa fa-arrow-trend-down"></span>
-                        )}
-                        {space}
-                        {changeInNetProfit === 0 ? "-" : changeInNetProfit}% vs
-                        last{space}
-                        {selectedFrequency
-                          .toLocaleLowerCase()
-                          .substring(0, selectedFrequency.length - 2)}
-                      </div>
+                      {thisMonthsIOStatement && (
+                        <div
+                          style={{
+                            width: !(windowWidth < 500) ? "150px" : "",
+                            color:
+                              thisMonthsIOStatement.NetProfit === 0
+                                ? "grey"
+                                : thisMonthsIOStatement.NetProfit > 0
+                                ? "mediumseagreen"
+                                : "crimson",
+                          }}
+                        >
+                          {Number(changeInNetProfit) >= 0 ? (
+                            <span class="fa fa-arrow-trend-up"></span>
+                          ) : (
+                            <span class="fa fa-arrow-trend-down"></span>
+                          )}
+                          {space}
+                          {changeInNetProfit === 0 ? "-" : changeInNetProfit}%
+                          vs last{space}
+                          {selectedFrequency
+                            .toLocaleLowerCase()
+                            .substring(0, selectedFrequency.length - 2)}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -4577,3 +4619,4 @@ function MyComponent() {
 }
 
 export default MyComponent;
+
