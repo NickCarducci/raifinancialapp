@@ -4060,21 +4060,32 @@ function MyComponent() {
                     : "flex",
               }}
             >
-              {(payoutLog.find((x) => x.PaymentDate) ||
-                windowWidth < 500 ||
-                (windowWidth < 900 && !mobileView)) && (
-                <div
-                  style={{
-                    transition: ".3s ease-out",
-                    height: payoutLog && payoutLog.length > 0 ? "" : "0px",
-                    margin: "20px 60px",
-                    width:
-                      windowWidth < 500 ? windowWidth - windowWidth / 3 : 300,
-                  }}
-                >
-                  {pieChart()}
-                </div>
-              )}
+              <div
+                style={{
+                  height:
+                    (windowWidth < 500 ? windowWidth - windowWidth / 3 : 300) +
+                    20,
+                  width: windowWidth - (mobileView ? 0 : 305),
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                }}
+              >
+                {(payoutLog.find((x) => x.PaymentDate) ||
+                  windowWidth < 500 ||
+                  (windowWidth < 900 && !mobileView)) && (
+                  <div
+                    style={{
+                      transition: ".3s ease-out",
+                      height: payoutLog && payoutLog.length > 0 ? "" : "0px",
+                      margin: "20px 60px",
+                      width:
+                        windowWidth < 500 ? windowWidth - windowWidth / 3 : 300,
+                    }}
+                  >
+                    {pieChart()}
+                  </div>
+                )}
+              </div>
               <br />
               <div
                 style={{
