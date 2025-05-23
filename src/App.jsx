@@ -1985,6 +1985,7 @@ function MyComponent() {
           >
             {["I/S", "General Ledger"].includes(selection) && (
               <form
+                style={{ margin: "0px 10px" }}
                 onSubmit={(e) => {
                   e.preventDefault();
                   setSelection("General Ledger");
@@ -3509,6 +3510,8 @@ function MyComponent() {
                       )}
                       <span
                         style={{
+                          display: "flex",
+                          alignItems: "center",
                           color: expenseFilterHover ? "grey" : "black",
                           transition: ".3s ease-in",
                           opacity: expenseFilter ? 1 : 0,
@@ -3526,26 +3529,44 @@ function MyComponent() {
                           setExpenseFilter(false);
                         }}
                       >
-                        <span
-                          style={{
-                            fontSize: "25px",
-                            WebkitTextStroke: "1.5px white",
-                            position: "absolute",
-                            fontWeight: "bolder",
-                            transform: `translate(150%,-20%) rotate(30deg)`,
-                          }}
-                        >
-                          /
+                        {expenseFilter && (
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              borderRadius: "6px",
+                              padding: "4px 6px",
+                              backgroundColor: expenseFilterHover
+                                ? "grey"
+                                : "black",
+                              color: "white",
+                              transition: ".9s ease-in",
+                            }}
+                          >
+                            {expenseFilter.toLocaleUpperCase()}
+                          </span>
+                        )}
+                        <span>
+                          <span
+                            style={{
+                              fontSize: "25px",
+                              WebkitTextStroke: "1.5px white",
+                              position: "absolute",
+                              fontWeight: "bolder",
+                              transform: `translate(150%,-20%) rotate(30deg)`,
+                            }}
+                          >
+                            /
+                          </span>
+                          <span
+                            style={{
+                              height: "min-content",
+                              padding: "6px",
+                              paddingRight: "0px",
+                              borderRadius: "10px",
+                            }}
+                            class="fa-solid fa-filter"
+                          ></span>
                         </span>
-                        <span
-                          style={{
-                            height: "min-content",
-                            padding: "6px",
-                            paddingRight: "0px",
-                            borderRadius: "10px",
-                          }}
-                          class="fa-solid fa-filter"
-                        ></span>
                       </span>
                     </div>
                   )}
