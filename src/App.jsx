@@ -229,7 +229,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               return instance.logoutRedirect({
                 account: accounts[0],
                 mainWindowRedirectUri: window.location.href,
@@ -542,7 +542,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               return instance.logoutRedirect({
                 account: accounts[0],
                 mainWindowRedirectUri: window.location.href,
@@ -670,7 +670,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               return instance.logoutRedirect({
                 account: accounts[0],
                 mainWindowRedirectUri: window.location.href,
@@ -932,7 +932,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               //console.log("logout!");
               return instance.logoutRedirect({
                 account: accounts[0],
@@ -1056,7 +1056,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               return instance.logoutRedirect({
                 account: accounts[0],
                 mainWindowRedirectUri: window.location.href,
@@ -1101,7 +1101,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               return instance.logoutRedirect({
                 account: accounts[0],
                 mainWindowRedirectUri: window.location.href,
@@ -1142,7 +1142,7 @@ function MyComponent() {
           .then(async (res) => await res.json())
           .then(async (result) => {
             console.log(result);
-            if (result.code === 401) {
+            if (Number(result.code) === 401) {
               return instance.logoutRedirect({
                 account: accounts[0],
                 mainWindowRedirectUri: window.location.href,
@@ -1675,7 +1675,7 @@ function MyComponent() {
                               )
                                 .then(async (res) => await res.json())
                                 .then(async (result) => {
-                                  if (result.code === 401) {
+                                  if (Number(result.code) === 401) {
                                     return instance.logoutRedirect({
                                       account: accounts[0],
                                       mainWindowRedirectUri:
@@ -1708,7 +1708,7 @@ function MyComponent() {
                               )
                                 .then(async (res) => await res.json())
                                 .then(async (result) => {
-                                  if (result.code === 401) {
+                                  if (Number(result.code) === 401) {
                                     return instance.logoutRedirect({
                                       account: accounts[0],
                                       mainWindowRedirectUri:
@@ -4763,7 +4763,7 @@ function MyComponent() {
                   }}
                   onClick={() => {
                     setExpenseFilter(null);
-                    //getGeneralLedger();
+                    getGeneralLedger();
                   }}
                 >
                   &times;&nbsp;
@@ -4803,7 +4803,7 @@ function MyComponent() {
                           .then(async (res) => await res.json())
                           .then(async (result) => {
                             console.log(result);
-                            if (result.code === 401) {
+                            if (Number(result.code) === 401) {
                               return instance.logoutRedirect({
                                 account: accounts[0],
                                 mainWindowRedirectUri: window.location.href,
@@ -4930,7 +4930,7 @@ function MyComponent() {
                           .then(async (res) => await res.json())
                           .then(async (result) => {
                             console.log(result);
-                            if (result.code === 401) {
+                            if (Number(result.code) === 401) {
                               return instance.logoutRedirect({
                                 account: accounts[0],
                                 mainWindowRedirectUri: window.location.href,
