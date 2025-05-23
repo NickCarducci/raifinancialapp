@@ -1315,9 +1315,40 @@ function MyComponent() {
                 fontSize: windowWidth < 500 ? "" : "20px",
               }}
             >
-              {scrollPosition > 0 && mobileView && !selectionMenu
-                ? selection
-                : "RAI Finance"}
+              <span
+                style={{
+                  fontSize:
+                    scrollPosition > 0 && mobileView && !selectionMenu
+                      ? "0px"
+                      : "",
+                  width:
+                    scrollPosition > 0 && mobileView && !selectionMenu
+                      ? "0px"
+                      : "",
+                  opacity:
+                    scrollPosition > 0 && mobileView && !selectionMenu ? 0 : 1,
+                  transition: ".3s ease-out",
+                }}
+              >
+                RAI Finance
+              </span>
+              <span
+                style={{
+                  fontSize:
+                    scrollPosition > 0 && mobileView && !selectionMenu
+                      ? ""
+                      : "0px",
+                  width:
+                    scrollPosition > 0 && mobileView && !selectionMenu
+                      ? ""
+                      : "0px",
+                  opacity:
+                    scrollPosition > 0 && mobileView && !selectionMenu ? 1 : 0,
+                  transition: ".3s ease-out",
+                }}
+              >
+                {selection}
+              </span>
             </div>
             {!(windowWidth < 500) && (
               <div
