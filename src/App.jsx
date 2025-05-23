@@ -1154,7 +1154,6 @@ function MyComponent() {
               });
               return setPayoutLog([{ EmployeeName: "please log in again..." }]);
             }
-
             var payoutLog = result.payoutLog.map((x) => {
               const employeeName = x.EmployeeName.split("RTP Sent ")[1];
               return {
@@ -4145,17 +4144,20 @@ function MyComponent() {
             >
               <div
                 style={{
-                  height:
-                    (windowWidth < 500 ? windowWidth - windowWidth / 3 : 300) +
-                    20,
+                  transition: ".3s ease-in",
+                  height: !payoutLog.find((x) => x.PaymentDate)
+                    ? "0px"
+                    : (windowWidth < 500
+                        ? windowWidth - windowWidth / 3
+                        : 300) + 20,
                   width: windowWidth - (mobileView ? 0 : 305),
                   overflowX: "auto",
                   overflowY: "hidden",
                 }}
               >
-                {(payoutLog.find((x) => x.PaymentDate) ||
-                  windowWidth < 500 ||
-                  (windowWidth < 900 && !mobileView)) && (
+                {
+                  //windowWidth < 500 ||
+                  //(windowWidth < 900 && !mobileView)
                   <div
                     style={{
                       transition: ".3s ease-out",
@@ -4167,7 +4169,7 @@ function MyComponent() {
                   >
                     {pieChart()}
                   </div>
-                )}
+                }
               </div>
               <br />
               <div
