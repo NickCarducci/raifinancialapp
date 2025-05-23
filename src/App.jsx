@@ -3833,7 +3833,7 @@ function MyComponent() {
                                 onMouseLeave={() => {
                                   setHoverRow(null);
                                 }}
-                                key={x.TransactionID}
+                                key={x.TransactionID ? x.TransactionID : i}
                                 style={{
                                   backgroundColor:
                                     x.TransactionID === hoverRow
