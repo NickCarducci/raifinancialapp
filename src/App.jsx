@@ -1039,7 +1039,7 @@ function MyComponent() {
   const getInvoices = () => {
     if (mobileView) setSelectionMenu(false);
     setSelection("Invoices");
-    setInvoices([{ Description: "Connecting to database..." }]);
+    setInvoices([{ Category: "Connecting to database..." }]);
     instance
       .acquireTokenSilent({
         ...loginRequest,
@@ -1066,7 +1066,7 @@ function MyComponent() {
                 //forceRefresh: true,
                 refreshTokenExpirationOffsetSeconds: 7200, // 2 hours * 60 minutes * 60 seconds = 7200 seconds
               });
-              return setInvoices([{ Description: "please log in again..." }]);
+              return setInvoices([{ Category: "please log in again..." }]);
             }
 
             setInvoices(
