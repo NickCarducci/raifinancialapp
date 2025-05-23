@@ -1492,7 +1492,6 @@ function MyComponent() {
                 }}
               >
                 <div
-                  onMouseLeave={(e) => setSelector("")}
                   onMouseEnter={(e) => setSelector("I/S")}
                   style={{
                     padding: "6px 10px",
@@ -4940,14 +4939,6 @@ function MyComponent() {
                         account: accounts[0],
                       })
                       .then((response) => {
-                        setLastStartingDate(startingDate);
-                        setLastEndingDate(endingDate);
-                        const newStartingDate = new Date(
-                          new Date(startingDate).getTime() + 86400000 * 2
-                        );
-                        const newEndingDate = new Date(
-                          new Date(endingDate).getTime() + 86400000 * 2
-                        );
                         fetch(
                           "https://raifinancial.azurewebsites.net/api/generalledgersearch/" +
                             newSearchQuery,
