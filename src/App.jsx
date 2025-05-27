@@ -1808,7 +1808,7 @@ function MyComponent() {
             justifyContent: "space-between",
             fontWeight: mobileView ? "" : "bolder",
             textIndent: "20px",
-            width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
+            //width: `calc(100vw - ${mobileView ? 0 : 300}px)`,
             color: "black",
             backgroundColor: "white",
             overflowX: "auto",
