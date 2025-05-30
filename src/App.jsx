@@ -1035,6 +1035,7 @@ function MyComponent() {
     windowWidth,
     selectionMenu,
     newSearchQuery,
+    clickedPie
   ]);
   const getInvoices = () => {
     if (mobileView) setSelectionMenu(false);
